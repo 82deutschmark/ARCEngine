@@ -1,0 +1,343 @@
+"""
+Module for sprite-related classes and functionality in the ARCEngine.
+"""
+
+from enum import Enum
+import numpy as np
+from typing import List, Optional
+import uuid
+
+
+class BlockingMode(Enum):
+    """Enum defining different blocking behaviors for sprites."""
+    NOT_BLOCKED = 0
+    BOUNDING_BOX = 1
+    PIXEL_PERFECT = 2
+
+
+def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
+    """
+    Nearest-neighbor style down-scaling for palette images.
+    For each non-overlapping block it keeps the dominant color
+    (mode), breaking ties by the highest palette index.
+
+    Parameters
+    ----------
+    arr : 2-D np.ndarray
+        Input image of dtype int8 / uint8 holding palette indices.
+    factor : int
+        The integer scale factor (e.g. 2 turns 64×64 → 32×32).
+
+    Returns
+    -------
+    np.ndarray
+        The down-scaled image, same dtype as the input.
+
+    Raises
+    ------
+    ValueError
+        If the array dimensions are not divisible by the scale factor.
+    """
+    H, W = arr.shape
+    if H % factor != 0 or W % factor != 0:
+        raise ValueError(f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}")
+
+    # Step 1: split into blocks → shape (out_h, out_w, factor, factor)
+    blocks = arr.reshape(H // factor, factor, -1, factor).swapaxes(1, 2)
+    blocks = blocks.reshape(-1, factor * factor)
+
+    # Step 2: find dominant color for each block
+    max_index = arr.max()  # upper bound for palette indices
+    out = np.empty(len(blocks), dtype=arr.dtype)
+
+    for i, blk in enumerate(blocks):
+        cnts = np.bincount(blk.astype(np.int16), minlength=max_index + 1)
+        # Get the indices where we have the maximum count
+        max_count = cnts.max()
+        max_indices = np.where(cnts == max_count)[0]
+        # Among the most frequent values, pick the highest
+        out[i] = max_indices[-1]
+
+    # Step 3: reshape to 2-D image
+    return out.reshape(H // factor, W // factor)
+
+
+class Sprite:
+    """A 2D sprite that can be positioned and scaled in the game world."""
+    
+    # Valid rotation values in degrees (clockwise)
+    VALID_ROTATIONS = {0, 90, 180, 270}
+    
+    def __init__(
+        self,
+        pixels: List[List[int]],
+        name: Optional[str] = None,
+        x: int = 0,
+        y: int = 0,
+        scale: int = 1,
+        rotation: int = 0,
+        blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
+        layer: int = 0,
+    ):
+        """Initialize a new Sprite.
+        
+        Args:
+            pixels: 2D list representing the sprite's pixels
+            name: Sprite name (default: None, will generate UUID)
+            x: X coordinate in pixels (default: 0)
+            y: Y coordinate in pixels (default: 0)
+            scale: Scale factor (default: 1)
+            rotation: Rotation in degrees (default: 0)
+            blocking: Collision detection method (default: NOT_BLOCKED)
+            layer: Z-order layer for rendering (default: 0, higher values render on top)
+            
+        Raises:
+            ValueError: If scale is 0, pixels is not a 2D list, rotation is invalid,
+                       or if downscaling factor doesn't evenly divide sprite dimensions
+        """
+        if not isinstance(pixels, list) or not all(isinstance(row, list) for row in pixels):
+            raise ValueError("Pixels must be a 2D list")
+            
+        self.pixels = np.array(pixels, dtype=np.int8)
+        if self.pixels.ndim != 2:
+            raise ValueError("Pixels must be a 2D array")
+
+        self._name = name if name is not None else str(uuid.uuid4())    
+        self._x = int(x)
+        self._y = int(y)
+        self._set_rotation(rotation)
+        self._blocking = blocking
+        self._layer = int(layer)
+        self.set_scale(scale)  # Use set_scale to validate scale factor
+
+    def clone(self, new_name: Optional[str] = None) -> 'Sprite':
+        """Create an independent copy of this sprite.
+        
+        Args:
+            new_name: Optional name for the cloned sprite. If None, generates a new UUID.
+            
+        Returns:
+            A new Sprite instance with the same properties but independent state.
+        """
+        # Create a deep copy of the pixels array
+        pixels_copy = self.pixels.copy()
+        
+        # Create a new sprite with copied properties
+        return Sprite(
+            pixels=pixels_copy.tolist(),  # Convert back to list for constructor
+            name=new_name,  # Use new name or generate new UUID
+            x=self._x,
+            y=self._y,
+            scale=self._scale,
+            rotation=self.rotation,  # Use the public property to get normalized value
+            blocking=self._blocking,
+            layer=self._layer
+        )
+
+    def _set_rotation(self, rotation: int) -> None:
+        """Internal method to set rotation with validation.
+        
+        Args:
+            rotation: The rotation value in degrees
+        
+        Raises:
+            ValueError: If rotation is not a valid 90-degree increment
+        """
+        normalized = rotation % 360
+        if normalized not in self.VALID_ROTATIONS:
+            raise ValueError(
+                f"Rotation must be one of {self.VALID_ROTATIONS}, got {rotation}"
+            )
+        self.rotation = normalized
+
+    def set_rotation(self, rotation: int) -> None:
+        """Set the sprite's rotation to a specific value.
+        
+        Args:
+            rotation: The new rotation in degrees (must be 0, 90, 180, or 270)
+        
+        Raises:
+            ValueError: If rotation is not a valid 90-degree increment
+        """
+        self._set_rotation(int(rotation))
+
+    def rotate(self, delta: int) -> None:
+        """Rotate the sprite by a given amount.
+        
+        Args:
+            delta: The change in rotation in degrees (must result in a valid rotation)
+        
+        Raises:
+            ValueError: If resulting rotation is not a valid 90-degree increment
+        """
+        if delta < 0:
+            delta = 360 + (delta % 360)
+        new_rotation = (self.rotation + delta) % 360
+        self._set_rotation(new_rotation)
+
+    def set_position(self, x: int, y: int) -> None:
+        """Set the sprite's position.
+        
+        Args:
+            x: New X coordinate in pixels
+            y: New Y coordinate in pixels
+        """
+        self._x = int(x)
+        self._y = int(y)
+
+    def set_scale(self, scale: int) -> None:
+        """Set the sprite's scale factor.
+        
+        Args:
+            scale: The new scale factor. Positive values scale up, negative values scale down.
+                  Negative values indicate divisor: -1 means half size (divide by 2), -2 means one-third size, etc.
+            
+        Raises:
+            ValueError: If scale is 0 or if downscaling factor doesn't evenly divide sprite dimensions
+        """
+        scale_int = int(scale)
+        if scale_int == 0:
+            raise ValueError("Scale cannot be zero")
+            
+        # For downscaling, validate dimensions are divisible by scale factor
+        if scale_int < 0:
+            H, W = self.pixels.shape
+            factor = -scale_int + 1  # -1 -> 2, -2 -> 3, -3 -> 4, etc.
+            if H % factor != 0 or W % factor != 0:
+                raise ValueError(
+                    f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}"
+                )
+        
+        self._scale = scale_int
+
+    def adjust_scale(self, delta: int) -> None:
+        """Adjust the sprite's scale by a delta value, moving one step at a time.
+        
+        The method will adjust the scale by incrementing or decrementing by 1 
+        repeatedly until reaching the target scale. This ensures smooth transitions
+        and validates each step.
+        
+        Negative scales indicate downscaling factors:
+        -1 = half size (1/2)
+        -2 = one-third size (1/3)
+        -3 = one-fourth size (1/4)
+        etc.
+        
+        For example:
+        - Current scale 1, delta +2 -> Steps through: 1 -> 2 -> 3
+        - Current scale 1, delta -2 -> Steps through: 1 -> 0 -> -1 (half size)
+        - Current scale -2, delta +3 -> Steps through: -2 -> -1 -> 0 -> 1
+        
+        Args:
+            delta: The total change in scale to apply. Positive values increase scale,
+                  negative values decrease it.
+                  
+        Raises:
+            ValueError: If any intermediate scale would be 0 or if a downscaling factor 
+                       doesn't evenly divide sprite dimensions
+        """
+        if delta == 0:
+            return
+            
+        # Determine direction of change
+        step = 1 if delta > 0 else -1
+        target_scale = self._scale + delta
+        
+        # Take steps one at a time
+        while self._scale != target_scale:
+            next_scale = self._scale + step
+            
+            # Skip over zero since it's invalid
+            if next_scale == 0:
+                next_scale = step
+                
+            # Let ValueError propagate up
+            self.set_scale(next_scale)
+
+    def set_blocking(self, blocking: BlockingMode) -> None:
+        """Set the sprite's blocking behavior.
+        
+        Args:
+            blocking: The new blocking behavior
+        """
+        if not isinstance(blocking, BlockingMode):
+            raise ValueError("blocking must be a BlockingMode enum value")
+        self._blocking = blocking
+
+    def set_name(self, name: str) -> None:
+        """Set the sprite's name.
+        
+        Args:
+            name: New name for the sprite
+        """
+        if not name:
+            raise ValueError("Name cannot be empty")
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        """Get the sprite's name."""
+        return self._name
+
+    @property
+    def x(self) -> int:
+        """Get the current X coordinate."""
+        return self._x
+
+    @property
+    def y(self) -> int:
+        """Get the current Y coordinate."""
+        return self._y
+
+    @property
+    def scale(self) -> int:
+        """Get the current scale factor."""
+        return self._scale
+
+    @property
+    def blocking(self) -> BlockingMode:
+        """Get the current blocking behavior."""
+        return self._blocking
+
+    @property
+    def layer(self) -> int:
+        """Get the current rendering layer."""
+        return self._layer
+
+    def set_layer(self, layer: int) -> None:
+        """Set the sprite's rendering layer.
+        
+        Args:
+            layer: New layer value. Higher values render on top.
+        """
+        self._layer = int(layer)
+
+    def render(self) -> np.ndarray:
+        """Render the sprite with current scale and rotation.
+        
+        Returns:
+            np.ndarray: The rendered sprite as a 2D numpy array
+        """
+        # Start with the base pixels
+        result = self.pixels.copy()
+        
+        # Handle rotation first (if any)
+        if self.rotation != 0:
+            # Convert degrees to number of 90-degree rotations (clockwise)
+            k = int((-self.rotation % 360) / 90)  # Negative for clockwise rotation
+            if k != 0:
+                result = np.rot90(result, k=k)
+        
+        # Handle scaling
+        if self._scale != 1:
+            if self._scale > 1:
+                # For upscaling, repeat the array in both dimensions
+                result = np.repeat(np.repeat(result, self._scale, axis=0), 
+                                 self._scale, axis=1)
+            else:  # self._scale < 0
+                # For downscaling, use mode-based approach
+                # Convert negative scale to actual divisor (e.g. -1 -> 2, -2 -> 3)
+                factor = -self._scale + 1  # -1 -> 2, -2 -> 3, -3 -> 4, etc.
+                result = _downscale_mode(result, factor)
+        
+        return result

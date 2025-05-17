@@ -1,0 +1,403 @@
+"""Tests for the sprites module."""
+
+import unittest
+import numpy as np
+from arcengine.sprites import Sprite, BlockingMode
+
+
+class TestSprite(unittest.TestCase):
+    """Test cases for the Sprite class."""
+
+    def test_sprite_initialization(self):
+        """Test basic sprite initialization with different input types."""
+        # Test with valid 2D list
+        pixels_list = [[1, 2], [3, 4]]
+        sprite = Sprite(pixels_list)
+        self.assertTrue(np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8)))
+        self.assertEqual(sprite.x, 0)
+        self.assertEqual(sprite.y, 0)
+        self.assertEqual(sprite.scale, 1)
+        self.assertEqual(sprite.rotation, 0)
+        self.assertEqual(sprite.blocking, BlockingMode.NOT_BLOCKED)
+
+        # Test with custom parameters
+        sprite = Sprite(pixels_list, x=10, y=20, scale=2, rotation=90, 
+                       blocking=BlockingMode.BOUNDING_BOX)
+        self.assertTrue(np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8)))
+        self.assertEqual(sprite.x, 10)
+        self.assertEqual(sprite.y, 20)
+        self.assertEqual(sprite.scale, 2)
+        self.assertEqual(sprite.rotation, 90)
+        self.assertEqual(sprite.blocking, BlockingMode.BOUNDING_BOX)
+
+        # Test invalid rotation on init
+        with self.assertRaises(ValueError):
+            Sprite(pixels_list, rotation=45)
+
+        # Test invalid scale on init
+        with self.assertRaises(ValueError) as ctx:
+            Sprite(pixels_list, scale=0)
+        self.assertEqual(str(ctx.exception), "Scale cannot be zero")
+
+        # Test invalid downscale on init
+        with self.assertRaises(ValueError) as ctx:
+            Sprite(pixels_list, scale=-3)
+        self.assertIn("must be divisible by scale factor", str(ctx.exception))
+
+    def test_invalid_inputs(self):
+        """Test that invalid inputs raise appropriate errors."""
+        # Test with 1D list
+        with self.assertRaises(ValueError):
+            Sprite([1, 2, 3])
+
+        # Test with numpy array (should fail)
+        with self.assertRaises(ValueError):
+            Sprite(np.array([[1, 2], [3, 4]]))
+
+        # Test with invalid nested structure
+        with self.assertRaises(ValueError):
+            Sprite([[1, 2], 3])
+
+        # Test with empty list
+        with self.assertRaises(ValueError):
+            Sprite([])
+
+    def test_scale_validation(self):
+        """Test that scale cannot be set to zero and validates downscale factors."""
+        # Create a 6x6 sprite to test various scale factors
+        pixels = [
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+        ]
+        sprite = Sprite(pixels)
+        
+        # Test setting valid scales
+        valid_scales = [1, 2, 3, -1, -2]  # -1 = half size, -2 = one-third size
+        for scale in valid_scales:
+            sprite.set_scale(scale)
+            self.assertEqual(sprite.scale, scale)
+        
+        # Test setting scale to zero
+        with self.assertRaises(ValueError) as ctx:
+            sprite.set_scale(0)
+        self.assertEqual(str(ctx.exception), "Scale cannot be zero")
+        
+        # Test invalid downscale factors
+        with self.assertRaises(ValueError) as ctx:
+            sprite.set_scale(-3)  # Would try to divide by 4, 6x6 not divisible by 4
+        self.assertIn("must be divisible by scale factor", str(ctx.exception))
+        
+        # Test scale remains unchanged after failed set
+        self.assertEqual(sprite.scale, valid_scales[-1])
+
+    def test_adjust_scale(self):
+        """Test the adjust_scale method."""
+        # Create a 6x6 sprite to test various scale factors
+        pixels = [
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+        ]
+        sprite = Sprite(pixels)
+        
+        # Test no change
+        sprite.set_scale(2)
+        sprite.adjust_scale(0)
+        self.assertEqual(sprite.scale, 2)
+        
+        # Test positive adjustments
+        sprite.set_scale(1)
+        sprite.adjust_scale(2)  # 1 -> 2 -> 3
+        self.assertEqual(sprite.scale, 3)
+        
+        # Test negative adjustments (downscaling)
+        sprite.set_scale(1)
+        sprite.adjust_scale(-2)  # 1 -> 0 -> -1 (half size)
+        self.assertEqual(sprite.scale, -1)  # -1 means half size
+        
+        # Test moving from downscale to upscale
+        sprite.set_scale(-2)  # one-third size
+        sprite.adjust_scale(3)  # -2 -> -1 -> 0 -> 1
+        self.assertEqual(sprite.scale, 1)
+        
+        # Test moving from upscale to downscale
+        sprite.set_scale(2)
+        sprite.adjust_scale(-3)  # 2 -> 1 -> 0 -> -1 (half size)
+        self.assertEqual(sprite.scale, -1)
+        
+        # Test invalid scale transitions
+        with self.assertRaises(ValueError) as ctx:
+            sprite.set_scale(1)
+            sprite.adjust_scale(-4)  # Would try to reach -3, which needs factor of 4
+        self.assertIn("must be divisible by scale factor", str(ctx.exception))
+
+    def test_rotation_methods(self):
+        """Test the set_rotation and rotate methods."""
+        sprite = Sprite([[1, 2], [3, 4]])
+        
+        # Test set_rotation with valid values
+        valid_rotations = [0, 90, 180, 270]
+        for rotation in valid_rotations:
+            sprite.set_rotation(rotation)
+            self.assertEqual(sprite.rotation, rotation)
+        
+        # Test set_rotation with invalid values
+        invalid_rotations = [45, 100, 200, -45]
+        for rotation in invalid_rotations:
+            with self.assertRaises(ValueError):
+                sprite.set_rotation(rotation)
+        
+        # Test rotate with valid deltas
+        sprite.set_rotation(0)
+        sprite.rotate(90)  # 0 -> 90
+        self.assertEqual(sprite.rotation, 90)
+        sprite.rotate(90)  # 90 -> 180
+        self.assertEqual(sprite.rotation, 180)
+        sprite.rotate(90)  # 180 -> 270
+        self.assertEqual(sprite.rotation, 270)
+        sprite.rotate(90)  # 270 -> 0
+        self.assertEqual(sprite.rotation, 0)
+        
+        # Test negative rotations
+        sprite.set_rotation(0)
+        sprite.rotate(-90)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 270)
+        sprite.rotate(-90)  # 270 -> 180
+        self.assertEqual(sprite.rotation, 180)
+        sprite.rotate(-90)  # 180 -> 90
+        self.assertEqual(sprite.rotation, 90)
+        sprite.rotate(-90)  # 90 -> 0
+        self.assertEqual(sprite.rotation, 0)
+        
+        # Test wraparound cases
+        sprite.set_rotation(270)
+        sprite.rotate(90)  # 270 -> 0
+        self.assertEqual(sprite.rotation, 0)
+        
+        sprite.set_rotation(0)
+        sprite.rotate(-90)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 270)
+
+        sprite.set_rotation(0)
+        sprite.rotate(-180)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 180)
+
+        sprite.set_rotation(180)
+        sprite.rotate(180)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 0)
+
+        sprite.set_rotation(0)
+        sprite.rotate(-270)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 90)
+
+        sprite.set_rotation(180)
+        sprite.rotate(270)  # 0 -> 270
+        self.assertEqual(sprite.rotation, 90)
+        
+        # Test rotate with invalid deltas
+        with self.assertRaises(ValueError):
+            sprite.rotate(45)
+        
+        # Test rotation normalization
+        sprite.set_rotation(360)  # Should normalize to 0
+        self.assertEqual(sprite.rotation, 0)
+        sprite.set_rotation(450)  # Should normalize to 90
+        self.assertEqual(sprite.rotation, 90)
+        sprite.rotate(360)  # Should stay at 90
+        self.assertEqual(sprite.rotation, 90)
+
+    def test_sprite_render_no_transform(self):
+        """Test sprite rendering without any transformations."""
+        pixels = [[1, 2], [3, 4]]
+        sprite = Sprite(pixels)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, np.array(pixels, dtype=np.int8)))
+        self.assertEqual(rendered.dtype, np.int8)
+
+    def test_sprite_render_rotation(self):
+        """Test sprite rotation rendering."""
+        pixels = [
+            [1, 2],
+            [3, 4]
+        ]
+        
+        # Test 90 degree rotation (clockwise)
+        sprite = Sprite(pixels, rotation=90)
+        expected_90 = np.array([
+            [3, 1],
+            [4, 2]
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_90))
+
+        # Test 180 degree rotation
+        sprite.set_rotation(180)
+        expected_180 = np.array([
+            [4, 3],
+            [2, 1]
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_180))
+
+        # Test 270 degree rotation
+        sprite.set_rotation(270)
+        expected_270 = np.array([
+            [2, 4],
+            [1, 3]
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_270))
+
+        # Test negative rotation
+        sprite.set_rotation(0)
+        sprite.rotate(-90)  # Should be equivalent to 270
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_270))
+
+    def test_sprite_render_scaling(self):
+        """Test sprite scaling rendering."""
+        pixels = [
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+        ]
+        
+        # Test upscaling by 2
+        sprite = Sprite(pixels, scale=2)
+        expected_upscale = np.array([
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            [3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_upscale))
+
+        # Test downscaling by 2 (scale=-1, half size)
+        sprite = Sprite(pixels, scale=-1)
+        expected_downscale = np.array([
+            [1, 2, 2],
+            [3, 4, 4],
+            [3, 4, 4],
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_downscale))
+
+        # Test downscaling by 3 (scale=-2, one-third size)
+        sprite = Sprite(pixels, scale=-2)
+        expected_downscale = np.array([
+            [1, 2],
+            [3, 4],
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected_downscale))
+
+    def test_sprite_render_combined(self):
+        """Test sprite rendering with both rotation and scaling."""
+        pixels = [
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [1, 1, 1, 2, 2, 2],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+            [3, 3, 3, 4, 4, 4],
+        ]
+        
+        # Test 90 degree rotation with scale 2
+        sprite = Sprite(pixels, rotation=90, scale=2)
+        expected = np.array([
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+            [4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2],
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected))
+
+        # Test 90 degree rotation with scale -2 (one-third size)
+        sprite = Sprite(pixels, rotation=90, scale=-2)
+        expected = np.array([
+            [3, 1],
+            [4, 2],
+        ], dtype=np.int8)
+        rendered = sprite.render()
+        self.assertTrue(np.array_equal(rendered, expected))
+
+    def test_sprite_clone(self):
+        """Test sprite cloning functionality."""
+        # Create original sprite with some non-default values
+        pixels = [
+            [1, 2],
+            [3, 4]
+        ]
+        original = Sprite(
+            pixels=pixels,
+            name="original",
+            x=10,
+            y=20,
+            scale=2,
+            rotation=90,
+            blocking=BlockingMode.BOUNDING_BOX
+        )
+        
+        # Create clone with default name (should get new UUID)
+        clone1 = original.clone()
+        self.assertTrue(np.array_equal(clone1.pixels, original.pixels))
+        self.assertEqual(clone1.x, original.x)
+        self.assertEqual(clone1.y, original.y)
+        self.assertEqual(clone1.scale, original.scale)
+        self.assertEqual(clone1.rotation, original.rotation)
+        self.assertEqual(clone1.blocking, original.blocking)
+        self.assertNotEqual(clone1.name, original.name)  # Should get new UUID
+        
+        # Create clone with specific name
+        clone2 = original.clone(new_name="clone2")
+        self.assertEqual(clone2.name, "clone2")
+        
+        # Verify independence of clones
+        original.set_position(30, 40)
+        original.set_rotation(180)
+        original.set_scale(3)
+        self.assertEqual(clone1.x, 10)  # Should keep original values
+        self.assertEqual(clone1.y, 20)
+        self.assertEqual(clone1.rotation, 90)
+        self.assertEqual(clone1.scale, 2)
+        
+        # Modify pixels of original
+        original.pixels[0, 0] = 9
+        self.assertEqual(clone1.pixels[0, 0], 1)  # Should keep original value
+        
+        # Verify rendered output is independent
+        original_rendered = original.render()
+        clone1_rendered = clone1.render()
+        self.assertFalse(np.array_equal(original_rendered, clone1_rendered))
+
+
+if __name__ == '__main__':
+    unittest.main() 
