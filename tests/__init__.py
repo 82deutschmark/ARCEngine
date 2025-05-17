@@ -1,6 +1,7 @@
 """Test package for ARCEngine."""
 
-from tests.test_sprites import TestSprite
+from .test_sprites import TestSprite
+from .test_camera import TestCamera
 
 __all__ = [
     "TestSprite",
