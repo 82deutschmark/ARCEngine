@@ -1,9 +1,7 @@
 """Tests for the level module."""
 
 import unittest
-from arcengine import Level
-from arcengine import Sprite
-
+from arcengine import Level, Sprite
 
 class TestLevel(unittest.TestCase):
     """Test cases for the Level class."""

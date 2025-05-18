@@ -80,6 +80,7 @@ class Camera:
         Args:
             sprites: List of sprites to render. Sprites are rendered in order of their layer
                     value (lower layers first). Negative pixel values are treated as transparent.
+                    Only visible sprites (based on their interaction mode) will be rendered.
             
         Returns:
             np.ndarray: The rendered view as a 2D numpy array
@@ -90,8 +91,11 @@ class Camera:
         if not sprites:
             return output
             
-        # Sort sprites by layer (lower layers first)
-        sorted_sprites = sorted(sprites, key=lambda s: s.layer)
+        # Sort sprites by layer (lower layers first) and filter out non-visible sprites
+        sorted_sprites = sorted(
+            (s for s in sprites if s.is_visible),
+            key=lambda s: s.layer
+        )
         
         for sprite in sorted_sprites:
             # Get the sprite's rendered pixels (handles rotation and scaling)

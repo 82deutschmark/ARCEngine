@@ -400,5 +400,24 @@ class TestSprite(unittest.TestCase):
         clone1_rendered = clone1.render()
         self.assertFalse(np.array_equal(original_rendered, clone1_rendered))
 
+    def test_interaction_mode(self):
+        """Test interaction mode functionality."""        
+        # Test sprite interaction mode
+        sprite = Sprite([[1]], interaction=InteractionMode.TANGIBLE)
+        self.assertTrue(sprite.is_visible)
+        self.assertTrue(sprite.is_collidable)
+        
+        sprite.set_interaction(InteractionMode.INTANGIBLE)
+        self.assertTrue(sprite.is_visible)
+        self.assertFalse(sprite.is_collidable)
+        
+        sprite.set_interaction(InteractionMode.INVISIBLE)
+        self.assertFalse(sprite.is_visible)
+        self.assertTrue(sprite.is_collidable)
+        
+        sprite.set_interaction(InteractionMode.REMOVED)
+        self.assertFalse(sprite.is_visible)
+        self.assertFalse(sprite.is_collidable)
+
 if __name__ == '__main__':
     unittest.main() 

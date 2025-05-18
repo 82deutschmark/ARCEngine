@@ -2,9 +2,7 @@
 
 import unittest
 import numpy as np
-from arcengine import Camera
-from arcengine import Sprite
-
+from arcengine import Camera, Sprite, InteractionMode
 
 class TestCamera(unittest.TestCase):
     """Test cases for the Camera class."""
@@ -310,20 +308,21 @@ class TestCamera(unittest.TestCase):
         self.assertTrue(np.all(raw3[1:, 1:] == 0))  # Rest is background 
 
     def test_render_overlapping_sprite_with_layers(self):
-        """Test rendering a scaled sprite."""
-        # Create a 2x2 sprite that will be scaled up
+        """Test rendering transparent overlapping sprites with layers"""
+        # Create a 4x4 sprite
         sprite1 = Sprite([
             [-1, 2, 2, -1],
             [-1, 2, 2, -1],
             [-1, 2, 2, -1],
             [-1, 2, 2, -1],
-        ], x=1, y=1, layer=2)  # Scale up by 2 and position explicitly
+        ], x=1, y=1, layer=2)
+        # -2 should also be transparent
         sprite2 = Sprite([
-            [-1, -1, -1, -1],
+            [-2, -2, -2, -1],
             [3, 3, 3, 3],
             [3, 3, 3, 3],
-            [-1, -1, -1, -1],
-        ], x=1, y=1, layer=1)  # Scale up by 2 and position explicitly
+            [-2, -2, -2, -2],
+        ], x=1, y=1, layer=1)
         
         # Create a 6x6 camera
         camera = Camera(width=6, height=6, background=0, letter_box=5)
@@ -335,6 +334,47 @@ class TestCamera(unittest.TestCase):
             [0, 0, 2, 2, 0, 0],
             [0, 3, 2, 2, 3, 0],
             [0, 3, 2, 2, 3, 0],
+            [0, 0, 2, 2, 0, 0],
+            [0, 0, 0, 0, 0, 0]
+        ], dtype=np.int8)
+        
+        # Verify shape and content
+        self.assertEqual(rendered.shape, (6, 6))
+        self.assertTrue(np.array_equal(rendered, expected))
+        
+    def test_invisible_sprites_do_not_render(self):    
+        """Test that a sprite set to INVISIBLE and REMOVED to not reunder"""
+        # Create a 4x4 sprite
+        sprite1 = Sprite([
+            [-1, 2, 2, -1],
+            [-1, 2, 2, -1],
+            [-1, 2, 2, -1],
+            [-1, 2, 2, -1],
+        ], x=1, y=1, layer=2)
+        # -2 should also be transparent
+        sprite2 = Sprite([
+            [-2, -2, -2, -1],
+            [3, 3, 3, 3],
+            [3, 3, 3, 3],
+            [-2, -2, -2, -2],
+        ], x=1, y=1, layer=1, interaction=InteractionMode.INVISIBLE)
+        sprite3= Sprite([
+            [-2, -2, -2, -1],
+            [3, 3, 3, 3],
+            [3, 3, 3, 3],
+            [-2, -2, -2, -2],
+        ], x=1, y=1, layer=1, interaction=InteractionMode.REMOVED)
+        
+        # Create a 6x6 camera
+        camera = Camera(width=6, height=6, background=0, letter_box=5)
+        rendered = camera._raw_render([sprite1, sprite2, sprite3])
+        
+        # Expected output: sprite scaled 2x at position (1,1)
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 2, 2, 0, 0],
+            [0, 0, 2, 2, 0, 0],
+            [0, 0, 2, 2, 0, 0],
             [0, 0, 2, 2, 0, 0],
             [0, 0, 0, 0, 0, 0]
         ], dtype=np.int8)

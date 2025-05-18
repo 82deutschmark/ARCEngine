@@ -17,4 +17,4 @@ class InteractionMode(Enum):
     TANGIBLE = auto()         # Visible and can be collided with
     INTANGIBLE = auto()       # Visible but cannot be collided with (ghost-like)
     INVISIBLE = auto()        # Not visible but can be collided with (invisible wall)
-    REMOVED = auto()          # Not visible and cannot be collided with (effectively removed) 
+    REMOVED = auto()          # Not visible and cannot be collided with (effectively removed)

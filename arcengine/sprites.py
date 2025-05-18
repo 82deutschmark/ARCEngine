@@ -328,6 +328,24 @@ class Sprite:
             raise ValueError("interaction must be an InteractionMode enum value")
         self._interaction = interaction
 
+    @property
+    def is_visible(self) -> bool:
+        """Check if a sprite with this interaction mode should be rendered.
+        
+        Returns:
+            bool: True if the sprite should be visible, False otherwise
+        """
+        return self._interaction in {InteractionMode.TANGIBLE, InteractionMode.INTANGIBLE}
+        
+    @property
+    def is_collidable(self) -> bool:
+        """Check if a sprite with this interaction mode should participate in collisions.
+        
+        Returns:
+            bool: True if the sprite should be checked for collisions, False otherwise
+        """
+        return self._interaction in {InteractionMode.TANGIBLE, InteractionMode.INVISIBLE} 
+
     def render(self) -> np.ndarray:
         """Render the sprite with current scale and rotation.
         
