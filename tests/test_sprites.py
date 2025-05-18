@@ -2,8 +2,7 @@
 
 import unittest
 import numpy as np
-from arcengine.sprites import Sprite, BlockingMode
-
+from arcengine import Sprite, BlockingMode, InteractionMode
 
 class TestSprite(unittest.TestCase):
     """Test cases for the Sprite class."""
@@ -19,16 +18,19 @@ class TestSprite(unittest.TestCase):
         self.assertEqual(sprite.scale, 1)
         self.assertEqual(sprite.rotation, 0)
         self.assertEqual(sprite.blocking, BlockingMode.NOT_BLOCKED)
+        self.assertEqual(sprite.interaction, InteractionMode.TANGIBLE)
 
         # Test with custom parameters
         sprite = Sprite(pixels_list, x=10, y=20, scale=2, rotation=90, 
-                       blocking=BlockingMode.BOUNDING_BOX)
+                       blocking=BlockingMode.BOUNDING_BOX,
+                       interaction=InteractionMode.INTANGIBLE)
         self.assertTrue(np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8)))
         self.assertEqual(sprite.x, 10)
         self.assertEqual(sprite.y, 20)
         self.assertEqual(sprite.scale, 2)
         self.assertEqual(sprite.rotation, 90)
         self.assertEqual(sprite.blocking, BlockingMode.BOUNDING_BOX)
+        self.assertEqual(sprite.interaction, InteractionMode.INTANGIBLE)
 
         # Test invalid rotation on init
         with self.assertRaises(ValueError):
@@ -366,7 +368,7 @@ class TestSprite(unittest.TestCase):
             blocking=BlockingMode.BOUNDING_BOX
         )
         
-        # Create clone with default name (should get new UUID)
+        # Create clone with default name (should be the same name)
         clone1 = original.clone()
         self.assertTrue(np.array_equal(clone1.pixels, original.pixels))
         self.assertEqual(clone1.x, original.x)
@@ -374,7 +376,7 @@ class TestSprite(unittest.TestCase):
         self.assertEqual(clone1.scale, original.scale)
         self.assertEqual(clone1.rotation, original.rotation)
         self.assertEqual(clone1.blocking, original.blocking)
-        self.assertNotEqual(clone1.name, original.name)  # Should get new UUID
+        self.assertEqual(clone1.name, original.name)  # Should get new UUID
         
         # Create clone with specific name
         clone2 = original.clone(new_name="clone2")
@@ -397,7 +399,6 @@ class TestSprite(unittest.TestCase):
         original_rendered = original.render()
         clone1_rendered = clone1.render()
         self.assertFalse(np.array_equal(original_rendered, clone1_rendered))
-
 
 if __name__ == '__main__':
     unittest.main() 

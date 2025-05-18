@@ -6,13 +6,7 @@ from enum import Enum
 import numpy as np
 from typing import List, Optional
 import uuid
-
-
-class BlockingMode(Enum):
-    """Enum defining different blocking behaviors for sprites."""
-    NOT_BLOCKED = 0
-    BOUNDING_BOX = 1
-    PIXEL_PERFECT = 2
+from .enums import BlockingMode, InteractionMode
 
 
 def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
@@ -78,6 +72,7 @@ class Sprite:
         rotation: int = 0,
         blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
         layer: int = 0,
+        interaction: InteractionMode = InteractionMode.TANGIBLE,
     ):
         """Initialize a new Sprite.
         
@@ -90,6 +85,7 @@ class Sprite:
             rotation: Rotation in degrees (default: 0)
             blocking: Collision detection method (default: NOT_BLOCKED)
             layer: Z-order layer for rendering (default: 0, higher values render on top)
+            interaction: How the sprite interacts with the game world (default: TANGIBLE)
             
         Raises:
             ValueError: If scale is 0, pixels is not a 2D list, rotation is invalid,
@@ -109,12 +105,13 @@ class Sprite:
         self._blocking = blocking
         self._layer = int(layer)
         self.set_scale(scale)  # Use set_scale to validate scale factor
+        self._interaction = interaction
 
     def clone(self, new_name: Optional[str] = None) -> 'Sprite':
         """Create an independent copy of this sprite.
         
         Args:
-            new_name: Optional name for the cloned sprite. If None, generates a new UUID.
+            new_name: Optional name for the cloned sprite. If None, reuses current name.
             
         Returns:
             A new Sprite instance with the same properties but independent state.
@@ -125,13 +122,14 @@ class Sprite:
         # Create a new sprite with copied properties
         return Sprite(
             pixels=pixels_copy.tolist(),  # Convert back to list for constructor
-            name=new_name,  # Use new name or generate new UUID
+            name=new_name if new_name is not None else self._name,  # Use new name or generate new UUID
             x=self._x,
             y=self._y,
             scale=self._scale,
             rotation=self.rotation,  # Use the public property to get normalized value
             blocking=self._blocking,
-            layer=self._layer
+            layer=self._layer,
+            interaction=self._interaction
         )
 
     def _set_rotation(self, rotation: int) -> None:
@@ -311,6 +309,24 @@ class Sprite:
             layer: New layer value. Higher values render on top.
         """
         self._layer = int(layer)
+
+    @property
+    def interaction(self) -> InteractionMode:
+        """Get the current interaction mode."""
+        return self._interaction
+
+    def set_interaction(self, interaction: InteractionMode) -> None:
+        """Set the sprite's interaction mode.
+        
+        Args:
+            interaction: The new interaction mode
+            
+        Raises:
+            ValueError: If interaction is not an InteractionMode enum value
+        """
+        if not isinstance(interaction, InteractionMode):
+            raise ValueError("interaction must be an InteractionMode enum value")
+        self._interaction = interaction
 
     def render(self) -> np.ndarray:
         """Render the sprite with current scale and rotation.
