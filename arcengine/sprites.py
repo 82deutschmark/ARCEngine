@@ -375,3 +375,79 @@ class Sprite:
                 result = _downscale_mode(result, factor)
         
         return result
+
+    def collides_with(self, other: 'Sprite') -> bool:
+        """Check if this sprite collides with another sprite.
+        
+        The collision check follows these rules:
+        1. A sprite cannot collide with itself
+        2. Non-collidable sprites (based on interaction mode) never collide
+        3. For collidable sprites, the collision detection method is based on their blocking mode:
+           - NOT_BLOCKED: Always returns False
+           - BOUNDING_BOX: Simple rectangular collision check
+           - PIXEL_PERFECT: Precise pixel-level collision detection
+        
+        Args:
+            other: The other sprite to check collision with
+            
+        Returns:
+            bool: True if the sprites collide, False otherwise
+        """
+        # Rule 1: A sprite cannot collide with itself
+        if self is other:
+            return False
+            
+        # Rule 2: Both sprites must be collidable
+        if not (self.is_collidable and other.is_collidable):
+            return False
+            
+        # Rule 3: Handle different blocking modes
+        if self._blocking == BlockingMode.NOT_BLOCKED or other._blocking == BlockingMode.NOT_BLOCKED:
+            return False
+            
+        # Get sprite dimensions after rendering (accounts for rotation and scaling)
+        self_pixels = self.render()
+        other_pixels = other.render()
+        self_height, self_width = self_pixels.shape
+        other_height, other_width = other_pixels.shape
+        
+        # First check bounding box collision
+        # If there's no bounding box collision, there can't be pixel collision
+        if (self._x >= other._x + other_width or
+            self._x + self_width <= other._x or
+            self._y >= other._y + other_height or
+            self._y + self_height <= other._y):
+            return False
+            
+        # If either sprite uses PIXEL_PERFECT, do pixel-level collision detection
+        if (self._blocking == BlockingMode.PIXEL_PERFECT or 
+            other._blocking == BlockingMode.PIXEL_PERFECT):
+            
+            # Calculate intersection region
+            x_min = max(self._x, other._x)
+            x_max = min(self._x + self_width, other._x + other_width)
+            y_min = max(self._y, other._y)
+            y_max = min(self._y + self_height, other._y + other_height)
+            
+            # Get the overlapping regions from both sprites
+            self_x_start = x_min - self._x
+            self_x_end = x_max - self._x
+            self_y_start = y_min - self._y
+            self_y_end = y_max - self._y
+            
+            other_x_start = x_min - other._x
+            other_x_end = x_max - other._x
+            other_y_start = y_min - other._y
+            other_y_end = y_max - other._y
+            
+            # Extract overlapping regions
+            self_region = self_pixels[self_y_start:self_y_end, self_x_start:self_x_end]
+            other_region = other_pixels[other_y_start:other_y_end, other_x_start:other_x_end]
+            
+            # Check if any non-transparent pixels overlap
+            self_mask = self_region != -1
+            other_mask = other_region != -1
+            return np.any(self_mask & other_mask)
+            
+        # Otherwise, we already know there's a bounding box collision
+        return True

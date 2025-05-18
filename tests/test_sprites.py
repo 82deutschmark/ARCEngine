@@ -419,5 +419,111 @@ class TestSprite(unittest.TestCase):
         self.assertFalse(sprite.is_visible)
         self.assertFalse(sprite.is_collidable)
 
+    def test_collision_basic_rules(self):
+        """Test basic collision rules (self-collision and collidable status)."""
+        sprite1 = Sprite([[1]], x=0, y=0, blocking=BlockingMode.BOUNDING_BOX)
+        sprite2 = Sprite([[1]], x=0, y=0, blocking=BlockingMode.BOUNDING_BOX)
+        
+        # Test self-collision
+        self.assertFalse(sprite1.collides_with(sprite1))
+        
+        # Test non-collidable interaction modes
+        sprite1.set_interaction(InteractionMode.INTANGIBLE)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        sprite1.set_interaction(InteractionMode.TANGIBLE)
+        sprite2.set_interaction(InteractionMode.REMOVED)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test NOT_BLOCKED mode
+        sprite1.set_interaction(InteractionMode.TANGIBLE)
+        sprite2.set_interaction(InteractionMode.TANGIBLE)
+        sprite1.set_blocking(BlockingMode.NOT_BLOCKED)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        sprite1.set_blocking(BlockingMode.BOUNDING_BOX)
+        sprite2.set_blocking(BlockingMode.NOT_BLOCKED)
+        self.assertFalse(sprite1.collides_with(sprite2))
+
+    def test_bounding_box_collision(self):
+        """Test bounding box collision detection."""
+        # Create two 2x2 sprites
+        sprite1 = Sprite([
+            [1, 1],
+            [1, 1]
+        ], blocking=BlockingMode.BOUNDING_BOX)
+        sprite2 = Sprite([
+            [2, 2],
+            [2, 2]
+        ], blocking=BlockingMode.BOUNDING_BOX)
+        
+        # Test no collision when sprites are apart
+        sprite1.set_position(0, 0)
+        sprite2.set_position(3, 3)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test collision when sprites overlap
+        sprite2.set_position(1, 1)
+        self.assertTrue(sprite1.collides_with(sprite2))
+        
+        # Test collision is commutative
+        self.assertTrue(sprite2.collides_with(sprite1))
+        
+        # Test edge touching counts as collision
+        sprite2.set_position(2, 2)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test with scaled sprites
+        sprite1.set_scale(2)  # Now 4x4
+        sprite2.set_position(3, 3)
+        self.assertTrue(sprite1.collides_with(sprite2))
+        
+        # Test with rotated sprites
+        sprite1.set_rotation(90)  # Rotation shouldn't affect bounding box
+        self.assertTrue(sprite1.collides_with(sprite2))
+        
+        # Test with invisible but collidable sprite
+        sprite2.set_interaction(InteractionMode.INVISIBLE)
+        self.assertTrue(sprite1.collides_with(sprite2))
+
+    def test_pixel_perfect_collision(self):
+        """Test pixel-perfect collision detection."""
+        # Create two sprites with transparent pixels (-1)
+        sprite1 = Sprite([
+            [-1,  1],
+            [ 1, -1]
+        ], blocking=BlockingMode.PIXEL_PERFECT)
+        
+        sprite2 = Sprite([
+            [ 2, -1],
+            [-1,  2]
+        ], blocking=BlockingMode.PIXEL_PERFECT)
+        
+        # Test no collision when sprites are apart
+        sprite1.set_position(0, 0)
+        sprite2.set_position(3, 3)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test no collision when transparent pixels overlap
+        sprite2.set_position(1, 1)  # Overlaps only on transparent pixels
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test collision when non-transparent pixels overlap
+        sprite2.set_position(1, 0)  # Direct overlap of non-transparent pixels
+        self.assertTrue(sprite1.collides_with(sprite2))
+        
+        # Test with one sprite using PIXEL_PERFECT and other using BOUNDING_BOX
+        sprite2.set_blocking(BlockingMode.BOUNDING_BOX)
+        sprite2.set_position(1, 1)  # Would collide with bounding box, but not pixels
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        # Test with scaled sprites
+        sprite1.set_scale(2)  # Now 4x4 with scaled transparent pixels
+        sprite2.set_position(2, 0)
+        self.assertTrue(sprite1.collides_with(sprite2))  # Non-transparent pixels overlap
+        
+        # Test with rotated sprites
+        sprite1.set_rotation(90)
+        sprite2.set_position(0, 0)
+        self.assertTrue(sprite1.collides_with(sprite2))  # Should still collide after rotation
+
 if __name__ == '__main__':
     unittest.main() 
