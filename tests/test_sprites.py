@@ -1,8 +1,10 @@
 """Tests for the sprites module."""
 
 import unittest
+
 import numpy as np
-from arcengine import Sprite, BlockingMode, InteractionMode
+
+from arcengine import BlockingMode, InteractionMode, Sprite
 
 
 class TestSprite(unittest.TestCase):

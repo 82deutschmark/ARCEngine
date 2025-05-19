@@ -2,8 +2,10 @@
 Module for camera-related functionality in the ARCEngine.
 """
 
-import numpy as np
 from typing import List, Tuple
+
+import numpy as np
+
 from arcengine.sprites import Sprite
 
 

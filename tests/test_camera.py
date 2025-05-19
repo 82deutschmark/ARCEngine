@@ -1,8 +1,10 @@
 """Tests for the camera module."""
 
 import unittest
+
 import numpy as np
-from arcengine import Camera, Sprite, InteractionMode
+
+from arcengine import Camera, InteractionMode, Sprite
 
 
 class TestCamera(unittest.TestCase):

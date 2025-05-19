@@ -2,9 +2,11 @@
 Module for sprite-related classes and functionality in the ARCEngine.
 """
 
-import numpy as np
-from typing import List, Optional
 import uuid
+from typing import List, Optional
+
+import numpy as np
+
 from .enums import BlockingMode, InteractionMode
 
 

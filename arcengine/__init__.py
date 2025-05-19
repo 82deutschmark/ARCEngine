@@ -2,10 +2,18 @@
 ARCEngine - A Python library for 2D sprite-based game development
 """
 
-from .sprites import Sprite
 from .camera import Camera
+from .enums import (
+    BlockingMode,
+    ComplexAction,
+    FrameData,
+    GameAction,
+    GameState,
+    InteractionMode,
+    SimpleAction,
+)
 from .level import Level
-from .enums import BlockingMode, InteractionMode
+from .sprites import Sprite
 
 __version__ = "0.1.0"
 __all__ = [
@@ -14,4 +22,9 @@ __all__ = [
     "InteractionMode",
     "Camera",
     "Level",
+    "GameAction",
+    "GameState",
+    "SimpleAction",
+    "ComplexAction",
+    "FrameData",
 ]

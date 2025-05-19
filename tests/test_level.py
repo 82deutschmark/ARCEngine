@@ -1,6 +1,7 @@
 """Tests for the level module."""
 
 import unittest
+
 from arcengine import Level, Sprite
 
 
