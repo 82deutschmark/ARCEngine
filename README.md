@@ -4,8 +4,49 @@ A Python library for 2D sprite-based game development.
 
 ## Installation
 
+Add ARCEngine to your project using one of these methods:
+
+### Using uv (Recommended)
+
+Add ARCEngine to your `pyproject.toml`:
+```toml
+[project]
+dependencies = [
+    "arcengine @ git+ssh://git@github.com/yourusername/ARCEngine.git@main",
+]
+```
+
+Then install with uv:
 ```bash
-pip install arcengine
+uv pip install --editable .
+```
+
+### Using pip
+
+Add ARCEngine to your `pyproject.toml`:
+```toml
+[project]
+dependencies = [
+    "arcengine @ git+ssh://git@github.com/yourusername/ARCEngine.git@main",
+]
+```
+
+Then install with pip:
+```bash
+pip install --editable .
+```
+
+### Using Poetry
+
+Add ARCEngine to your `pyproject.toml`:
+```toml
+[tool.poetry.dependencies]
+arcengine = { git = "ssh://git@github.com/yourusername/ARCEngine.git", branch = "main" }
+```
+
+Then install with Poetry:
+```bash
+poetry install
 ```
 
 ## Development Setup
