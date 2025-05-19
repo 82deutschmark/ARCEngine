@@ -7,4 +7,5 @@ from .test_level import TestLevel
 __all__ = [
     "TestSprite",
     "TestCamera",
+    "TestLevel",
 ]

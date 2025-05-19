@@ -61,7 +61,7 @@ poetry install
 The `Sprite` class represents a 2D sprite that can be positioned and scaled in the game world.
 
 ```python
-from arcengine import Sprite, BlockingMode
+from arcengine import Sprite, BlockingMode, InteractionMode
 
 # Create a simple 2x2 sprite
 sprite = Sprite([
@@ -78,7 +78,8 @@ sprite = Sprite(
     scale=2,
     rotation=90,
     blocking=BlockingMode.BOUNDING_BOX,
-    layer=1  # Higher values render on top
+    layer=1,  # Higher values render on top
+    interaction=InteractionMode.TANGIBLE
 )
 ```
 
@@ -88,13 +89,17 @@ sprite = Sprite(
 - `x` (int): X coordinate in pixels
 - `y` (int): Y coordinate in pixels
 - `scale` (int): Scale factor. Positive values scale up (2 = double size, 3 = triple size). Negative values scale down (-1 = half size, -2 = one-third size, -3 = one-fourth size).
+- `rotation` (int): Rotation in degrees (0, 90, 180, or 270)
 - `blocking` (BlockingMode): Collision detection method
 - `pixels` (numpy.ndarray): The sprite's pixel data
 - `layer` (int): Z-order layer for rendering (higher values render on top)
+- `interaction` (InteractionMode): How the sprite interacts with the game world
+- `is_visible` (bool): Whether the sprite should be rendered
+- `is_collidable` (bool): Whether the sprite should participate in collisions
 
 #### Methods
 
-##### `__init__(pixels, name=None, x=0, y=0, scale=1, rotation=0, blocking=BlockingMode.NOT_BLOCKED, layer=0)`
+##### `__init__(pixels, name=None, x=0, y=0, scale=1, rotation=0, blocking=BlockingMode.NOT_BLOCKED, layer=0, interaction=InteractionMode.TANGIBLE)`
 Initialize a new Sprite.
 
 - `pixels`: 2D list representing the sprite's pixels
@@ -105,6 +110,7 @@ Initialize a new Sprite.
 - `rotation`: Rotation in degrees (default: 0)
 - `blocking`: Collision detection method (default: NOT_BLOCKED)
 - `layer`: Z-order layer for rendering (default: 0, higher values render on top)
+- `interaction`: How the sprite interacts with the game world (default: TANGIBLE)
 
 Raises `ValueError` if scale is 0, pixels is not a 2D list, rotation is invalid, or if downscaling factor doesn't evenly divide sprite dimensions.
 
@@ -119,6 +125,12 @@ Set the sprite's position.
 
 - `x`: New X coordinate in pixels
 - `y`: New Y coordinate in pixels
+
+##### `move(dx, dy)`
+Move the sprite by the given deltas.
+
+- `dx`: Change in x position (positive = right, negative = left)
+- `dy`: Change in y position (positive = down, negative = up)
 
 ##### `set_scale(scale)`
 Set the sprite's scale factor.
@@ -183,6 +195,38 @@ Set the sprite's rendering layer.
 
 - `layer`: New layer value. Higher values render on top.
 
+##### `set_blocking(blocking)`
+Set the sprite's blocking behavior.
+
+- `blocking`: The new blocking behavior (BlockingMode enum value)
+- Raises `ValueError` if blocking is not a BlockingMode enum value
+
+##### `set_name(name)`
+Set the sprite's name.
+
+- `name`: New name for the sprite
+- Raises `ValueError` if name is empty
+
+##### `set_interaction(interaction)`
+Set the sprite's interaction mode.
+
+- `interaction`: The new interaction mode (InteractionMode enum value)
+- Raises `ValueError` if interaction is not an InteractionMode enum value
+
+##### `collides_with(other)`
+Check if this sprite collides with another sprite.
+
+The collision check follows these rules:
+1. A sprite cannot collide with itself
+2. Non-collidable sprites (based on interaction mode) never collide
+3. For collidable sprites, the collision detection method is based on their blocking mode:
+   - NOT_BLOCKED: Always returns False
+   - BOUNDING_BOX: Simple rectangular collision check
+   - PIXEL_PERFECT: Precise pixel-level collision detection
+
+- `other`: The other sprite to check collision with
+- Returns: True if the sprites collide, False otherwise
+
 ### BlockingMode
 
 An enumeration defining different collision detection behaviors for sprites:
@@ -190,6 +234,118 @@ An enumeration defining different collision detection behaviors for sprites:
 - `NOT_BLOCKED`: No collision detection
 - `BOUNDING_BOX`: Collision detection using the sprite's bounding box
 - `PIXEL_PERFECT`: Collision detection using pixel-perfect testing
+
+### InteractionMode
+
+An enumeration defining how a sprite interacts with the game world:
+
+- `TANGIBLE`: Visible and can be collided with
+- `INTANGIBLE`: Visible but cannot be collided with (ghost-like)
+- `INVISIBLE`: Not visible but can be collided with (invisible wall)
+- `REMOVED`: Not visible and cannot be collided with (effectively removed)
+
+### Camera
+
+The `Camera` class defines a viewport into the game world, handling rendering of sprites and viewport scaling.
+
+```python
+from arcengine import Camera
+
+# Create a default 64x64 camera
+camera = Camera()
+
+# Create a custom camera
+camera = Camera(
+    x=10,
+    y=20,
+    width=32,
+    height=32,
+    background=1,  # Background color index
+    letter_box=2   # Letter box color index
+)
+```
+
+#### Properties
+
+- `x` (int): X coordinate in pixels
+- `y` (int): Y coordinate in pixels
+- `width` (int): Viewport width in pixels (max: 64)
+- `height` (int): Viewport height in pixels (max: 64)
+- `background` (int): Background color index
+- `letter_box` (int): Letter box color index
+
+#### Methods
+
+##### `__init__(x=0, y=0, width=64, height=64, background=5, letter_box=5)`
+Initialize a new Camera.
+
+- `x`: X coordinate in pixels (default: 0)
+- `y`: Y coordinate in pixels (default: 0)
+- `width`: Viewport width in pixels (default: 64, max: 64)
+- `height`: Viewport height in pixels (default: 64, max: 64)
+- `background`: Background color index (default: 5 - Black)
+- `letter_box`: Letter box color index (default: 5 - Black)
+
+Raises `ValueError` if width or height exceed 64 pixels.
+
+##### `render(sprites)`
+Render the camera view.
+
+- `sprites`: List of sprites to render
+- Returns: A 64x64 numpy array representing the rendered view
+
+The rendered output is always 64x64 pixels. If the camera's viewport is smaller, the view will be scaled up uniformly (maintaining aspect ratio) to fit within 64x64, and the remaining space will be filled with the letter_box color.
+
+### Level
+
+The `Level` class manages a collection of sprites, providing methods to add, remove, and query sprites.
+
+```python
+from arcengine import Level, Sprite
+
+# Create an empty level
+level = Level()
+
+# Create a level with initial sprites
+sprites = [
+    Sprite([[1]], name="player"),
+    Sprite([[2]], name="enemy")
+]
+level = Level(sprites=sprites)
+```
+
+#### Methods
+
+##### `__init__(sprites=None)`
+Initialize a new Level.
+
+- `sprites`: Optional list of sprites to initialize the level with
+
+##### `add_sprite(sprite)`
+Add a sprite to the level.
+
+- `sprite`: The sprite to add
+
+##### `remove_sprite(sprite)`
+Remove a sprite from the level.
+
+- `sprite`: The sprite to remove
+
+##### `get_sprites()`
+Get all sprites in the level.
+
+- Returns: A copy of the list of all sprites in the level
+
+##### `get_sprites_by_name(name)`
+Get all sprites with the given name.
+
+- `name`: The name to search for
+- Returns: List of sprites with the given name
+
+##### `clone()`
+Create a deep copy of this level.
+
+- Returns: A new Level instance with cloned sprites
 
 ## Usage
 
@@ -217,8 +373,22 @@ To set up the development environment:
 
 3. Install development dependencies:
    ```bash
-   uv pip install -e ".[dev]"
+   uv sync
    ```
+
+4. Install git hooks:
+
+```bash
+pre-commit install
+```
+
+You're now ready to contribute! This repo uses [`ruff`](https://github.com/astral-sh/ruff) to lint and format code and [`mypy`](https://github.com/python/mypy) for static type checking. You can run all of the tools manually like this:
+
+```bash
+pre-commit run --all-files
+```
+
+Note: by default these tools will run automatically before `git commit`. It's also recommended to set up `ruff` [inside your IDE](https://docs.astral.sh/ruff/editors/setup/).
 
 ## License
 
