@@ -1,60 +1,84 @@
 # ARCEngine
 
-A Python library built with numpy support for 2D sprite-based game development.
+A Python library for 2D sprite-based game development.
 
 ## Installation
 
-Add ARCEngine to your project using one of these methods:
-
-### Using uv (Recommended)
-
-Add ARCEngine to your `pyproject.toml`:
-```toml
-[project]
-dependencies = [
-    "arcengine @ git+https://github.com/yourusername/ARCEngine.git@main",
-]
-```
-
-Then install with uv:
 ```bash
-uv pip install --editable .
+pip install arcengine
 ```
 
-### Using pip
+## Development Setup
 
-Add ARCEngine to your `pyproject.toml`:
-```toml
-[project]
-dependencies = [
-    "arcengine @ git+https://github.com/yourusername/ARCEngine.git@main",
-]
-```
+1. Clone the repository
+2. Install development dependencies:
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+3. Install git hooks:
+   ```bash
+   pre-commit install
+   ```
 
-Then install with pip:
-```bash
-pip install --editable .
-```
-
-### Using Poetry
-
-Add ARCEngine to your `pyproject.toml`:
-```toml
-[tool.poetry.dependencies]
-arcengine = { git = "https://github.com/yourusername/ARCEngine.git", branch = "main" }
-```
-
-Then install with Poetry:
-```bash
-poetry install
-```
-
-## Requirements
-
-- Python >= 3.8
-- NumPy >= 1.24.0
+The project uses `ruff` for linting and formatting code, and `mypy` for static type checking.
 
 ## API Documentation
+
+### ARCBaseGame
+
+The base class for ARCEngine games that manages levels and camera.
+
+```python
+from arcengine import ARCBaseGame, Level, Camera
+
+# Create a game with levels and optional custom camera
+game = ARCBaseGame(levels=[level1, level2], camera=camera)  # camera is optional
+```
+
+#### Properties
+
+- `current_level` (Level): The current active level
+- `camera` (Camera): The game's camera
+- `game_id` (str): The game's identifier (should be set by subclasses)
+- `action` (GameAction): The current action being performed
+
+#### Methods
+
+##### `__init__(levels, camera=None)`
+Initialize a new game.
+
+- `levels`: List of levels to initialize the game with. Each level will be cloned.
+- `camera`: Optional camera to use. If not provided, a default 64x64 camera will be created.
+
+Raises `ValueError` if levels list is empty.
+
+##### `set_level(index)`
+Set the current level by index.
+
+- `index`: The index of the level to set as current
+
+Raises `IndexError` if index is out of range.
+
+##### `perform_action(action_input)`
+Perform an action and return the resulting frame data.
+
+This method should not be overridden. Game logic should be implemented in the `step()` method.
+
+- `action_input`: The action to perform
+- Returns: FrameData containing the rendered frames and game state
+
+##### `step()`
+Step the game. This is where your game logic should be implemented.
+
+REQUIRED: Call `complete_action()` when the action is complete. It does not need to be called every step, but once the action is complete. The engine will keep calling step and rendering frames until the action is complete.
+
+##### `complete_action()`
+Mark the current action as complete.
+
+##### `is_action_complete()`
+Check if the current action is complete.
+
+- Returns: True if the action is complete, False otherwise
 
 ### Sprite
 

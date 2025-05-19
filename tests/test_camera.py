@@ -39,6 +39,43 @@ class TestCamera(unittest.TestCase):
             Camera(height=65)
         self.assertIn("Height cannot exceed 64 pixels", str(ctx.exception))
 
+    def test_camera_properties(self):
+        """Test camera property getters and setters."""
+        camera = Camera()
+
+        # Test initial values
+        self.assertEqual(camera.x, 0)
+        self.assertEqual(camera.y, 0)
+        self.assertEqual(camera.width, 64)
+        self.assertEqual(camera.height, 64)
+
+        # Test setters
+        camera.x = 10
+        camera.y = 20
+        camera.width = 32
+        camera.height = 32
+
+        self.assertEqual(camera.x, 10)
+        self.assertEqual(camera.y, 20)
+        self.assertEqual(camera.width, 32)
+        self.assertEqual(camera.height, 32)
+
+        # Test invalid width
+        with self.assertRaises(ValueError) as ctx:
+            camera.width = 65
+        self.assertIn("Width cannot exceed 64 pixels", str(ctx.exception))
+
+        # Test invalid height
+        with self.assertRaises(ValueError) as ctx:
+            camera.height = 65
+        self.assertIn("Height cannot exceed 64 pixels", str(ctx.exception))
+
+        # Test type conversion
+        camera.x = "10"
+        camera.y = "20"
+        self.assertEqual(camera.x, 10)
+        self.assertEqual(camera.y, 20)
+
     def test_render_no_scaling(self):
         """Test rendering when no scaling is needed (64x64)."""
         camera = Camera(width=64, height=64, background=1, letter_box=2)
@@ -305,14 +342,12 @@ class TestCamera(unittest.TestCase):
         self.assertTrue(np.all(raw1 == 0))  # All background
 
         # Move camera to see sprite
-        camera._x = 9
-        camera._y = 9
+        camera.move(9, 9)
         raw2 = camera._raw_render([sprite])
         self.assertEqual(raw2[1, 1], 1)  # Sprite now visible
 
         # Move camera to partially see sprite
-        camera._x = 11
-        camera._y = 11
+        camera.move(2, 2)
         raw3 = camera._raw_render([sprite])
         self.assertEqual(raw3[0, 0], 1)  # Only one pixel visible
         self.assertTrue(np.all(raw3[1:, 1:] == 0))  # Rest is background

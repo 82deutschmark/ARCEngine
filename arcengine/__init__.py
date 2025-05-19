@@ -2,8 +2,10 @@
 ARCEngine - A Python library for 2D sprite-based game development
 """
 
+from .base_game import ARCBaseGame
 from .camera import Camera
 from .enums import (
+    ActionInput,
     BlockingMode,
     ComplexAction,
     FrameData,
@@ -27,4 +29,6 @@ __all__ = [
     "SimpleAction",
     "ComplexAction",
     "FrameData",
+    "ARCBaseGame",
+    "ActionInput",
 ]

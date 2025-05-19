@@ -53,6 +53,100 @@ class Camera:
         self._background = int(background)
         self._letter_box = int(letter_box)
 
+    @property
+    def x(self) -> int:
+        """Get the camera's x position.
+
+        Returns:
+            int: The camera's x position
+        """
+        return self._x
+
+    @x.setter
+    def x(self, value: int) -> None:
+        """Set the camera's x position.
+
+        Args:
+            value: The new x position
+        """
+        self._x = int(value)
+
+    @property
+    def y(self) -> int:
+        """Get the camera's y position.
+
+        Returns:
+            int: The camera's y position
+        """
+        return self._y
+
+    @y.setter
+    def y(self, value: int) -> None:
+        """Set the camera's y position.
+
+        Args:
+            value: The new y position
+        """
+        self._y = int(value)
+
+    @property
+    def width(self) -> int:
+        """Get the camera's width.
+
+        Returns:
+            int: The camera's width
+        """
+        return self._width
+
+    @width.setter
+    def width(self, value: int) -> None:
+        """Set the camera's width.
+
+        Args:
+            value: The new width
+
+        Raises:
+            ValueError: If width exceeds MAX_DIMENSION
+        """
+        width_int = int(value)
+        if width_int > self.MAX_DIMENSION:
+            raise ValueError(f"Width cannot exceed {self.MAX_DIMENSION} pixels")
+        self._width = width_int
+
+    @property
+    def height(self) -> int:
+        """Get the camera's height.
+
+        Returns:
+            int: The camera's height
+        """
+        return self._height
+
+    @height.setter
+    def height(self, value: int) -> None:
+        """Set the camera's height.
+
+        Args:
+            value: The new height
+
+        Raises:
+            ValueError: If height exceeds MAX_DIMENSION
+        """
+        height_int = int(value)
+        if height_int > self.MAX_DIMENSION:
+            raise ValueError(f"Height cannot exceed {self.MAX_DIMENSION} pixels")
+        self._height = height_int
+
+    def move(self, dx: int, dy: int) -> None:
+        """Move the camera by the specified delta.
+
+        Args:
+            dx: The change in x position
+            dy: The change in y position
+        """
+        self._x += int(dx)
+        self._y += int(dy)
+
     def _calculate_scale_and_offset(self) -> Tuple[int, int, int]:
         """Calculate the scale factor and offsets for letterboxing.
 
