@@ -525,5 +525,43 @@ class TestSprite(unittest.TestCase):
         sprite2.set_position(0, 0)
         self.assertTrue(sprite1.collides_with(sprite2))  # Should still collide after rotation
 
+    def test_sprite_movement(self):
+        """Test sprite movement functionality."""
+        sprite = Sprite([[1]], x=5, y=5)
+        self.assertEqual(sprite.x, 5)
+        self.assertEqual(sprite.y, 5)
+        
+        # Test positive movement
+        sprite.move(3, 2)
+        self.assertEqual(sprite.x, 8)
+        self.assertEqual(sprite.y, 7)
+        
+        # Test negative movement
+        sprite.move(-4, -3)
+        self.assertEqual(sprite.x, 4)
+        self.assertEqual(sprite.y, 4)
+        
+        # Test zero movement
+        sprite.move(0, 0)
+        self.assertEqual(sprite.x, 4)
+        self.assertEqual(sprite.y, 4)
+        
+        # Test movement affects collision detection
+        sprite1 = Sprite([[1]], blocking=BlockingMode.BOUNDING_BOX)
+        sprite2 = Sprite([[2]], blocking=BlockingMode.BOUNDING_BOX)
+        
+        sprite1.set_position(0, 0)
+        sprite2.set_position(2, 2)
+        self.assertFalse(sprite1.collides_with(sprite2))
+        
+        sprite1.move(1, 1)
+        sprite2.move(-1, -1)
+        self.assertTrue(sprite1.collides_with(sprite2))
+        
+        # Test with floating point values (should be converted to int)
+        sprite.move(1.7, -2.3)
+        self.assertEqual(sprite.x, 5)  # 4 + 1
+        self.assertEqual(sprite.y, 2)  # 4 - 2
+
 if __name__ == '__main__':
     unittest.main() 

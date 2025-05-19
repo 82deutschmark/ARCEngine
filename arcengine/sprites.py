@@ -451,3 +451,13 @@ class Sprite:
             
         # Otherwise, we already know there's a bounding box collision
         return True
+
+    def move(self, dx: int, dy: int) -> None:
+        """Move the sprite by the given deltas.
+        
+        Args:
+            dx: Change in x position (positive = right, negative = left)
+            dy: Change in y position (positive = down, negative = up)
+        """
+        self._x += int(dx)
+        self._y += int(dy)
