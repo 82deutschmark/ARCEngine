@@ -18,50 +18,8 @@ dependencies = [
 
 Then install with uv:
 ```bash
-uv pip install --editable .
+uv sync
 ```
-
-### Using pip
-
-Add ARCEngine to your `pyproject.toml`:
-```toml
-[project]
-dependencies = [
-    "arcengine @ git+ssh://git@github.com/yourusername/ARCEngine.git@main",
-]
-```
-
-Then install with pip:
-```bash
-pip install --editable .
-```
-
-### Using Poetry
-
-Add ARCEngine to your `pyproject.toml`:
-```toml
-[tool.poetry.dependencies]
-arcengine = { git = "ssh://git@github.com/yourusername/ARCEngine.git", branch = "main" }
-```
-
-Then install with Poetry:
-```bash
-poetry install
-```
-
-## Development Setup
-
-1. Clone the repository
-2. Install development dependencies:
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-3. Install git hooks:
-   ```bash
-   pre-commit install
-   ```
-
-The project uses `ruff` for linting and formatting code, and `mypy` for static type checking.
 
 ## API Documentation
 
@@ -73,7 +31,7 @@ The base class for ARCEngine games that manages levels and camera.
 from arcengine import ARCBaseGame, Level, Camera
 
 # Create a game with levels and optional custom camera
-game = ARCBaseGame(levels=[level1, level2], camera=camera)  # camera is optional
+game = ARCBaseGame(game_id="my_gane", levels=[level1, level2], camera=camera)  # camera is optional
 ```
 
 #### Properties
@@ -108,18 +66,48 @@ This method should not be overridden. Game logic should be implemented in the `s
 - `action_input`: The action to perform
 - Returns: FrameData containing the rendered frames and game state
 
+##### `complete_action()`
+"""Complete the action. Call this when the provided action is fully resolved"""
+
+##### `win()`
+"""Call this when the player has beaten the game."""
+
+##### `lose`
+"""Complete the action. Call this when the provided action is fully resolved"""
+
 ##### `step()`
 Step the game. This is where your game logic should be implemented.
 
 REQUIRED: Call `complete_action()` when the action is complete. It does not need to be called every step, but once the action is complete. The engine will keep calling step and rendering frames until the action is complete.
 
-##### `complete_action()`
-Mark the current action as complete.
-
 ##### `is_action_complete()`
 Check if the current action is complete.
 
 - Returns: True if the action is complete, False otherwise
+
+##### `try_move(sprite_name, dx, dy)`
+Try to move a sprite and return a list of sprites it collides with.
+
+This method attempts to move the sprite by the given deltas and checks for collisions.
+If any collisions are detected, the sprite is not moved and the method returns a list
+of sprites that were collided with.
+
+- `sprite_name`: The name of the sprite to move
+- `dx`: The change in x position (positive = right, negative = left)
+- `dy`: The change in y position (positive = down, negative = up)
+- Returns: A list of sprites that the sprite collided with. If no collisions occurred,
+  the sprite is moved and an empty list is returned
+- Raises: ValueError if no sprite with the given name is found
+
+Example:
+```python
+# Try to move a sprite right by 1 pixel
+collisions = game.try_move("player", 1, 0)
+if not collisions:
+    print("Move successful!")
+else:
+    print(f"Collided with: {[sprite.name for sprite in collisions]}")
+```
 
 ### Sprite
 
@@ -311,22 +299,23 @@ An enumeration defining how a sprite interacts with the game world:
 
 ### Camera
 
-The `Camera` class defines a viewport into the game world, handling rendering of sprites and viewport scaling.
+A camera that defines the viewport into the game world.
 
 ```python
-from arcengine import Camera
+from arcengine import Camera, RenderableUserDisplay
 
-# Create a default 64x64 camera
+# Create a default camera (64x64 viewport)
 camera = Camera()
 
 # Create a custom camera
 camera = Camera(
-    x=10,
-    y=20,
-    width=32,
-    height=32,
-    background=1,  # Background color index
-    letter_box=2   # Letter box color index
+    x=10,                    # X position in pixels
+    y=20,                    # Y position in pixels
+    width=32,                # Viewport width (max 64)
+    height=32,               # Viewport height (max 64)
+    background=1,            # Background color index
+    letter_box=2,            # Letter box color index
+    interfaces=[],           # Optional list of renderable interfaces
 )
 ```
 
@@ -336,30 +325,130 @@ camera = Camera(
 - `y` (int): Y coordinate in pixels
 - `width` (int): Viewport width in pixels (max: 64)
 - `height` (int): Viewport height in pixels (max: 64)
-- `background` (int): Background color index
-- `letter_box` (int): Letter box color index
 
 #### Methods
 
-##### `__init__(x=0, y=0, width=64, height=64, background=5, letter_box=5)`
+##### `__init__(x=0, y=0, width=64, height=64, background=5, letter_box=5, interfaces=[])`
+
 Initialize a new Camera.
 
-- `x`: X coordinate in pixels (default: 0)
-- `y`: Y coordinate in pixels (default: 0)
-- `width`: Viewport width in pixels (default: 64, max: 64)
-- `height`: Viewport height in pixels (default: 64, max: 64)
-- `background`: Background color index (default: 5 - Black)
-- `letter_box`: Letter box color index (default: 5 - Black)
+Args:
+- `x` (int): X coordinate in pixels (default: 0)
+- `y` (int): Y coordinate in pixels (default: 0)
+- `width` (int): Viewport width in pixels (default: 64, max: 64)
+- `height` (int): Viewport height in pixels (default: 64, max: 64)
+- `background` (int): Background color index (default: 5 - Black)
+- `letter_box` (int): Letter box color index (default: 5 - Black)
+- `interfaces` (list[RenderableUserDisplay]): Optional list of renderable interfaces to initialize with
 
-Raises `ValueError` if width or height exceed 64 pixels.
+Raises:
+- `ValueError`: If width or height exceed 64 pixels or are negative
+
+##### `move(dx, dy)`
+
+Move the camera by the specified delta.
+
+Args:
+- `dx` (int): The change in x position
+- `dy` (int): The change in y position
 
 ##### `render(sprites)`
-Render the camera view.
 
-- `sprites`: List of sprites to render
-- Returns: A 64x64 numpy array representing the rendered view
+Render the camera view. The rendered output is always 64x64 pixels. If the camera's viewport is smaller, the view will be scaled up uniformly (maintaining aspect ratio) to fit within 64x64, and the remaining space will be filled with the letter_box color.
 
-The rendered output is always 64x64 pixels. If the camera's viewport is smaller, the view will be scaled up uniformly (maintaining aspect ratio) to fit within 64x64, and the remaining space will be filled with the letter_box color.
+Args:
+- `sprites` (list[Sprite]): List of sprites to render
+
+Returns:
+- `np.ndarray`: The rendered view as a 64x64 numpy array
+
+##### `replace_interface(new_interfaces)`
+
+Replace the current interfaces with new ones. This method replaces all current interfaces with the provided ones. Each interface in the new list will be cloned to prevent external modification.
+
+Args:
+- `new_interfaces` (list[RenderableUserDisplay]): List of new interfaces to use. These should be cloned before passing them in.
+
+### RenderableUserDisplay
+
+The `RenderableUserDisplay` class is an abstract base class that defines the interface for UI elements that can be rendered by the camera. It is used as the final step in the camera's rendering pipeline to produce the 64x64 output frame.
+
+```python
+from abc import ABC, abstractmethod
+from arcengine import RenderableUserDisplay
+
+class MyCustomUI(RenderableUserDisplay):
+    def render_interface(self, frame: np.ndarray) -> None:
+        # Implement custom rendering logic here
+        pass
+```
+
+#### Methods
+##### `render_interface(frame)`
+Render this UI element onto the given frame.
+
+- `frame`: The 64x64 numpy array to render onto
+
+This method is called by the camera during the final step of rendering. Implementations should modify the frame directly.
+
+### ToggleableUserDisplay
+
+The `ToggleableUserDisplay` class is an example implementation of `RenderableUserDisplay` that manages a collection of sprite pairs (enabled/disabled states) and provides methods to toggle between them.
+
+```python
+from arcengine import ToggleableUserDisplay, Sprite
+
+# Create a toggleable UI element with sprite pairs
+ui_element = ToggleableUserDisplay([
+    (enabled_sprite1, disabled_sprite1),
+    (enabled_sprite2, disabled_sprite2)
+])
+
+# Enable/disable specific sprite pairs
+ui_element.enable(0)  # Enable first pair
+ui_element.disable(1)  # Disable second pair
+
+# Check if a pair is enabled
+is_enabled = ui_element.is_enabled(0)
+```
+
+#### Methods
+
+##### `__init__(sprite_pairs)`
+Initialize a new ToggleableUserDisplay.
+
+- `sprite_pairs`: List of (enabled_sprite, disabled_sprite) tuples
+
+##### `is_enabled(index)`
+Check if a sprite pair is enabled.
+
+- `index`: Index of the sprite pair to check
+- Returns: True if the pair is enabled, False otherwise
+- Raises: IndexError if index is out of range
+
+##### `enable(index)`
+Enable a sprite pair.
+
+- `index`: Index of the sprite pair to enable
+- Raises: IndexError if index is out of range
+
+##### `disable(index)`
+Disable a sprite pair.
+
+- `index`: Index of the sprite pair to disable
+- Raises: IndexError if index is out of range
+
+##### `render_interface(frame)`
+Render the UI element onto the given frame.
+
+- `frame`: The 64x64 numpy array to render onto
+
+This method renders all sprite pairs, using the enabled sprite if the pair is enabled, and the disabled sprite if the pair is disabled.
+
+##### `clone()`
+Create a deep copy of this UI element.
+
+- Returns: A new ToggleableUserDisplay instance with cloned sprite pairs
 
 ### Level
 

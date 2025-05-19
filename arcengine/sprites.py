@@ -6,6 +6,7 @@ import uuid
 from typing import List, Optional
 
 import numpy as np
+from numpy import ndarray
 
 from .enums import BlockingMode, InteractionMode
 
@@ -65,17 +66,29 @@ class Sprite:
     # Valid rotation values in degrees (clockwise)
     VALID_ROTATIONS = {0, 90, 180, 270}
 
+    pixels: ndarray
+    _name: str
+    _x: int
+    _y: int
+    _layer: int
+    _rotation: int
+    _scale: int  # Use set_scale to validate scale factor
+    _blocking: BlockingMode
+    _interaction: InteractionMode
+    _tags: list[str]
+
     def __init__(
         self,
         pixels: List[List[int]],
         name: Optional[str] = None,
         x: int = 0,
         y: int = 0,
+        layer: int = 0,
         scale: int = 1,
         rotation: int = 0,
         blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
-        layer: int = 0,
         interaction: InteractionMode = InteractionMode.TANGIBLE,
+        tags: list[str] = [],
     ):
         """Initialize a new Sprite.
 
@@ -84,10 +97,10 @@ class Sprite:
             name: Sprite name (default: None, will generate UUID)
             x: X coordinate in pixels (default: 0)
             y: Y coordinate in pixels (default: 0)
+            layer: Z-order layer for rendering (default: 0, higher values render on top)
             scale: Scale factor (default: 1)
             rotation: Rotation in degrees (default: 0)
             blocking: Collision detection method (default: NOT_BLOCKED)
-            layer: Z-order layer for rendering (default: 0, higher values render on top)
             interaction: How the sprite interacts with the game world (default: TANGIBLE)
 
         Raises:
@@ -106,11 +119,12 @@ class Sprite:
         self._name = name if name is not None else str(uuid.uuid4())
         self._x = int(x)
         self._y = int(y)
+        self._layer = int(layer)
         self._set_rotation(rotation)
         self._blocking = blocking
-        self._layer = int(layer)
         self.set_scale(scale)  # Use set_scale to validate scale factor
         self._interaction = interaction
+        self._tags = tags
 
     def clone(self, new_name: Optional[str] = None) -> "Sprite":
         """Create an independent copy of this sprite.
@@ -137,6 +151,7 @@ class Sprite:
             blocking=self._blocking,
             layer=self._layer,
             interaction=self._interaction,
+            tags=self._tags.copy(),  # Copy the tags list
         )
 
     def _set_rotation(self, rotation: int) -> None:
@@ -308,6 +323,11 @@ class Sprite:
     def layer(self) -> int:
         """Get the current rendering layer."""
         return self._layer
+
+    @property
+    def tags(self) -> list[str]:
+        """Get the current tags."""
+        return self._tags
 
     def set_layer(self, layer: int) -> None:
         """Set the sprite's rendering layer.

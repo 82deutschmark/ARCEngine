@@ -57,6 +57,59 @@ class Level:
         """
         return [s for s in self._sprites if s.name == name]
 
+    def get_sprites_by_tag(self, tag: str) -> List[Sprite]:
+        """Get all sprites that have the given tag.
+
+        Args:
+            tag: The tag to search for
+
+        Returns:
+            List[Sprite]: All sprites that have the given tag
+        """
+        return [s for s in self._sprites if tag in s.tags]
+
+    def get_sprites_by_tags(self, tags: List[str]) -> List[Sprite]:
+        """Get all sprites that have all of the given tags.
+
+        Args:
+            tags: The tags to search for
+
+        Returns:
+            List[Sprite]: All sprites that have all of the given tags
+        """
+        if not tags:
+            return []
+        return [s for s in self._sprites if all(tag in s.tags for tag in tags)]
+
+    def get_sprites_by_any_tag(self, tags: List[str]) -> List[Sprite]:
+        """Get all sprites that have any of the specified tags.
+
+        Args:
+            tags: List of tags to search for
+
+        Returns:
+            List[Sprite]: List of sprites that have any of the specified tags
+        """
+        return [
+            sprite
+            for sprite in self._sprites
+            if any(tag in sprite.tags for tag in tags)
+        ]
+
+    def get_all_tags(self) -> set[str]:
+        """Get all unique tags from all sprites in the level.
+
+        This method collects all tags from all sprites and returns them as a set,
+        ensuring each tag appears only once in the result.
+
+        Returns:
+            set[str]: A set containing all unique tags from all sprites
+        """
+        all_tags = set()
+        for sprite in self._sprites:
+            all_tags.update(sprite.tags)
+        return all_tags
+
     def clone(self) -> "Level":
         """Create a deep copy of this level.
 

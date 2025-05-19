@@ -4,15 +4,24 @@ Module for the base game class in ARCEngine.
 
 from typing import List, Optional, final
 
+from numpy import ndarray
+
 from .camera import Camera
-from .enums import ActionInput, FrameData, GameAction, GameState
+from .enums import ActionInput, FrameData, FrameDataRaw, GameAction, GameState
 from .level import Level
 from .sprites import Sprite
 
 
 class ARCBaseGame:
-    """Base class for ARCEngine games that manages levels and camera."""
+    """Base class for ARCEngine games that manages levels and camera.
 
+    This is a base class that games should inherit from. and extend with game logic.
+    It handles the game loop and rendering.
+
+    Custom game logic should be implemented in the step() method.
+    """
+
+    _game_id: str
     _levels: list[Level]
     _current_level_index: int
     _camera: Camera
@@ -20,7 +29,6 @@ class ARCBaseGame:
     _action_complete: bool
     _state: GameState
     _score: int
-    _game_id: str
 
     def __init__(
         self,
@@ -103,7 +111,9 @@ class ARCBaseGame:
         self._current_level_index = index
 
     @final
-    def perform_action(self, action_input: ActionInput) -> FrameData:
+    def perform_action(
+        self, action_input: ActionInput, raw: bool = False
+    ) -> FrameData | FrameDataRaw:
         """Perform an action and return the resulting frame data.
 
         DO NOT OVERRIDE THIS METHOD, Your Game Logic should be in step()
@@ -124,14 +134,26 @@ class ARCBaseGame:
             raise ValueError(f"Invalid data for action {action_input.id}")
         self._set_action(action_input)
 
-        frame_list: list[list[list[int]]] = []
+        frame_list: list[ndarray | list[list[int]]] = []
 
         while not self.is_action_complete():
             self.step()
             frame = self.camera.render(self.current_level.get_sprites())
-            frame_list.append(frame.tolist())
+            if raw:
+                frame_list.append(frame)
+            else:
+                frame_list.append(frame.tolist())
 
         # Create and return FrameData
+        if raw:
+            frame_raw = FrameDataRaw()
+            frame_raw.game_id = self._game_id
+            frame_raw.frame = frame_list
+            frame_raw.state = self._state
+            frame_raw.score = self._score
+            frame_raw.action_input = action_input
+            return frame_raw
+
         return FrameData(
             game_id=self._game_id,
             frame=frame_list,
@@ -158,7 +180,7 @@ class ARCBaseGame:
 
     @final
     def complete_action(self) -> None:
-        """Complete the action."""
+        """Complete the action. Call this when the provided action is fully resolved"""
         self._action_complete = True
 
     @final
@@ -172,12 +194,12 @@ class ARCBaseGame:
 
     @final
     def win(self) -> None:
-        """Win the game."""
+        """Call this when the player has beaten the game."""
         self._state = GameState.WIN
 
     @final
     def lose(self) -> None:
-        """Lose the game."""
+        """Call this when the player has losses the game."""
         self._state = GameState.GAME_OVER
 
     def step(self) -> None:

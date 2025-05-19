@@ -9,11 +9,13 @@ from .enums import (
     BlockingMode,
     ComplexAction,
     FrameData,
+    FrameDataRaw,
     GameAction,
     GameState,
     InteractionMode,
     SimpleAction,
 )
+from .interfaces import ToggleableUserDisplay
 from .level import Level
 from .sprites import Sprite
 
@@ -29,6 +31,8 @@ __all__ = [
     "SimpleAction",
     "ComplexAction",
     "FrameData",
+    "FrameDataRaw",
     "ARCBaseGame",
     "ActionInput",
+    "ToggleableUserDisplay",
 ]

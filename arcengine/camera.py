@@ -6,7 +6,8 @@ from typing import List, Tuple
 
 import numpy as np
 
-from arcengine.sprites import Sprite
+from .interfaces import RenderableUserDisplay
+from .sprites import Sprite
 
 
 class Camera:
@@ -14,6 +15,14 @@ class Camera:
 
     # Maximum allowed dimensions
     MAX_DIMENSION = 64
+
+    _x: int
+    _y: int
+    _width: int
+    _height: int
+    _background: int
+    _letter_box: int
+    _interfaces: list[RenderableUserDisplay]
 
     def __init__(
         self,
@@ -23,6 +32,7 @@ class Camera:
         height: int = 64,
         background: int = 5,
         letter_box: int = 5,
+        interfaces: list[RenderableUserDisplay] = [],
     ):
         """Initialize a new Camera.
 
@@ -33,25 +43,27 @@ class Camera:
             height: Viewport height in pixels (default: 64, max: 64)
             background: Background color index (default: 5 - Black)
             letter_box: Letter box color index (default: 5 - Black)
+            interfaces: Optional list of renderable interfaces to initialize with
 
         Raises:
             ValueError: If width or height exceed 64 pixels
         """
-        self._x = int(x)
-        self._y = int(y)
+        if width > 64 or height > 64 or width < 0 or height < 0:
+            raise ValueError(
+                "Camera dimensions cannot exceed 64x64 pixels and must be positive"
+            )
 
-        # Validate and set dimensions
-        width_int = int(width)
-        height_int = int(height)
-        if width_int > self.MAX_DIMENSION:
-            raise ValueError(f"Width cannot exceed {self.MAX_DIMENSION} pixels")
-        if height_int > self.MAX_DIMENSION:
-            raise ValueError(f"Height cannot exceed {self.MAX_DIMENSION} pixels")
-        self._width = width_int
-        self._height = height_int
+        self._x = x
+        self._y = y
+        self.width = width
+        self.height = height
+        self._background = background
+        self._letter_box = letter_box
+        self._interfaces: List[RenderableUserDisplay] = []
 
-        self._background = int(background)
-        self._letter_box = int(letter_box)
+        if interfaces:
+            for interface in interfaces:
+                self._interfaces.append(interface)
 
     @property
     def x(self) -> int:
@@ -268,4 +280,21 @@ class Camera:
             y_offset : y_offset + view.shape[0], x_offset : x_offset + view.shape[1]
         ] = view
 
+        for interface in self._interfaces:
+            output = interface.render_interface(output)
+
         return output
+
+    def replace_interface(self, new_interfaces: list[RenderableUserDisplay]) -> None:
+        """Replace the current interfaces with new ones.
+
+        This method replaces all current interfaces with the provided ones. Each interface
+        in the new list will be cloned to prevent external modification.
+
+        Args:
+            new_interfaces: List of new interfaces to use.  These should be cloned before passing them in.
+        """
+        self._interfaces = []
+        if new_interfaces:
+            for interface in new_interfaces:
+                self._interfaces.append(interface)

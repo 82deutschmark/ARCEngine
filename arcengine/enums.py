@@ -7,6 +7,7 @@ from __future__ import annotations
 from enum import Enum, auto
 from typing import Any, Optional, Type, Union
 
+from numpy import ndarray
 from pydantic import BaseModel, Field
 
 
@@ -113,6 +114,18 @@ class FrameData(BaseModel):
     frame: list[list[list[int]]] = []
     state: GameState = GameState.NOT_PLAYED
     score: int = Field(0, ge=0, le=254)
+    action_input: ActionInput = Field(default_factory=lambda: ActionInput())
+    guid: Optional[str] = None
+
+    def is_empty(self) -> bool:
+        return len(self.frame) == 0
+
+
+class FrameDataRaw:
+    game_id: str = ""
+    frame: list[ndarray] = []
+    state: GameState = GameState.NOT_PLAYED
+    score: int = 0
     action_input: ActionInput = Field(default_factory=lambda: ActionInput())
     guid: Optional[str] = None
 

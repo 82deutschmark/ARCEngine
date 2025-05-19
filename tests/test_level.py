@@ -93,3 +93,58 @@ class TestLevel(unittest.TestCase):
         orig_box.set_position(50, 60)
         self.assertEqual(clone_box.x, 10)  # Original position
         self.assertEqual(clone_box.y, 20)
+
+    def test_sprite_tags(self):
+        """Test sprite tag-related functionality."""
+        # Create test sprites with various tags
+        sprite1 = Sprite([[1]], name="enemy1", tags=["enemy", "flying"])
+        sprite2 = Sprite([[2]], name="enemy2", tags=["enemy", "ground"])
+        sprite3 = Sprite([[3]], name="player", tags=["player", "ground"])
+        sprite4 = Sprite([[4]], name="obstacle", tags=["obstacle"])
+
+        # Create level with sprites
+        level = Level(sprites=[sprite1, sprite2, sprite3, sprite4])
+
+        # Test get_sprites_by_tag
+        enemies = level.get_sprites_by_tag("enemy")
+        self.assertEqual(len(enemies), 2)
+        self.assertIn(sprite1, enemies)
+        self.assertIn(sprite2, enemies)
+
+        ground_units = level.get_sprites_by_tag("ground")
+        self.assertEqual(len(ground_units), 2)
+        self.assertIn(sprite2, ground_units)
+        self.assertIn(sprite3, ground_units)
+
+        # Test get_sprites_by_tags (AND)
+        flying_enemies = level.get_sprites_by_tags(["enemy", "flying"])
+        self.assertEqual(len(flying_enemies), 1)
+        self.assertEqual(flying_enemies[0], sprite1)
+
+        ground_enemies = level.get_sprites_by_tags(["enemy", "ground"])
+        self.assertEqual(len(ground_enemies), 1)
+        self.assertEqual(ground_enemies[0], sprite2)
+
+        # Test get_sprites_by_any_tag (OR)
+        ground_or_flying = level.get_sprites_by_any_tag(["ground", "flying"])
+        self.assertEqual(len(ground_or_flying), 3)
+        self.assertIn(sprite1, ground_or_flying)  # flying
+        self.assertIn(sprite2, ground_or_flying)  # ground
+        self.assertIn(sprite3, ground_or_flying)  # ground
+
+        # Test with non-existent tags
+        self.assertEqual(len(level.get_sprites_by_tag("nonexistent")), 0)
+        self.assertEqual(len(level.get_sprites_by_tags(["enemy", "nonexistent"])), 0)
+        self.assertEqual(len(level.get_sprites_by_any_tag(["nonexistent"])), 0)
+
+        # Test with empty tag list
+        self.assertEqual(len(level.get_sprites_by_tags([])), 0)
+        self.assertEqual(len(level.get_sprites_by_any_tag([])), 0)
+
+        all_tags = level.get_all_tags()
+        self.assertEqual(len(all_tags), 5)
+        self.assertIn("enemy", all_tags)
+        self.assertIn("flying", all_tags)
+        self.assertIn("ground", all_tags)
+        self.assertIn("obstacle", all_tags)
+        self.assertIn("player", all_tags)
