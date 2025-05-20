@@ -98,11 +98,7 @@ class Level:
         Returns:
             List[Sprite]: List of sprites that have any of the specified tags
         """
-        return [
-            sprite
-            for sprite in self._sprites
-            if any(tag in sprite.tags for tag in tags)
-        ]
+        return [sprite for sprite in self._sprites if any(tag in sprite.tags for tag in tags)]
 
     def get_all_tags(self) -> set[str]:
         """Get all unique tags from all sprites in the level.

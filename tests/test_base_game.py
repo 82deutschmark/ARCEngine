@@ -120,15 +120,9 @@ class TestARCBaseGame(unittest.TestCase):
     def test_try_move(self):
         """Test the try_move method."""
         # Create a level with multiple sprites
-        player = Sprite(
-            [[1]], name="player", x=0, y=0, blocking=BlockingMode.BOUNDING_BOX
-        )
-        wall1 = Sprite(
-            [[2]], name="wall1", x=2, y=0, blocking=BlockingMode.BOUNDING_BOX
-        )
-        wall2 = Sprite(
-            [[2]], name="wall2", x=0, y=1, blocking=BlockingMode.BOUNDING_BOX
-        )
+        player = Sprite([[1]], name="player", x=0, y=0, blocking=BlockingMode.BOUNDING_BOX)
+        wall1 = Sprite([[2]], name="wall1", x=2, y=0, blocking=BlockingMode.BOUNDING_BOX)
+        wall2 = Sprite([[2]], name="wall2", x=0, y=1, blocking=BlockingMode.BOUNDING_BOX)
         level = Level([player, wall1, wall2])
         game = ARCBaseGame("test_game", [level])
 

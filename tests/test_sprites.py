@@ -15,9 +15,7 @@ class TestSprite(unittest.TestCase):
         # Test with valid 2D list
         pixels_list = [[1, 2], [3, 4]]
         sprite = Sprite(pixels_list)
-        self.assertTrue(
-            np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8))
-        )
+        self.assertTrue(np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8)))
         self.assertEqual(sprite.x, 0)
         self.assertEqual(sprite.y, 0)
         self.assertEqual(sprite.scale, 1)
@@ -35,9 +33,7 @@ class TestSprite(unittest.TestCase):
             blocking=BlockingMode.BOUNDING_BOX,
             interaction=InteractionMode.INTANGIBLE,
         )
-        self.assertTrue(
-            np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8))
-        )
+        self.assertTrue(np.array_equal(sprite.pixels, np.array(pixels_list, dtype=np.int8)))
         self.assertEqual(sprite.x, 10)
         self.assertEqual(sprite.y, 20)
         self.assertEqual(sprite.scale, 2)
@@ -519,16 +515,12 @@ class TestSprite(unittest.TestCase):
         # Test with scaled sprites
         sprite1.set_scale(2)  # Now 4x4 with scaled transparent pixels
         sprite2.set_position(2, 0)
-        self.assertTrue(
-            sprite1.collides_with(sprite2)
-        )  # Non-transparent pixels overlap
+        self.assertTrue(sprite1.collides_with(sprite2))  # Non-transparent pixels overlap
 
         # Test with rotated sprites
         sprite1.set_rotation(90)
         sprite2.set_position(0, 0)
-        self.assertTrue(
-            sprite1.collides_with(sprite2)
-        )  # Should still collide after rotation
+        self.assertTrue(sprite1.collides_with(sprite2))  # Should still collide after rotation
 
     def test_sprite_movement(self):
         """Test sprite movement functionality."""

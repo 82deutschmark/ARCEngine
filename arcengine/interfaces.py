@@ -50,9 +50,7 @@ class ToggleableUserDisplay(RenderableUserDisplay):
         self._sprite_pairs: list[tuple[Sprite, Sprite]] = []
         if sprite_pairs:
             for sprite_pair in sprite_pairs:
-                self._sprite_pairs.append(
-                    (sprite_pair[0].clone(), sprite_pair[1].clone())
-                )
+                self._sprite_pairs.append((sprite_pair[0].clone(), sprite_pair[1].clone()))
 
     def clone(self) -> "ToggleableUserDisplay":
         """Create a deep copy of this toggleable interface.
@@ -196,11 +194,7 @@ class ToggleableUserDisplay(RenderableUserDisplay):
         Returns:
             list[Sprite]: List of sprite pairs where either sprite has the tag.
         """
-        return [
-            sprite_pair
-            for sprite_pair in self._sprite_pairs
-            if tag in sprite_pair[0].tags
-        ]
+        return [sprite_pair for sprite_pair in self._sprite_pairs if tag in sprite_pair[0].tags]
 
     def _enable_sprite_pair(self, sprite_pair: tuple[Sprite, Sprite]) -> None:
         """Enable a sprite pair by setting appropriate interaction modes.
@@ -270,11 +264,11 @@ class ToggleableUserDisplay(RenderableUserDisplay):
                     frame_end_y = min(64, end_y)
                     frame_end_x = min(64, end_x)
 
-                    # Copy visible pixels to frame
-                    frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x] = (
-                        sprite_pixels[
-                            sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x
-                        ]
+                    # Only render non-negative pixels
+                    frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x] = np.where(
+                        sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x] >= 0,
+                        sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x],
+                        frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x],
                     )
 
         return frame

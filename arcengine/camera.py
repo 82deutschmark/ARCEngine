@@ -49,9 +49,7 @@ class Camera:
             ValueError: If width or height exceed 64 pixels
         """
         if width > 64 or height > 64 or width < 0 or height < 0:
-            raise ValueError(
-                "Camera dimensions cannot exceed 64x64 pixels and must be positive"
-            )
+            raise ValueError("Camera dimensions cannot exceed 64x64 pixels and must be positive")
 
         self._x = x
         self._y = y
@@ -211,9 +209,7 @@ class Camera:
             return output
 
         # Sort sprites by layer (lower layers first) and filter out non-visible sprites
-        sorted_sprites = sorted(
-            (s for s in sprites if s.is_visible), key=lambda s: s.layer
-        )
+        sorted_sprites = sorted((s for s in sprites if s.is_visible), key=lambda s: s.layer)
 
         for sprite in sorted_sprites:
             # Get the sprite's rendered pixels (handles rotation and scaling)
@@ -238,22 +234,16 @@ class Camera:
             sprite_x_start = max(0, -rel_x)
             sprite_x_end = sprite_width - max(0, (rel_x + sprite_width) - self._width)
             sprite_y_start = max(0, -rel_y)
-            sprite_y_end = sprite_height - max(
-                0, (rel_y + sprite_height) - self._height
-            )
+            sprite_y_end = sprite_height - max(0, (rel_y + sprite_height) - self._height)
 
             # Get the sprite region we're going to copy
-            sprite_region = sprite_pixels[
-                sprite_y_start:sprite_y_end, sprite_x_start:sprite_x_end
-            ]
+            sprite_region = sprite_pixels[sprite_y_start:sprite_y_end, sprite_x_start:sprite_x_end]
 
             # Create a mask for non-negative (visible) pixels
             visible_mask = sprite_region >= 0
 
             # Update only the non-transparent pixels
-            output[dest_y_start:dest_y_end, dest_x_start:dest_x_end][visible_mask] = (
-                sprite_region[visible_mask]
-            )
+            output[dest_y_start:dest_y_end, dest_x_start:dest_x_end][visible_mask] = sprite_region[visible_mask]
 
         return output
 
@@ -271,9 +261,7 @@ class Camera:
             np.ndarray: The rendered view as a 64x64 numpy array
         """
         # Start with a letter-boxed canvas
-        output = np.full(
-            (self.MAX_DIMENSION, self.MAX_DIMENSION), self._letter_box, dtype=np.int8
-        )
+        output = np.full((self.MAX_DIMENSION, self.MAX_DIMENSION), self._letter_box, dtype=np.int8)
 
         # Get the raw camera view
         view = self._raw_render(sprites)
@@ -286,9 +274,7 @@ class Camera:
             view = np.repeat(np.repeat(view, scale, axis=0), scale, axis=1)
 
         # Insert the scaled view into the letter-boxed output
-        output[
-            y_offset : y_offset + view.shape[0], x_offset : x_offset + view.shape[1]
-        ] = view
+        output[y_offset : y_offset + view.shape[0], x_offset : x_offset + view.shape[1]] = view
 
         for interface in self._interfaces:
             output = interface.render_interface(output)

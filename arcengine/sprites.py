@@ -36,9 +36,7 @@ def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
     """
     H, W = arr.shape
     if H % factor != 0 or W % factor != 0:
-        raise ValueError(
-            f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}"
-        )
+        raise ValueError(f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}")
 
     # Step 1: split into blocks → shape (out_h, out_w, factor, factor)
     blocks = arr.reshape(H // factor, factor, -1, factor).swapaxes(1, 2)
@@ -107,9 +105,7 @@ class Sprite:
             ValueError: If scale is 0, pixels is not a 2D list, rotation is invalid,
                        or if downscaling factor doesn't evenly divide sprite dimensions
         """
-        if not isinstance(pixels, list) or not all(
-            isinstance(row, list) for row in pixels
-        ):
+        if not isinstance(pixels, list) or not all(isinstance(row, list) for row in pixels):
             raise ValueError("Pixels must be a 2D list")
 
         self.pixels = np.array(pixels, dtype=np.int8)
@@ -141,9 +137,7 @@ class Sprite:
         # Create a new sprite with copied properties
         return Sprite(
             pixels=pixels_copy.tolist(),  # Convert back to list for constructor
-            name=new_name
-            if new_name is not None
-            else self._name,  # Use new name or generate new UUID
+            name=new_name if new_name is not None else self._name,  # Use new name or generate new UUID
             x=self._x,
             y=self._y,
             scale=self._scale,
@@ -165,9 +159,7 @@ class Sprite:
         """
         normalized = rotation % 360
         if normalized not in self.VALID_ROTATIONS:
-            raise ValueError(
-                f"Rotation must be one of {self.VALID_ROTATIONS}, got {rotation}"
-            )
+            raise ValueError(f"Rotation must be one of {self.VALID_ROTATIONS}, got {rotation}")
         self.rotation = normalized
 
     def set_rotation(self, rotation: int) -> None:
@@ -225,9 +217,7 @@ class Sprite:
             H, W = self.pixels.shape
             factor = -scale_int + 1  # -1 -> 2, -2 -> 3, -3 -> 4, etc.
             if H % factor != 0 or W % factor != 0:
-                raise ValueError(
-                    f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}"
-                )
+                raise ValueError(f"Array dimensions ({H}, {W}) must be divisible by scale factor {factor}")
 
         self._scale = scale_int
         return self
@@ -405,9 +395,7 @@ class Sprite:
         if self._scale != 1:
             if self._scale > 1:
                 # For upscaling, repeat the array in both dimensions
-                result = np.repeat(
-                    np.repeat(result, self._scale, axis=0), self._scale, axis=1
-                )
+                result = np.repeat(np.repeat(result, self._scale, axis=0), self._scale, axis=1)
             else:  # self._scale < 0
                 # For downscaling, use mode-based approach
                 # Convert negative scale to actual divisor (e.g. -1 -> 2, -2 -> 3)
@@ -442,10 +430,7 @@ class Sprite:
             return False
 
         # Rule 3: Handle different blocking modes
-        if (
-            self._blocking == BlockingMode.NOT_BLOCKED
-            or other._blocking == BlockingMode.NOT_BLOCKED
-        ):
+        if self._blocking == BlockingMode.NOT_BLOCKED or other._blocking == BlockingMode.NOT_BLOCKED:
             return False
 
         # Get sprite dimensions after rendering (accounts for rotation and scaling)
@@ -456,19 +441,11 @@ class Sprite:
 
         # First check bounding box collision
         # If there's no bounding box collision, there can't be pixel collision
-        if (
-            self._x >= other._x + other_width
-            or self._x + self_width <= other._x
-            or self._y >= other._y + other_height
-            or self._y + self_height <= other._y
-        ):
+        if self._x >= other._x + other_width or self._x + self_width <= other._x or self._y >= other._y + other_height or self._y + self_height <= other._y:
             return False
 
         # If either sprite uses PIXEL_PERFECT, do pixel-level collision detection
-        if (
-            self._blocking == BlockingMode.PIXEL_PERFECT
-            or other._blocking == BlockingMode.PIXEL_PERFECT
-        ):
+        if self._blocking == BlockingMode.PIXEL_PERFECT or other._blocking == BlockingMode.PIXEL_PERFECT:
             # Calculate intersection region
             x_min = max(self._x, other._x)
             x_max = min(self._x + self_width, other._x + other_width)
@@ -488,9 +465,7 @@ class Sprite:
 
             # Extract overlapping regions
             self_region = self_pixels[self_y_start:self_y_end, self_x_start:self_x_end]
-            other_region = other_pixels[
-                other_y_start:other_y_end, other_x_start:other_x_end
-            ]
+            other_region = other_pixels[other_y_start:other_y_end, other_x_start:other_x_end]
 
             # Check if any non-transparent pixels overlap
             self_mask = self_region != -1

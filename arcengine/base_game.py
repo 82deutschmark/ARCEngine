@@ -106,9 +106,7 @@ class ARCBaseGame:
             IndexError: If index is out of range
         """
         if not 0 <= index < len(self._levels):
-            raise IndexError(
-                f"Level index {index} out of range [0, {len(self._levels)})"
-            )
+            raise IndexError(f"Level index {index} out of range [0, {len(self._levels)})")
         self._current_level_index = index
         level = self.current_level
         if level.grid_size:
@@ -125,9 +123,7 @@ class ARCBaseGame:
         return self._current_level_index
 
     @final
-    def perform_action(
-        self, action_input: ActionInput, raw: bool = False
-    ) -> FrameData | FrameDataRaw:
+    def perform_action(self, action_input: ActionInput, raw: bool = False) -> FrameData | FrameDataRaw:
         """Perform an action and return the resulting frame data.
 
         DO NOT OVERRIDE THIS METHOD, Your Game Logic should be in step()

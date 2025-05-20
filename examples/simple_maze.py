@@ -91,14 +91,10 @@ class SimpleMaze(ARCBaseGame):
     def __init__(self) -> None:
         """Initialize the SimpleMaze game."""
         # Create camera with white background and letterbox
-        camera = Camera(
-            width=8, height=8, background=0, letter_box=0
-        )  # White background and letterbox
+        camera = Camera(width=8, height=8, background=0, letter_box=0)  # White background and letterbox
 
         # Initialize the base game
-        super().__init__(
-            game_id="simple_maze", levels=[LEVEL_1, LEVEL_2], camera=camera
-        )
+        super().__init__(game_id="simple_maze", levels=[LEVEL_1, LEVEL_2], camera=camera)
 
     def step(self) -> None:
         """Step the game forward based on the current action."""
