@@ -129,9 +129,8 @@ class ARCBaseGame:
         DO NOT OVERRIDE THIS METHOD, Your Game Logic should be in step()
 
         The base implementation:
-        1. Validates the action input
-        2. While the action is not complete, call step() and render frames
-        3. Returns a FrameData object with the current state
+        1. While the action is not complete, call step() and render frames
+        2. Returns a FrameData object with the current state
 
         Args:
             action_input: The action to perform
@@ -140,8 +139,6 @@ class ARCBaseGame:
             FrameData: The resulting frame data
         """
         # Validate action input
-        if not action_input.id.validate_data(action_input.data):
-            raise ValueError(f"Invalid data for action {action_input.id}")
         self._set_action(action_input)
 
         frame_list: list[ndarray | list[list[int]]] = []
