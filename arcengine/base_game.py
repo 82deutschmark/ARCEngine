@@ -242,8 +242,27 @@ class ARCBaseGame:
         sprites = self.current_level.get_sprites_by_name(sprite_name)
         if not sprites:
             raise ValueError(f"No sprite found with name: {sprite_name}")
-        sprite = sprites[0]  # Use the first sprite with this name
+        return self.try_move_sprite(sprites[0], dx, dy)  # Use the first sprite with this name
 
+    def try_move_sprite(self, sprite: Sprite, dx: int, dy: int) -> List[Sprite]:
+        """Try to move a sprite and return a list of sprites it collides with.
+
+        This method attempts to move the sprite by the given deltas and checks for collisions.
+        If any collisions are detected, the sprite is not moved and the method returns a list
+        of sprite names that were collided with.
+
+        Args:
+            sprite_name: The name of the sprite to move.
+            dx: The change in x position (positive = right, negative = left).
+            dy: The change in y position (positive = down, negative = up).
+
+        Returns:
+            A list of sprite names that the sprite collided with. If no collisions occurred,
+            the sprite is moved and an empty list is returned.
+
+        Raises:
+            ValueError: If no sprite with the given name is found.
+        """  # Get the sprite to move
         # Store original position
         original_x = sprite.x
         original_y = sprite.y
@@ -274,6 +293,6 @@ class ARCBaseGame:
     def next_level(self) -> None:
         """Move to the next level."""
         if not self.is_last_level():
-            self._current_level_index += 1
+            self.set_level(self._current_level_index + 1)
         else:
             self.win()
