@@ -17,11 +17,10 @@ from arcengine import (
 
 
 class TestGame(ARCBaseGame):
-    """Test implementation of ARCBaseGame."""
+    """Test implementation of TestGame."""
 
-    def __init__(self, levels: list[Level], camera: Camera | None = None) -> None:
-        super().__init__(levels, camera)
-        self._game_id = "test_game"
+    def __init__(self, game_id: str, levels: list[Level], camera: Camera | None = None) -> None:
+        super().__init__(game_id=game_id, levels=levels, camera=camera)
         self._step_count = 0
 
     def step(self) -> None:
@@ -32,7 +31,7 @@ class TestGame(ARCBaseGame):
 
 
 class TestARCBaseGame(unittest.TestCase):
-    """Test cases for the ARCBaseGame class."""
+    """Test cases for the TestGame class."""
 
     def test_initialization(self):
         """Test basic game initialization."""
@@ -41,7 +40,7 @@ class TestARCBaseGame(unittest.TestCase):
         level2 = Level([Sprite([[2]], name="enemy")])
 
         # Test with default camera
-        game = ARCBaseGame("test_game", [level1, level2])
+        game = TestGame("test_game", [level1, level2])
         self.assertEqual(len(game._levels), 2)
         self.assertEqual(game._current_level_index, 0)
         self.assertEqual(game.camera.width, 64)  # Default camera size
@@ -49,13 +48,13 @@ class TestARCBaseGame(unittest.TestCase):
 
         # Test with custom camera
         camera = Camera(width=32, height=32)
-        game = ARCBaseGame("test_game", [level1, level2], camera=camera)
+        game = TestGame("test_game", [level1, level2], camera=camera)
         self.assertEqual(game.camera.width, 32)
         self.assertEqual(game.camera.height, 32)
 
         # Test empty levels list
         with self.assertRaises(ValueError) as ctx:
-            ARCBaseGame("test_game", [])
+            TestGame("test_game", [])
         self.assertIn("must have at least one level", str(ctx.exception))
 
     def test_camera_resizes_to_level_size(self):
@@ -66,7 +65,7 @@ class TestARCBaseGame(unittest.TestCase):
 
         # Test with custom camera
         camera = Camera(width=32, height=32)
-        game = ARCBaseGame("test_game", [level1, level2], camera=camera)
+        game = TestGame("test_game", [level1, level2], camera=camera)
         self.assertEqual(game.camera.width, 8)
         self.assertEqual(game.camera.height, 8)
 
@@ -79,7 +78,7 @@ class TestARCBaseGame(unittest.TestCase):
         # Create test levels
         level1 = Level([Sprite([[1]], name="player")])
         level2 = Level([Sprite([[2]], name="enemy")])
-        game = ARCBaseGame("test_game", [level1, level2])
+        game = TestGame("test_game", [level1, level2])
 
         # Test current level
         self.assertEqual(game.current_level, game._levels[0])
@@ -102,7 +101,7 @@ class TestARCBaseGame(unittest.TestCase):
         # Create a level with a sprite
         sprite = Sprite([[1]], name="player")
         level = Level([sprite])
-        game = ARCBaseGame("test_game", [level])
+        game = TestGame("test_game", [level])
 
         # Verify the level was cloned
         self.assertIsNot(game._levels[0], level)
@@ -124,7 +123,7 @@ class TestARCBaseGame(unittest.TestCase):
         wall1 = Sprite([[2]], name="wall1", x=2, y=0, blocking=BlockingMode.BOUNDING_BOX)
         wall2 = Sprite([[2]], name="wall2", x=0, y=1, blocking=BlockingMode.BOUNDING_BOX)
         level = Level([player, wall1, wall2])
-        game = ARCBaseGame("test_game", [level])
+        game = TestGame("test_game", [level])
 
         player = game.current_level.get_sprites_by_name("player")[0]
 
@@ -154,7 +153,7 @@ class TestARCBaseGame(unittest.TestCase):
 
     def test_camera_properties(self):
         """Test camera property getters and setters."""
-        game = ARCBaseGame("test_game", [Level()])
+        game = TestGame("test_game", [Level()])
 
         # Test initial values
         self.assertEqual(game.camera.x, 0)

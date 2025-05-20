@@ -2,6 +2,7 @@
 Module for the base game class in ARCEngine.
 """
 
+from abc import ABC
 from typing import List, Optional, final
 
 from numpy import ndarray
@@ -12,7 +13,7 @@ from .level import Level
 from .sprites import Sprite
 
 
-class ARCBaseGame:
+class ARCBaseGame(ABC):
     """Base class for ARCEngine games that manages levels and camera.
 
     This is a base class that games should inherit from. and extend with game logic.
@@ -111,6 +112,7 @@ class ARCBaseGame:
         level = self.current_level
         if level.grid_size:
             self.camera.resize(level.grid_size[0], level.grid_size[1])
+        self.on_set_level(level)
 
     @property
     @final
@@ -296,3 +298,7 @@ class ARCBaseGame:
             self.set_level(self._current_level_index + 1)
         else:
             self.win()
+
+    def on_set_level(self, level: Level) -> None:
+        """Called when the level is set, use this to set level specific data."""
+        pass
