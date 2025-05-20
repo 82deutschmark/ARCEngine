@@ -195,7 +195,7 @@ class Sprite:
         new_rotation = (self.rotation + delta) % 360
         self._set_rotation(new_rotation)
 
-    def set_position(self, x: int, y: int) -> None:
+    def set_position(self, x: int, y: int) -> "Sprite":
         """Set the sprite's position.
 
         Args:
@@ -204,8 +204,9 @@ class Sprite:
         """
         self._x = int(x)
         self._y = int(y)
+        return self
 
-    def set_scale(self, scale: int) -> None:
+    def set_scale(self, scale: int) -> "Sprite":
         """Set the sprite's scale factor.
 
         Args:
@@ -229,6 +230,7 @@ class Sprite:
                 )
 
         self._scale = scale_int
+        return self
 
     def adjust_scale(self, delta: int) -> None:
         """Adjust the sprite's scale by a delta value, moving one step at a time.
@@ -274,7 +276,7 @@ class Sprite:
             # Let ValueError propagate up
             self.set_scale(next_scale)
 
-    def set_blocking(self, blocking: BlockingMode) -> None:
+    def set_blocking(self, blocking: BlockingMode) -> "Sprite":
         """Set the sprite's blocking behavior.
 
         Args:
@@ -283,8 +285,9 @@ class Sprite:
         if not isinstance(blocking, BlockingMode):
             raise ValueError("blocking must be a BlockingMode enum value")
         self._blocking = blocking
+        return self
 
-    def set_name(self, name: str) -> None:
+    def set_name(self, name: str) -> "Sprite":
         """Set the sprite's name.
 
         Args:
@@ -293,6 +296,7 @@ class Sprite:
         if not name:
             raise ValueError("Name cannot be empty")
         self._name = name
+        return self
 
     @property
     def name(self) -> str:
@@ -329,20 +333,21 @@ class Sprite:
         """Get the current tags."""
         return self._tags
 
-    def set_layer(self, layer: int) -> None:
+    def set_layer(self, layer: int) -> "Sprite":
         """Set the sprite's rendering layer.
 
         Args:
             layer: New layer value. Higher values render on top.
         """
         self._layer = int(layer)
+        return self
 
     @property
     def interaction(self) -> InteractionMode:
         """Get the current interaction mode."""
         return self._interaction
 
-    def set_interaction(self, interaction: InteractionMode) -> None:
+    def set_interaction(self, interaction: InteractionMode) -> "Sprite":
         """Set the sprite's interaction mode.
 
         Args:
@@ -354,6 +359,7 @@ class Sprite:
         if not isinstance(interaction, InteractionMode):
             raise ValueError("interaction must be an InteractionMode enum value")
         self._interaction = interaction
+        return self
 
     @property
     def is_visible(self) -> bool:
