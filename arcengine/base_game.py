@@ -219,6 +219,7 @@ class ARCBaseGame(ABC):
     @final
     def full_reset(self) -> None:
         self._levels = [level.clone() for level in self._clean_levels]
+        self._score = 0
         self.set_level(0)
 
     def step(self) -> None:
@@ -305,6 +306,7 @@ class ARCBaseGame(ABC):
     def next_level(self) -> None:
         """Move to the next level."""
         if not self.is_last_level():
+            self._score += 1
             self.set_level(self._current_level_index + 1)
         else:
             self.win()

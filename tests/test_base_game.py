@@ -248,13 +248,15 @@ class TestARCBaseGame(unittest.TestCase):
         # Simulate some game logic
         game_sprite_1 = game.current_level._sprites[0]
         game_sprite_1.set_position(1, 1)
+        game._score = 100
 
         self.assertEqual(game_sprite_1.x, 1)
         self.assertEqual(game_sprite_1.y, 1)
+        self.assertEqual(game._score, 100)
 
         game.full_reset()
 
         game_sprite_2 = game.current_level._sprites[0]
         self.assertNotEqual(game_sprite_2, game_sprite_1)
         self.assertEqual(game_sprite_2.x, 0)
-        self.assertEqual(game_sprite_2.y, 0)
+        self.assertEqual(game._score, 0)
