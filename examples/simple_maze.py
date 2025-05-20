@@ -111,13 +111,13 @@ class SimpleMaze(ARCBaseGame):
         # Handle movement based on action ID
         dx = 0
         dy = 0
-        if self.action == GameAction.ACTION1:
+        if self.action.id == GameAction.ACTION1:
             dy = -1
-        elif self.action == GameAction.ACTION2:  # Move Down
+        elif self.action.id == GameAction.ACTION2:  # Move Down
             dy = 1
-        elif self.action == GameAction.ACTION3:  # Move Left
+        elif self.action.id == GameAction.ACTION3:  # Move Left
             dx = -1
-        elif self.action == GameAction.ACTION4:  # Move Right
+        elif self.action.id == GameAction.ACTION4:  # Move Right
             dx = 1
 
         collided = self.try_move("player", dx, dy)

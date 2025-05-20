@@ -7,7 +7,7 @@ from typing import List, Optional, final
 from numpy import ndarray
 
 from .camera import Camera
-from .enums import ActionInput, FrameData, FrameDataRaw, GameAction, GameState
+from .enums import ActionInput, FrameData, FrameDataRaw, GameState
 from .level import Level
 from .sprites import Sprite
 
@@ -25,7 +25,7 @@ class ARCBaseGame:
     _levels: list[Level]
     _current_level_index: int
     _camera: Camera
-    _action: GameAction | None
+    _action: ActionInput
     _action_complete: bool
     _state: GameState
     _score: int
@@ -61,7 +61,7 @@ class ARCBaseGame:
         # Game state
         self._state = GameState.NOT_PLAYED
         self._score = 0
-        self._action = None
+        self._action = ActionInput()
         self._action_complete = False
 
     @property
@@ -171,7 +171,7 @@ class ARCBaseGame:
 
     @property
     @final
-    def action(self) -> GameAction | None:
+    def action(self) -> ActionInput:
         """Get the current action."""
         return self._action
 
@@ -182,7 +182,7 @@ class ARCBaseGame:
         Args:
             action_input: The action to perform
         """
-        self._action = action_input.id
+        self._action = action_input
         self._action_complete = False
 
     @final
