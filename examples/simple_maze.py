@@ -71,7 +71,8 @@ LEVEL_1 = Level(
         LEVEL_1_MAZE,
         PLAYER_SPRITE.clone().set_position(1, 1),  # Start position
         EXIT_SPRITE.clone().set_position(6, 6),  # Exit position
-    ]
+    ],
+    grid_size=(8, 8),
 )
 
 LEVEL_2 = Level(
@@ -79,7 +80,8 @@ LEVEL_2 = Level(
         LEVEL_2_MAZE,
         PLAYER_SPRITE.clone().set_position(1, 1),  # Start position
         EXIT_SPRITE.clone().set_position(10, 10),  # Exit position
-    ]
+    ],
+    grid_size=(12, 12),
 )
 
 
@@ -97,13 +99,6 @@ class SimpleMaze(ARCBaseGame):
         super().__init__(
             game_id="simple_maze", levels=[LEVEL_1, LEVEL_2], camera=camera
         )
-
-    def next_level(self) -> None:
-        """Move to the next level and resize camera."""
-        super().next_level()
-        # Resize camera based on level index (8 + level_index * 4)
-        size = 8 + (self.level_index * 4)
-        self.camera.resize(size, size)
 
     def step(self) -> None:
         """Step the game forward based on the current action."""

@@ -63,6 +63,7 @@ class ARCBaseGame:
         self._score = 0
         self._action = ActionInput()
         self._action_complete = False
+        self.set_level(0)
 
     @property
     @final
@@ -109,6 +110,9 @@ class ARCBaseGame:
                 f"Level index {index} out of range [0, {len(self._levels)})"
             )
         self._current_level_index = index
+        level = self.current_level
+        if level.grid_size:
+            self.camera.resize(level.grid_size[0], level.grid_size[1])
 
     @property
     @final
