@@ -12,7 +12,7 @@ Add ARCEngine to your `pyproject.toml`:
 ```toml
 [project]
 dependencies = [
-    "arcengine @ git+ssh://git@github.com/yourusername/ARCEngine.git@main",
+    "arcengine @ git+ssh://git@github.com/arcprize/ARCEngine.git@main",
 ]
 ```
 
