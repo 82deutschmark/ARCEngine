@@ -216,7 +216,6 @@ class ARCBaseGame(ABC):
         """Call this when the player has losses the game."""
         self._state = GameState.GAME_OVER
 
-    @final
     def full_reset(self) -> None:
         self._levels = [level.clone() for level in self._clean_levels]
         self._score = 0
