@@ -148,3 +148,15 @@ class TestLevel(unittest.TestCase):
         self.assertIn("ground", all_tags)
         self.assertIn("obstacle", all_tags)
         self.assertIn("player", all_tags)
+
+    def test_level_data(self):
+        # Create level with sprites
+        level = Level(sprites=[], data={"test": "test"})
+
+        self.assertEqual(level.get_data("test"), "test")
+        self.assertEqual(level.get_data("nonexistent"), None)
+
+        level2 = level.clone()
+        level._data["test"] = "test2"
+        self.assertEqual(level.get_data("test"), "test2")
+        self.assertEqual(level2.get_data("test"), "test")

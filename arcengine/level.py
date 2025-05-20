@@ -2,7 +2,8 @@
 Module for level-related functionality in the ARCEngine.
 """
 
-from typing import List, Optional, Tuple
+import copy
+from typing import Any, List, Optional, Tuple
 
 from .sprites import Sprite
 
@@ -12,11 +13,13 @@ class Level:
 
     _sprites: List[Sprite]
     _grid_size: Tuple[int, int] | None
+    _data: dict[str, Any]
 
     def __init__(
         self,
         sprites: Optional[List[Sprite]] = None,
         grid_size: Tuple[int, int] | None = None,
+        data: dict[str, Any] = {},
     ):
         """Initialize a new Level.
 
@@ -28,6 +31,7 @@ class Level:
             for sprite in sprites:
                 self.add_sprite(sprite)
         self._grid_size = grid_size
+        self._data = data
 
     def add_sprite(self, sprite: Sprite) -> None:
         """Add a sprite to the level.
@@ -114,6 +118,9 @@ class Level:
             all_tags.update(sprite.tags)
         return all_tags
 
+    def get_data(self, key: str) -> Any:
+        return self._data.get(key)
+
     @property
     def grid_size(self) -> Tuple[int, int] | None:
         """Get the grid size of the level.
@@ -131,4 +138,4 @@ class Level:
         """
         # Clone each sprite and create new level
         cloned_sprites = [sprite.clone() for sprite in self._sprites]
-        return Level(sprites=cloned_sprites, grid_size=self._grid_size)
+        return Level(sprites=cloned_sprites, grid_size=self._grid_size, data=copy.deepcopy(self._data))
