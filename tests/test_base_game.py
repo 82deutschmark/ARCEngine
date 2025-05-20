@@ -189,7 +189,7 @@ class TestARCBaseGame(unittest.TestCase):
 
         # Verify the frame data
         self.assertEqual(frame_data.game_id, "test_game")
-        self.assertEqual(frame_data.state, GameState.NOT_PLAYED)
+        self.assertEqual(frame_data.state, GameState.NOT_FINISHED)
         self.assertEqual(frame_data.score, 0)
         self.assertEqual(frame_data.action_input, action_input)
 
@@ -235,3 +235,26 @@ class TestARCBaseGame(unittest.TestCase):
 
         self.assertEqual(first_frame1[0, 0], 1)  # First level shows sprite1
         self.assertEqual(first_frame2[0, 0], 2)  # Second level shows sprite2
+
+    def test_full_reset_gives_fresh_game(self):
+        """Test performing actions with multiple levels."""
+        # Create two levels with different sprites
+        sprite1 = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite1])
+
+        # Create a test game with both levels
+        game = TestGame("test_game", [level1])
+
+        # Simulate some game logic
+        game_sprite_1 = game.current_level._sprites[0]
+        game_sprite_1.set_position(1, 1)
+
+        self.assertEqual(game_sprite_1.x, 1)
+        self.assertEqual(game_sprite_1.y, 1)
+
+        game.full_reset()
+
+        game_sprite_2 = game.current_level._sprites[0]
+        self.assertNotEqual(game_sprite_2, game_sprite_1)
+        self.assertEqual(game_sprite_2.x, 0)
+        self.assertEqual(game_sprite_2.y, 0)

@@ -8,7 +8,7 @@ from typing import List, Optional, final
 from numpy import ndarray
 
 from .camera import Camera
-from .enums import ActionInput, FrameData, FrameDataRaw, GameState
+from .enums import ActionInput, FrameData, FrameDataRaw, GameAction, GameState
 from .level import Level
 from .sprites import Sprite
 
@@ -24,6 +24,7 @@ class ARCBaseGame(ABC):
 
     _game_id: str
     _levels: list[Level]
+    _clean_levels: list[Level]
     _current_level_index: int
     _camera: Camera
     _action: ActionInput
@@ -54,6 +55,7 @@ class ARCBaseGame(ABC):
 
         # Clone each level to prevent external modification
         self._levels = [level.clone() for level in levels]
+        self._clean_levels = [level.clone() for level in levels]
         self._current_level_index = 0
 
         # Use provided camera or create default
@@ -142,6 +144,8 @@ class ARCBaseGame(ABC):
         """
         # Validate action input
         self._set_action(action_input)
+        if action_input.id == GameAction.RESET:
+            self.full_reset()
 
         frame_list: list[ndarray | list[list[int]]] = []
 
@@ -184,6 +188,7 @@ class ARCBaseGame(ABC):
         Args:
             action_input: The action to perform
         """
+        self._state = GameState.NOT_FINISHED
         self._action = action_input
         self._action_complete = False
 
@@ -210,6 +215,11 @@ class ARCBaseGame(ABC):
     def lose(self) -> None:
         """Call this when the player has losses the game."""
         self._state = GameState.GAME_OVER
+
+    @final
+    def full_reset(self) -> None:
+        self._levels = [level.clone() for level in self._clean_levels]
+        self.set_level(0)
 
     def step(self) -> None:
         """Step the game.  This is where your game logic should be implemented.
