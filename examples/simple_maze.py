@@ -70,7 +70,7 @@ LEVEL_1 = Level(
     sprites=[
         LEVEL_1_MAZE,
         PLAYER_SPRITE.clone().set_position(1, 1),  # Start position
-        EXIT_SPRITE.clone().set_position(7, 7),  # Exit position
+        EXIT_SPRITE.clone().set_position(6, 6),  # Exit position
     ]
 )
 
@@ -78,7 +78,7 @@ LEVEL_2 = Level(
     sprites=[
         LEVEL_2_MAZE,
         PLAYER_SPRITE.clone().set_position(1, 1),  # Start position
-        EXIT_SPRITE.clone().set_position(11, 11),  # Exit position
+        EXIT_SPRITE.clone().set_position(10, 10),  # Exit position
     ]
 )
 
