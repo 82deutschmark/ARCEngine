@@ -58,6 +58,22 @@ class TestARCBaseGame(unittest.TestCase):
             ARCBaseGame("test_game", [])
         self.assertIn("must have at least one level", str(ctx.exception))
 
+    def test_camera_resizes_to_level_size(self):
+        """Test basic game initialization."""
+        # Create test levels
+        level1 = Level([Sprite([[1]], name="player")], grid_size=(8, 8))
+        level2 = Level([Sprite([[2]], name="enemy")], grid_size=(12, 12))
+
+        # Test with custom camera
+        camera = Camera(width=32, height=32)
+        game = ARCBaseGame("test_game", [level1, level2], camera=camera)
+        self.assertEqual(game.camera.width, 8)
+        self.assertEqual(game.camera.height, 8)
+
+        game.set_level(1)
+        self.assertEqual(game.camera.width, 12)
+        self.assertEqual(game.camera.height, 12)
+
     def test_level_management(self):
         """Test level management functionality."""
         # Create test levels

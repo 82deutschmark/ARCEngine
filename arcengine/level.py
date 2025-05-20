@@ -135,4 +135,4 @@ class Level:
         """
         # Clone each sprite and create new level
         cloned_sprites = [sprite.clone() for sprite in self._sprites]
-        return Level(sprites=cloned_sprites)
+        return Level(sprites=cloned_sprites, grid_size=self._grid_size)
