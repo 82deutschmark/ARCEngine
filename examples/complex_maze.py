@@ -138,6 +138,7 @@ LEVEL_1 = Level(
         EXIT_SPRITE.clone().set_position(6, 6),  # Layer: 0
     ],
     grid_size=(8, 8),
+    data={"move_maze": False},
 )
 
 LEVEL_2 = Level(
@@ -147,6 +148,7 @@ LEVEL_2 = Level(
         EXIT_SPRITE.clone().set_position(10, 10),  # Layer: 0
     ],
     grid_size=(12, 12),
+    data={"move_maze": False},
 )
 
 LEVEL_3 = Level(
@@ -158,6 +160,7 @@ LEVEL_3 = Level(
         BLOCK_ORANGE_SPRITE.clone().set_position(10, 2),  # Layer: 0
     ],
     grid_size=(12, 12),
+    data={"move_maze": False},
 )
 
 LEVEL_4 = Level(
@@ -169,6 +172,7 @@ LEVEL_4 = Level(
         BLOCK_ORANGE_SPRITE.clone().set_position(10, 8),  # Layer: 0
     ],
     grid_size=(12, 12),
+    data={"move_maze": False},
 )
 
 LEVEL_5 = Level(
@@ -180,6 +184,7 @@ LEVEL_5 = Level(
         ORANGE_BLOCK_FLEX_SPRITE.clone().set_position(5, 8),  # Layer: 0
     ],
     grid_size=(12, 12),
+    data={"move_maze": True, "max_delta_x": 0, "max_delta_y": 2},
 )
 
 
@@ -189,23 +194,19 @@ class ComplexMaze(ARCBaseGame):
     _ui: ToggleableUserDisplay
 
     def __init__(self) -> None:
-        """Initialize the SimpleMaze game."""
-        # Create camera with white background and letterbox
-        camera = Camera(width=8, height=8, background=0, letter_box=0)  # White background and letterbox
-
-        # Initialize the base game
-        super().__init__(game_id="simple_maze", levels=[LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5], camera=camera)
-
         # Create our UI
         sprite_pairs = []
         for i in range(32):
             sprite_pairs.append((ENERGY_PILL_ON_SPRITE.clone().set_position(i * 2, 0), ENERGY_PILL_OFF_SPRITE.clone().set_position(i * 2, 0)))
-            print(f"{sprite_pairs[0][0].tags}")
         for i in range(31):
             sprite_pairs.append((ENERGY_PILL_ON_SPRITE.clone().set_position(62, i * 2 + 2), ENERGY_PILL_OFF_SPRITE.clone().set_position(62, i * 2 + 2)))
-            print(f"{sprite_pairs[0][0].tags}")
         self._ui = ToggleableUserDisplay(sprite_pairs)
-        self.camera.replace_interface([self._ui])
+
+        # Create camera with white background and letterbox
+        camera = Camera(width=8, height=8, background=0, letter_box=0, interfaces=[self._ui])  # White background and letterbox
+
+        # Initialize the base game
+        super().__init__(game_id="simple_maze", levels=[LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5], camera=camera)
 
     def step(self) -> None:
         """Step the game forward based on the current action."""
@@ -224,10 +225,13 @@ class ComplexMaze(ARCBaseGame):
 
         self._try_pushing_move(dx, dy)
 
-        if not self._ui.disabled_first_by_tag("energy"):
+        if self.action.id != GameAction.RESET and not self._ui.disabled_first_by_tag("energy"):
             self.lose()  # will auto win if last level
 
         self.complete_action()
+
+    def on_set_level(self, level: Level) -> None:
+        self._ui.enable_all_by_tag("energy")
 
     def _try_pushing_move(self, dx: int, dy: int) -> None:
         collided = self.try_move("player", dx, dy)
@@ -235,9 +239,6 @@ class ComplexMaze(ARCBaseGame):
         # Check if player collided with exit
         if collided and any(sprite.name == "exit" for sprite in collided):
             self.next_level()
-            self.camera.x = 0
-            self.camera.y = 0
-            self._ui.enable_all_by_tag("energy")
 
         if collided:
             for sprite in collided:
@@ -256,9 +257,11 @@ class ComplexMaze(ARCBaseGame):
                     else:
                         self.try_move("player", dx, dy)
 
-                if sprite.name.startswith("maze"):
-                    sprite.move(dx, dy)
-                    fixed_sprites = self.current_level.get_sprites_by_tag("fixed")
-                    self.camera.move(dx, dy)
-                    for fixed_sprite in fixed_sprites:
-                        fixed_sprite.move(dx, dy)
+                if self.current_level.get_data("move_maze") and sprite.name.startswith("maze"):
+                    sprite_dx = abs(sprite.x + dx - 0)
+                    sprite_dy = abs(sprite.y + dy - 0)
+                    if sprite_dx <= self.current_level.get_data("max_delta_x") and sprite_dy <= self.current_level.get_data("max_delta_y"):
+                        sprite.move(dx, dy)
+                        fixed_sprites = self.current_level.get_sprites_by_tag("fixed")
+                        for fixed_sprite in fixed_sprites:
+                            fixed_sprite.move(dx, dy)
