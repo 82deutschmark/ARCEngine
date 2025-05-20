@@ -110,6 +110,16 @@ class ARCBaseGame:
             )
         self._current_level_index = index
 
+    @property
+    @final
+    def level_index(self) -> int:
+        """Get the current level index.
+
+        Returns:
+            int: The current level index
+        """
+        return self._current_level_index
+
     @final
     def perform_action(
         self, action_input: ActionInput, raw: bool = False
@@ -255,3 +265,18 @@ class ARCBaseGame:
             sprite.set_position(original_x, original_y)
 
         return collisions
+
+    def is_last_level(self) -> bool:
+        """Check if the current level is the last level.
+
+        Returns:
+            bool: True if the current level is the last level, False otherwise
+        """
+        return self._current_level_index == len(self._levels) - 1
+
+    def next_level(self) -> None:
+        """Move to the next level."""
+        if not self.is_last_level():
+            self._current_level_index += 1
+        else:
+            self.win()

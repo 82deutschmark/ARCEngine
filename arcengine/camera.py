@@ -149,6 +149,16 @@ class Camera:
             raise ValueError(f"Height cannot exceed {self.MAX_DIMENSION} pixels")
         self._height = height_int
 
+    def resize(self, width: int, height: int) -> None:
+        """Resize the camera.
+
+        Args:
+            width: The new width
+            height: The new height
+        """
+        self.width = width
+        self.height = height
+
     def move(self, dx: int, dy: int) -> None:
         """Move the camera by the specified delta.
 
