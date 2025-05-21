@@ -34,3 +34,6 @@ extend-select = ["I"]
 
 [tool.ruff]
 line-length = 280
+
+[tool.setuptools.package-data]
+"arcengine" = ["py.typed"]
