@@ -260,3 +260,82 @@ class TestARCBaseGame(unittest.TestCase):
         self.assertNotEqual(game_sprite_2, game_sprite_1)
         self.assertEqual(game_sprite_2.x, 0)
         self.assertEqual(game._score, 0)
+
+    def test_level_reset_only_resets_current_level(self):
+        """Test performing actions with multiple levels."""
+        # Create two levels with different sprites
+        sprite1 = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite1])
+        level2 = Level([sprite1.clone().set_position(1, 1)])
+
+        # Create a test game with both levels
+        game = TestGame("test_game", [level1, level2])
+
+        # Simulate some game logic
+        game_sprite_1 = game.current_level._sprites[0]
+        game_sprite_1.set_position(10, 10)
+        game._score = 100
+
+        self.assertEqual(game_sprite_1.x, 10)
+        self.assertEqual(game_sprite_1.y, 10)
+        self.assertEqual(game._score, 100)
+
+        game.next_level()
+
+        game_sprite_2 = game.current_level._sprites[0]
+
+        self.assertNotEqual(game_sprite_2, game_sprite_1)
+        self.assertEqual(game_sprite_2.x, 1)
+        self.assertEqual(game_sprite_2.y, 1)
+        self.assertEqual(game._score, 101)
+
+        # Simulate some game logic
+        game_sprite_2 = game.current_level._sprites[0]
+        game_sprite_2.set_position(9, 9)
+
+        self.assertEqual(game._score, 101)
+        self.assertNotEqual(game_sprite_2, game_sprite_1)
+        self.assertEqual(game_sprite_2.x, 9)
+        self.assertEqual(game_sprite_2.y, 9)
+
+    def test_reset_action_count(self):
+        """Test that the reset action count is properly set."""
+        # Create a test level with a sprite
+        sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite])
+        level2 = Level([sprite.clone().set_position(1, 1)])
+
+        # Create a test game
+        game = TestGame("test_game", [level1, level2])
+
+        game.next_level()
+
+        # Perform an action and simulate a step
+        game.perform_action(ActionInput(id=GameAction.ACTION1))
+        game_sprite_1 = game.current_level._sprites[0]
+        game_sprite_1.move(2, 2)
+
+        game_sprite_1 = game.current_level._sprites[0]
+        self.assertEqual(game_sprite_1.x, 3)
+        self.assertEqual(game_sprite_1.y, 3)
+        self.assertEqual(game._action_count, 1)
+
+        game.perform_action(ActionInput(id=GameAction.RESET))
+
+        game_sprite_2 = game.current_level._sprites[0]
+        self.assertEqual(game._action_count, 0)
+        self.assertEqual(game._current_level_index, 1)
+        self.assertEqual(game_sprite_2.x, 1)
+        self.assertEqual(game_sprite_2.y, 1)
+        self.assertNotAlmostEqual(game_sprite_1.x, game_sprite_2.x)
+
+        # another reset with no action should do a full reset
+        game.perform_action(ActionInput(id=GameAction.RESET))
+
+        game_sprite_3 = game.current_level._sprites[0]
+        self.assertEqual(game._action_count, 0)
+        self.assertEqual(game._current_level_index, 0)
+        self.assertEqual(game_sprite_3.x, 0)
+        self.assertEqual(game_sprite_3.y, 0)
+        self.assertNotAlmostEqual(game_sprite_1.x, game_sprite_3.x)
+        self.assertNotAlmostEqual(game_sprite_2.x, game_sprite_3.x)

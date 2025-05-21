@@ -29,6 +29,7 @@ class ARCBaseGame(ABC):
     _camera: Camera
     _action: ActionInput
     _action_complete: bool
+    _action_count: int
     _state: GameState
     _score: int
 
@@ -66,6 +67,7 @@ class ARCBaseGame(ABC):
         self._score = 0
         self._action = ActionInput()
         self._action_complete = False
+        self._action_count = 0
         self.set_level(0)
 
     @property
@@ -111,6 +113,7 @@ class ARCBaseGame(ABC):
         if not 0 <= index < len(self._levels):
             raise IndexError(f"Level index {index} out of range [0, {len(self._levels)})")
         self._current_level_index = index
+        self._action_count = 0
         level = self.current_level
         if level.grid_size:
             self.camera.resize(level.grid_size[0], level.grid_size[1])
@@ -143,7 +146,7 @@ class ARCBaseGame(ABC):
             FrameData: The resulting frame data
         """
         if action_input.id == GameAction.RESET:
-            self.full_reset()
+            self.handle_reset()
         elif self._state == GameState.GAME_OVER or self._state == GameState.WIN:
             return FrameData(
                 game_id=self._game_id,
@@ -199,6 +202,8 @@ class ARCBaseGame(ABC):
         self._state = GameState.NOT_FINISHED
         self._action = action_input
         self._action_complete = False
+        if action_input.id != GameAction.RESET:
+            self._action_count += 1
 
     @final
     def complete_action(self) -> None:
@@ -224,10 +229,26 @@ class ARCBaseGame(ABC):
         """Call this when the player has losses the game."""
         self._state = GameState.GAME_OVER
 
+    def handle_reset(self) -> None:
+        """Handle the reset of the game.
+
+        If the action count is 0, perform a full reset.
+        Otherwise, perform a level reset.
+        """
+        if self._action_count == 0:
+            self.full_reset()
+        else:
+            self.level_reset()
+
     def full_reset(self) -> None:
         self._levels = [level.clone() for level in self._clean_levels]
         self._score = 0
+        self._action_count = 0
         self.set_level(0)
+
+    def level_reset(self) -> None:
+        self._levels[self._current_level_index] = self._clean_levels[self._current_level_index].clone()
+        self._action_count = 0
 
     def step(self) -> None:
         """Step the game.  This is where your game logic should be implemented.
