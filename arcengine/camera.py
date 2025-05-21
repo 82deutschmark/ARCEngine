@@ -294,3 +294,37 @@ class Camera:
         if new_interfaces:
             for interface in new_interfaces:
                 self._interfaces.append(interface)
+
+    def display_to_grid(self, display_x: int, display_y: int) -> tuple[int, int] | None:
+        """Convert display coordinates (64x64) to camera grid coordinates.
+
+        This takes into account:
+        - Camera scaling max(64/camera_width, 64/camera_height)
+        - Letterbox padding
+        - Grid boundaries
+
+        Args:
+            display_x: X coordinate in display space (0-63)
+            display_y: Y coordinate in display space (0-63)
+
+        Returns:
+            tuple[int, int]: The corresponding grid coordinates (x, y)
+        """
+        # Calculate scaling factor
+        scale_x = int(64 / self.width)
+        scale_y = int(64 / self.height)
+        scale = min(scale_x, scale_y)
+
+        # Calculate letterbox padding
+        x_padding = int((64 - (self.width * scale)) / 2)
+        y_padding = int((64 - (self.height * scale)) / 2)
+
+        # Remove padding and scale down
+        grid_x = int((display_x - x_padding) / scale) if display_x - x_padding >= 0 else -1
+        grid_y = int((display_y - y_padding) / scale) if display_y - y_padding >= 0 else -1
+
+        if grid_x < 0 or grid_y < 0 or grid_x >= self.width or grid_y >= self.height:
+            # Given X, Y is off the camera screen
+            return None
+
+        return grid_x + self.x, grid_y + self.y

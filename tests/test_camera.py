@@ -540,3 +540,41 @@ class TestCamera(unittest.TestCase):
         # Verify shape and content
         self.assertEqual(rendered.shape, (6, 6))
         self.assertTrue(np.array_equal(rendered, expected))
+
+    def test_user_space_back_to_grid_space(self):
+        """Test converting user space to grid space."""
+        camera = Camera(width=64, height=64, background=0, letter_box=5)
+        grid = camera.display_to_grid(5, 15)
+        self.assertEqual(grid, (5, 15))  # Off screen
+        grid = camera.display_to_grid(34, 30)
+        self.assertEqual(grid, (34, 30))
+
+        camera.move(10, 10)
+        grid = camera.display_to_grid(5, 15)
+        self.assertEqual(grid, (15, 25))  # Off screen
+        grid = camera.display_to_grid(34, 30)
+        self.assertEqual(grid, (44, 40))
+
+        camera = Camera(width=6, height=6, background=0, letter_box=5)
+        grid = camera.display_to_grid(0, 0)
+        self.assertEqual(grid, None)  # Off screen
+        grid = camera.display_to_grid(20, 30)
+        self.assertEqual(grid, (1, 2))
+
+        camera = Camera(width=32, height=64, background=0, letter_box=5)
+        grid = camera.display_to_grid(15, 0)
+        self.assertEqual(grid, None)  # Off screen
+        grid = camera.display_to_grid(34, 30)
+        self.assertEqual(grid, (18, 30))
+
+        camera = Camera(width=16, height=32, background=0, letter_box=5)
+        grid = camera.display_to_grid(15, 0)
+        self.assertEqual(grid, None)  # Off screen
+        grid = camera.display_to_grid(34, 30)
+        self.assertEqual(grid, (9, 15))
+
+        camera = Camera(width=30, height=15, background=0, letter_box=5)
+        grid = camera.display_to_grid(5, 15)
+        self.assertEqual(grid, None)  # Off screen
+        grid = camera.display_to_grid(34, 30)
+        self.assertEqual(grid, (16, 6))
