@@ -245,10 +245,12 @@ class ARCBaseGame(ABC):
         self._score = 0
         self._action_count = 0
         self.set_level(0)
+        self._state = GameState.NOT_FINISHED
 
     def level_reset(self) -> None:
         self._levels[self._current_level_index] = self._clean_levels[self._current_level_index].clone()
-        self._action_count = 0
+        self.set_level(self._current_level_index)
+        self._state = GameState.NOT_FINISHED
 
     def step(self) -> None:
         """Step the game.  This is where your game logic should be implemented.
