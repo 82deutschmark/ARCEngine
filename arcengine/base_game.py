@@ -235,7 +235,7 @@ class ARCBaseGame(ABC):
         If the action count is 0, perform a full reset.
         Otherwise, perform a level reset.
         """
-        if self._action_count == 0:
+        if self._action_count == 0 or self._state == GameState.WIN:
             self.full_reset()
         else:
             self.level_reset()
