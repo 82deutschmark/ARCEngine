@@ -142,10 +142,18 @@ class ARCBaseGame(ABC):
         Returns:
             FrameData: The resulting frame data
         """
-        # Validate action input
-        self._set_action(action_input)
         if action_input.id == GameAction.RESET:
             self.full_reset()
+        elif self._state == GameState.GAME_OVER or self._state == GameState.WIN:
+            return FrameData(
+                game_id=self._game_id,
+                frame=[],
+                state=self._state,
+                score=self._score,
+                action_input=action_input,
+            )
+
+        self._set_action(action_input)
 
         frame_list: list[ndarray | list[list[int]]] = []
 
