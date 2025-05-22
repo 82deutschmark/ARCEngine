@@ -335,8 +335,8 @@ class ARCBaseGame(ABC):
 
     def next_level(self) -> None:
         """Move to the next level."""
+        self._score += 1
         if not self.is_last_level():
-            self._score += 1
             self.set_level(self._current_level_index + 1)
         else:
             self.win()
