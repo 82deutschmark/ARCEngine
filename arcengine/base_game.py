@@ -27,6 +27,7 @@ class ARCBaseGame(ABC):
     _clean_levels: list[Level]
     _current_level_index: int
     _camera: Camera
+    _debug: bool
     _action: ActionInput
     _action_complete: bool
     _action_count: int
@@ -38,6 +39,7 @@ class ARCBaseGame(ABC):
         game_id: str,
         levels: List[Level],
         camera: Optional[Camera] = None,
+        debug: bool = False,
     ) -> None:
         """Initialize a new game.
 
@@ -59,6 +61,10 @@ class ARCBaseGame(ABC):
         self._clean_levels = [level.clone() for level in levels]
         self._current_level_index = 0
 
+        # Debug mode
+        self._debug = debug
+
+        # Camera
         # Use provided camera or create default
         self._camera = camera if camera is not None else Camera()
 
@@ -69,6 +75,15 @@ class ARCBaseGame(ABC):
         self._action_complete = False
         self._action_count = 0
         self.set_level(0)
+
+    def debug(self, message: str) -> None:
+        """Debug mode.
+
+        Args:
+            message: The message to print
+        """
+        if self._debug:
+            print(message)
 
     @property
     @final
