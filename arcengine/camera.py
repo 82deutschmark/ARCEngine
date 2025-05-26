@@ -147,6 +147,26 @@ class Camera:
             raise ValueError(f"Height cannot exceed {self.MAX_DIMENSION} pixels")
         self._height = height_int
 
+    @property
+    def background(self) -> int:
+        """Get the camera's background color."""
+        return self._background
+
+    @background.setter
+    def background(self, value: int) -> None:
+        """Set the camera's background color."""
+        self._background = value
+
+    @property
+    def letter_box(self) -> int:
+        """Get the camera's letter box color."""
+        return self._letter_box
+
+    @letter_box.setter
+    def letter_box(self, value: int) -> None:
+        """Set the camera's letter box color."""
+        self._letter_box = value
+
     def resize(self, width: int, height: int) -> None:
         """Resize the camera.
 
