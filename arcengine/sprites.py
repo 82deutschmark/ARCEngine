@@ -70,6 +70,8 @@ class Sprite:
     _y: int
     _layer: int
     _rotation: int
+    _mirror_ud: bool
+    _mirror_lr: bool
     _scale: int  # Use set_scale to validate scale factor
     _blocking: BlockingMode
     _interaction: InteractionMode
@@ -84,6 +86,8 @@ class Sprite:
         layer: int = 0,
         scale: int = 1,
         rotation: int = 0,
+        mirror_ud: bool = False,
+        mirror_lr: bool = False,
         blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
         interaction: InteractionMode = InteractionMode.TANGIBLE,
         tags: list[str] = [],
@@ -117,6 +121,8 @@ class Sprite:
         self._y = int(y)
         self._layer = int(layer)
         self._set_rotation(rotation)
+        self._mirror_ud = mirror_ud
+        self._mirror_lr = mirror_lr
         self._blocking = blocking
         self.set_scale(scale)  # Use set_scale to validate scale factor
         self._interaction = interaction
@@ -323,6 +329,26 @@ class Sprite:
         """Get the current tags."""
         return self._tags
 
+    @property
+    def mirror_ud(self) -> bool:
+        """Get the current mirror up/down state."""
+        return self._mirror_ud
+
+    @property
+    def mirror_lr(self) -> bool:
+        """Get the current mirror left/right state."""
+        return self._mirror_lr
+
+    def set_mirror_ud(self, mirror_ud: bool) -> "Sprite":
+        """Set the sprite's mirror up/down state."""
+        self._mirror_ud = mirror_ud
+        return self
+
+    def set_mirror_lr(self, mirror_lr: bool) -> "Sprite":
+        """Set the sprite's mirror left/right state."""
+        self._mirror_lr = mirror_lr
+        return self
+
     def set_layer(self, layer: int) -> "Sprite":
         """Set the sprite's rendering layer.
 
@@ -390,6 +416,11 @@ class Sprite:
             k = int((-self.rotation % 360) / 90)  # Negative for clockwise rotation
             if k != 0:
                 result = np.rot90(result, k=k)
+
+        if self._mirror_ud:
+            result = np.flipud(result)
+        if self._mirror_lr:
+            result = np.fliplr(result)
 
         # Handle scaling
         if self._scale != 1:

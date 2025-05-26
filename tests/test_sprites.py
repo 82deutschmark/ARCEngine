@@ -561,5 +561,44 @@ class TestSprite(unittest.TestCase):
         self.assertEqual(sprite.y, 2)  # 4 - 2
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_sprite_render_mirror(self):
+    """Test sprite rendering with mirroring."""
+    pixels = [
+        [1, 1, 1],
+        [2, 2, 2],
+        [3, 3, 3],
+    ]
+
+    # Test 90 degree rotation with scale 2
+    sprite = Sprite(pixels, mirror_ud=True)
+    expected = np.array(
+        [
+            [3, 3, 3],
+            [2, 2, 2],
+            [1, 1, 1],
+        ],
+        dtype=np.int8,
+    )
+    rendered = sprite.render()
+    self.assertTrue(np.array_equal(rendered, expected))
+
+    pixels = [
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+    ]
+
+    # Test 90 degree rotation with scale -2 (one-third size)
+    sprite = Sprite(pixels, mirror_lr=True)
+    expected = np.array(
+        [
+            [4, 3, 2, 1],
+            [4, 3, 2, 1],
+            [4, 3, 2, 1],
+            [4, 3, 2, 1],
+        ],
+        dtype=np.int8,
+    )
+    rendered = sprite.render()
+    self.assertTrue(np.array_equal(rendered, expected))
