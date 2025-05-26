@@ -160,3 +160,25 @@ class TestLevel(unittest.TestCase):
         level._data["test"] = "test2"
         self.assertEqual(level.get_data("test"), "test2")
         self.assertEqual(level2.get_data("test"), "test")
+
+    def test_sprite_at_location(self):
+        """Test getting sprit at a given location"""
+        # Create test sprites with various tags
+        sprite1 = Sprite([[1, 1]], name="enemy1", tags=["enemy", "flying"], x=10, y=10)
+        sprite2 = Sprite([[2], [2]], name="enemy2", tags=["enemy", "ground"], x=11, y=11)
+        sprite3 = Sprite([[3]], name="player", tags=["player", "ground"], x=10, y=10)
+        sprite4 = Sprite([[4]], name="obstacle", tags=["obstacle"], x=15, y=15)
+
+        level = Level(sprites=[sprite1, sprite2, sprite3, sprite4])
+
+        self.assertEqual(level.get_sprite_at(5, 5), None)
+        self.assertEqual(level.get_sprite_at(10, 10), sprite1)
+        self.assertEqual(level.get_sprite_at(11, 10), sprite1)
+        self.assertEqual(level.get_sprite_at(11, 11), sprite2)
+        self.assertEqual(level.get_sprite_at(11, 12), sprite2)
+        self.assertEqual(level.get_sprite_at(15, 15), sprite4)
+
+        self.assertEqual(level.get_sprite_at(10, 10, "enemy"), sprite1)
+        self.assertEqual(level.get_sprite_at(11, 11, "enemy"), sprite2)
+        self.assertEqual(level.get_sprite_at(10, 10, "player"), sprite3)
+        self.assertEqual(level.get_sprite_at(15, 15, "obstacle"), sprite4)

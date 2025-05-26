@@ -390,6 +390,16 @@ class Sprite:
         }
 
     @property
+    def width(self) -> int:
+        """Get the sprite's width."""
+        return int(self.pixels.shape[1])
+
+    @property
+    def height(self) -> int:
+        """Get the sprite's height."""
+        return int(self.pixels.shape[0])
+
+    @property
     def is_collidable(self) -> bool:
         """Check if a sprite with this interaction mode should participate in collisions.
 

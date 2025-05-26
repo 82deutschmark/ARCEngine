@@ -118,6 +118,23 @@ class Level:
             all_tags.update(sprite.tags)
         return all_tags
 
+    def get_sprite_at(self, x: int, y: int, tag: Optional[str] = None) -> Sprite | None:
+        """Get the sprite at the given coordinates.
+
+        This method returns the first sprite that is at the given coordinates.
+        If a tag is provided, it will return the first sprite that has the given tag.
+
+        Args:
+            x: The x coordinate
+            y: The y coordinate
+            tag: The tag to search for
+        """
+        for sprite in self._sprites:
+            if x >= sprite.x and y >= sprite.y and x < sprite.x + sprite.width and y < sprite.y + sprite.height:
+                if tag is None or tag in sprite.tags:
+                    return sprite
+        return None
+
     def get_data(self, key: str) -> Any:
         return self._data.get(key)
 
