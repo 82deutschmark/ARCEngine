@@ -33,6 +33,10 @@ class Level:
         self._grid_size = grid_size
         self._data = data
 
+    def remove_all_sprites(self) -> None:
+        """Remove all sprites from the level."""
+        self._sprites = []
+
     def add_sprite(self, sprite: Sprite) -> None:
         """Add a sprite to the level.
 
