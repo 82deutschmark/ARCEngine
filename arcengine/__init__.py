@@ -15,7 +15,7 @@ from .enums import (
     InteractionMode,
     SimpleAction,
 )
-from .interfaces import ToggleableUserDisplay
+from .interfaces import RenderableUserDisplay, ToggleableUserDisplay
 from .level import Level
 from .sprites import Sprite
 
@@ -34,5 +34,6 @@ __all__ = [
     "FrameDataRaw",
     "ARCBaseGame",
     "ActionInput",
+    "RenderableUserDisplay",
     "ToggleableUserDisplay",
 ]

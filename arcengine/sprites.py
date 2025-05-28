@@ -170,7 +170,7 @@ class Sprite:
             raise ValueError(f"Rotation must be one of {self.VALID_ROTATIONS}, got {rotation}")
         self.rotation = normalized
 
-    def set_rotation(self, rotation: int) -> 'Sprite':
+    def set_rotation(self, rotation: int) -> "Sprite":
         """Set the sprite's rotation to a specific value.
 
         Args:
@@ -182,7 +182,7 @@ class Sprite:
         self._set_rotation(int(rotation))
         return self
 
-    def rotate(self, delta: int) -> 'Sprite':
+    def rotate(self, delta: int) -> "Sprite":
         """Rotate the sprite by a given amount.
 
         Args:
