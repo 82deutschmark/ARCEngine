@@ -148,6 +148,8 @@ class Sprite:
             y=self._y,
             scale=self._scale,
             rotation=self.rotation,  # Use the public property to get normalized value
+            mirror_ud=self._mirror_ud,
+            mirror_lr=self._mirror_lr,
             blocking=self._blocking,
             layer=self._layer,
             interaction=self._interaction,
