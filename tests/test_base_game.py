@@ -22,12 +22,16 @@ class TestGame(ARCBaseGame):
     def __init__(self, game_id: str, levels: list[Level], camera: Camera | None = None) -> None:
         super().__init__(game_id=game_id, levels=levels, camera=camera)
         self._step_count = 0
+        self._level_index = -1
 
     def step(self) -> None:
         """Step the game, completing after 3 steps."""
         self._step_count += 1
         if self._step_count >= 3:
             self.complete_action()
+
+    def on_set_level(self, level: Level) -> None:
+        self._level_index = self._current_level_index
 
 
 class TestARCBaseGame(unittest.TestCase):
@@ -339,3 +343,25 @@ class TestARCBaseGame(unittest.TestCase):
         self.assertEqual(game_sprite_3.y, 0)
         self.assertNotAlmostEqual(game_sprite_1.x, game_sprite_3.x)
         self.assertNotAlmostEqual(game_sprite_2.x, game_sprite_3.x)
+
+    def test_set_level_by_name(self):
+        """Test setting the current level by name."""
+        # Create a test level with a sprite
+        sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite], name="level1")
+        level2 = Level([sprite.clone().set_position(1, 1)], name="level2")
+        game = TestGame("test_game", [level1, level2])
+
+        game.set_level_by_name("level1")
+        self.assertEqual(game.current_level.name, level1.name)
+        # check that the on_level_set is called and the level index is set correctly
+        self.assertEqual(game._level_index, 0)
+
+        game.set_level_by_name("level2")
+        self.assertEqual(game.current_level.name, level2.name)
+        # check that the on_level_set is called and the level index is set correctly
+        self.assertEqual(game._level_index, 1)
+
+        with self.assertRaises(ValueError) as ctx:
+            game.set_level_by_name("nonexistent")
+        self.assertIn("not found", str(ctx.exception))

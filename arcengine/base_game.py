@@ -134,6 +134,18 @@ class ARCBaseGame(ABC):
             self.camera.resize(level.grid_size[0], level.grid_size[1])
         self.on_set_level(level)
 
+    def set_level_by_name(self, name: str) -> None:
+        """Set the current level by name.
+
+        Args:
+            name: The name of the level to set as current
+        """
+        for index, level in enumerate(self._levels):
+            if level.name == name:
+                self.set_level(index)
+                return
+        raise ValueError(f"Level with name {name} not found")
+
     @property
     @final
     def level_index(self) -> int:

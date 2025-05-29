@@ -182,3 +182,10 @@ class TestLevel(unittest.TestCase):
         self.assertEqual(level.get_sprite_at(11, 11, "enemy"), sprite2)
         self.assertEqual(level.get_sprite_at(10, 10, "player"), sprite3)
         self.assertEqual(level.get_sprite_at(15, 15, "obstacle"), sprite4)
+
+    def test_level_name_on_clone(self):
+        """Test the name of a level is cloned correctly."""
+        level = Level(name="test_level")
+        cloned = level.clone()
+        self.assertEqual(level.name, "test_level")
+        self.assertEqual(cloned.name, "test_level")

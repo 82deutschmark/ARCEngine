@@ -14,12 +14,14 @@ class Level:
     _sprites: List[Sprite]
     _grid_size: Tuple[int, int] | None
     _data: dict[str, Any]
+    _name: str
 
     def __init__(
         self,
         sprites: Optional[List[Sprite]] = None,
         grid_size: Tuple[int, int] | None = None,
         data: dict[str, Any] = {},
+        name: str = "Level",
     ):
         """Initialize a new Level.
 
@@ -32,6 +34,7 @@ class Level:
                 self.add_sprite(sprite)
         self._grid_size = grid_size
         self._data = data
+        self._name = name
 
     def remove_all_sprites(self) -> None:
         """Remove all sprites from the level."""
@@ -139,6 +142,11 @@ class Level:
                     return sprite
         return None
 
+    @property
+    def name(self) -> str:
+        """Get the name of the level."""
+        return self._name
+
     def get_data(self, key: str) -> Any:
         return self._data.get(key)
 
@@ -159,4 +167,4 @@ class Level:
         """
         # Clone each sprite and create new level
         cloned_sprites = [sprite.clone() for sprite in self._sprites]
-        return Level(sprites=cloned_sprites, grid_size=self._grid_size, data=copy.deepcopy(self._data))
+        return Level(name=self._name, sprites=cloned_sprites, grid_size=self._grid_size, data=copy.deepcopy(self._data))
