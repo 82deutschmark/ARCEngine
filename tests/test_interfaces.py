@@ -5,12 +5,26 @@ import unittest
 import numpy as np
 
 from arcengine import (
+    RenderableUserDisplay,
     Sprite,
     ToggleableUserDisplay,
 )
 
 
-class TestToggleableUserDisplay(unittest.TestCase):
+class MockRenderableUserDisplay(RenderableUserDisplay):
+    def __init__(self):
+        self._sprites = [
+            Sprite([[1, 1], [1, 1]], name="sprite1"),
+            Sprite([[2, 2], [2, 2]], name="sprite2"),
+        ]
+
+    def render_interface(self, frame: np.ndarray) -> np.ndarray:
+        frame = self.draw_sprite(frame, self._sprites[0], 0, 0)
+        frame = self.draw_sprite(frame, self._sprites[1], 10, 0)
+        return frame
+
+
+class TestUserDisplays(unittest.TestCase):
     """Test cases for the ToggleableUserDisplay class."""
 
     def test_initialization(self):
@@ -114,3 +128,22 @@ class TestToggleableUserDisplay(unittest.TestCase):
         self.assertEqual(frame[63, 63], 1)  # Only one pixel should be visible
         self.assertEqual(frame[62, 63], 0)  # Rest should be clipped
         self.assertEqual(frame[63, 62], 0)  # Rest should be clipped
+
+    def test_draw_sprite(self):
+        """Test drawing a sprite to a frame."""
+        mock_ui = MockRenderableUserDisplay()
+        frame = np.zeros((64, 64), dtype=np.int32)
+
+        frame = mock_ui.render_interface(frame)
+        self.assertEqual(frame[0, 0], 1)
+        self.assertEqual(frame[0, 1], 1)
+        self.assertEqual(frame[1, 0], 1)
+        self.assertEqual(frame[1, 1], 1)
+        self.assertEqual(frame[2, 0], 0)
+        self.assertEqual(frame[2, 1], 0)
+        self.assertEqual(frame[0, 2], 0)
+        self.assertEqual(frame[1, 2], 0)
+        self.assertEqual(frame[0, 10], 2)
+        self.assertEqual(frame[0, 11], 2)
+        self.assertEqual(frame[1, 10], 2)
+        self.assertEqual(frame[1, 11], 2)

@@ -26,6 +26,36 @@ class RenderableUserDisplay(ABC):
         """
         pass
 
+    def draw_sprite(self, frame: np.ndarray, sprite: Sprite, start_x: int, start_y: int) -> np.ndarray:
+        sprite_pixels = sprite.render()
+        sprite_height, sprite_width = sprite_pixels.shape
+
+        # Calculate sprite boundaries
+        end_x = start_x + sprite_width
+        end_y = start_y + sprite_height
+
+        # Only render if sprite is at least partially visible
+        if start_x < 64 and start_y < 64 and end_x > 0 and end_y > 0:
+            # Calculate the visible portion of the sprite
+            sprite_start_y = max(0, -start_y)
+            sprite_start_x = max(0, -start_x)
+            sprite_end_y = sprite_height - max(0, end_y - 64)
+            sprite_end_x = sprite_width - max(0, end_x - 64)
+
+            # Calculate frame boundaries
+            frame_start_y = max(0, start_y)
+            frame_start_x = max(0, start_x)
+            frame_end_y = min(64, end_y)
+            frame_end_x = min(64, end_x)
+
+            # Only render non-negative pixels
+            frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x] = np.where(
+                sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x] >= 0,
+                sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x],
+                frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x],
+            )
+        return frame
+
 
 class ToggleableUserDisplay(RenderableUserDisplay):
     """A UI element that manages a collection of sprite pairs (enabled/disabled states).
@@ -240,35 +270,6 @@ class ToggleableUserDisplay(RenderableUserDisplay):
         # Render each visible sprite
         for sprite in all_sprites:
             if sprite.interaction != InteractionMode.REMOVED:
-                # Get sprite's rendered pixels
-                sprite_pixels = sprite.render()
-                sprite_height, sprite_width = sprite_pixels.shape
-
-                # Calculate sprite boundaries
-                start_x = sprite.x
-                start_y = sprite.y
-                end_x = start_x + sprite_width
-                end_y = start_y + sprite_height
-
-                # Only render if sprite is at least partially visible
-                if start_x < 64 and start_y < 64 and end_x > 0 and end_y > 0:
-                    # Calculate the visible portion of the sprite
-                    sprite_start_y = max(0, -start_y)
-                    sprite_start_x = max(0, -start_x)
-                    sprite_end_y = sprite_height - max(0, end_y - 64)
-                    sprite_end_x = sprite_width - max(0, end_x - 64)
-
-                    # Calculate frame boundaries
-                    frame_start_y = max(0, start_y)
-                    frame_start_x = max(0, start_x)
-                    frame_end_y = min(64, end_y)
-                    frame_end_x = min(64, end_x)
-
-                    # Only render non-negative pixels
-                    frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x] = np.where(
-                        sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x] >= 0,
-                        sprite_pixels[sprite_start_y:sprite_end_y, sprite_start_x:sprite_end_x],
-                        frame[frame_start_y:frame_end_y, frame_start_x:frame_end_x],
-                    )
+                frame = self.draw_sprite(frame, sprite, sprite.x, sprite.y)
 
         return frame

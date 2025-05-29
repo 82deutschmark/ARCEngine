@@ -2,7 +2,7 @@
 
 from .test_base_game import TestARCBaseGame
 from .test_camera import TestCamera
-from .test_interfaces import TestToggleableUserDisplay
+from .test_interfaces import TestUserDisplays
 from .test_level import TestLevel
 from .test_sprites import TestSprite
 
@@ -11,5 +11,5 @@ __all__ = [
     "TestCamera",
     "TestLevel",
     "TestARCBaseGame",
-    "TestToggleableUserDisplay",
+    "TestUserDisplays",
 ]
