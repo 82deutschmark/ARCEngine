@@ -371,3 +371,30 @@ class ARCBaseGame(ABC):
     def on_set_level(self, level: Level) -> None:
         """Called when the level is set, use this to set level specific data."""
         pass
+
+    def get_pixels_at_sprite(self, sprite: Sprite) -> ndarray:
+        """Get the camera pixels at a sprite.
+
+        Args:
+            sprite: The sprite to get the pixels at
+
+        Returns:
+            list[list[int]]: The camera returned pixels at the sprite
+        """
+        return self.get_pixels(sprite.x - self.camera.x, sprite.y - self.camera.y, sprite.width, sprite.height)
+
+    def get_pixels(self, x: int, y: int, width: int, height: int) -> ndarray:
+        """Get the camera pixels at a given position.
+
+        Args:
+            x: The x position to get the pixels at
+            y: The y position to get the pixels at
+            width: The width of the area to get the pixels at
+            height: The height of the area to get the pixels at
+
+        Returns:
+            list[list[int]]: The camera returned pixels at the given position and width/height
+        """
+
+        frame = self.camera._raw_render(self.current_level.get_sprites())
+        return frame[y : y + height, x : x + width]

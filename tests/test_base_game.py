@@ -365,3 +365,64 @@ class TestARCBaseGame(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             game.set_level_by_name("nonexistent")
         self.assertIn("not found", str(ctx.exception))
+
+    def test_get_pixels_at_sprite(self):
+        """Test getting pixels at a sprite's position."""
+        # Create a test sprite
+        sprite = Sprite(name="sprite", pixels=[[1, 2], [3, 4]], x=5, y=5)
+
+        # Add sprite to level
+        level = Level([sprite])
+
+        # Create a game with a 16x16 camera
+        game = TestGame("test_game", [level])
+        game.camera.resize(16, 16)
+
+        # Test getting pixels at sprite position
+        pixels = game.get_pixels_at_sprite(sprite)
+        self.assertEqual(pixels.tolist(), [[1, 2], [3, 4]])
+
+        # Test with camera offset
+        game.camera.move(2, 2)
+        pixels = game.get_pixels_at_sprite(sprite)
+        self.assertEqual(pixels.tolist(), [[1, 2], [3, 4]])
+
+        # Test with sprite partially off screen
+        game_sprite = game.current_level.get_sprites_by_name("sprite")[0]
+        game_sprite.set_position(15, 15)
+        pixels = game.get_pixels_at_sprite(game_sprite)
+        self.assertEqual(pixels.tolist(), [[1, 2], [3, 4]])
+
+    def test_get_pixels(self):
+        """Test getting pixels at specific coordinates."""
+        # Create test sprites
+        sprite1 = Sprite(pixels=[[1, 2], [3, 4]], x=5, y=5)
+        sprite2 = Sprite(pixels=[[6, 7], [8, 9]], x=7, y=7)
+
+        # Add sprites to level
+        level = Level([sprite1, sprite2])
+
+        # Create a game with a 16x16 camera
+        game = TestGame("test_game", [level])
+        game.camera.resize(16, 16)
+
+        # Test getting pixels at specific coordinates
+        pixels = game.get_pixels(5, 5, 2, 2)
+        self.assertEqual(pixels.tolist(), [[1, 2], [3, 4]])
+
+        # Test getting pixels at overlapping area
+        pixels = game.get_pixels(6, 6, 2, 2)
+        self.assertEqual(pixels.tolist(), [[4, 5], [5, 6]])
+
+        # Test with camera offset
+        game.camera.move(2, 2)
+        pixels = game.get_pixels(3, 3, 2, 2)
+        self.assertEqual(pixels.tolist(), [[1, 2], [3, 4]])
+
+        # Test getting pixels outside sprite area
+        pixels = game.get_pixels(0, 0, 2, 2)
+        self.assertEqual(pixels.tolist(), [[5, 5], [5, 5]])
+
+        # Test getting pixels partially outside sprite area
+        pixels = game.get_pixels(4, 4, 2, 2)
+        self.assertEqual(pixels.tolist(), [[4, 5], [5, 6]])

@@ -396,12 +396,12 @@ class Sprite:
     @property
     def width(self) -> int:
         """Get the sprite's width."""
-        return int(self.pixels.shape[1])
+        return int(self.render().shape[1])
 
     @property
     def height(self) -> int:
         """Get the sprite's height."""
-        return int(self.pixels.shape[0])
+        return int(self.render().shape[0])
 
     @property
     def is_collidable(self) -> bool:
@@ -599,6 +599,7 @@ class Sprite:
 
         # Create and return new sprite
         return Sprite(
+            name=self._name,
             pixels=merged_pixels.tolist(),
             x=min_x,
             y=min_y,
