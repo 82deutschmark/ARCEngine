@@ -653,6 +653,17 @@ class TestSprite(unittest.TestCase):
         merged = sprite1.merge(sprite2)
         assert merged.blocking == BlockingMode.PIXEL_PERFECT
 
+    def test_merge_complex(self):
+        sprite1 = Sprite(pixels=[[11, -1], [11, 9], [11, -1]], x=0, y=0)
+        sprite2 = Sprite(pixels=[[8, 8], [-1, 8]], x=1, y=0)
+        merged = sprite1.merge(sprite2)
+
+        result = merged.pixels.tolist()
+        expected = [[11, 8, 8], [11, 9, 8], [11, -1, -1]]
+        self.assertEqual(result, expected)
+        assert merged.x == 0
+        assert merged.y == 0
+
     def test_merge_interaction_modes(self):
         """Test merging sprites with different interaction modes."""
         # Test REMOVED + TANGIBLE
