@@ -449,7 +449,7 @@ class Sprite:
 
         return result
 
-    def collides_with(self, other: "Sprite") -> bool:
+    def collides_with(self, other: "Sprite", ignoreMode: bool = False) -> bool:
         """Check if this sprite collides with another sprite.
 
         The collision check follows these rules:
@@ -470,13 +470,14 @@ class Sprite:
         if self is other:
             return False
 
-        # Rule 2: Both sprites must be collidable
-        if not (self.is_collidable and other.is_collidable):
-            return False
+        if not ignoreMode:
+            # Rule 2: Both sprites must be collidable
+            if not (self.is_collidable and other.is_collidable):
+                return False
 
-        # Rule 3: Handle different blocking modes
-        if self._blocking == BlockingMode.NOT_BLOCKED or other._blocking == BlockingMode.NOT_BLOCKED:
-            return False
+            # Rule 3: Handle different blocking modes
+            if self._blocking == BlockingMode.NOT_BLOCKED or other._blocking == BlockingMode.NOT_BLOCKED:
+                return False
 
         # Get sprite dimensions after rendering (accounts for rotation and scaling)
         self_pixels = self.render()

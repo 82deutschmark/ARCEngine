@@ -189,3 +189,17 @@ class TestLevel(unittest.TestCase):
         cloned = level.clone()
         self.assertEqual(level.name, "test_level")
         self.assertEqual(cloned.name, "test_level")
+
+    def test_collides_with(self):
+        """Test the collides_with method of the level class."""
+        # Create test sprites with various tags
+        sprite1 = Sprite([[1, 1]], name="enemy1", tags=["enemy", "flying"], x=12, y=12)
+        sprite2 = Sprite([[3]], name="player", tags=["player", "ground"], x=10, y=10)
+
+        level = Level(sprites=[sprite1, sprite2])
+
+        self.assertEqual(len(level.collides_with(sprite1, True)), 0)
+
+        sprite1.move(-2, -2)
+
+        self.assertEqual(len(level.collides_with(sprite1, True)), 1)

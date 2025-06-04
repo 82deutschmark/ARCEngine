@@ -142,6 +142,14 @@ class Level:
                     return sprite
         return None
 
+    def collides_with(self, sprite: Sprite, ignoreMode: bool = False) -> List[Sprite]:
+        """Checks all sprites in the level for collisions with the given sprite.
+
+        Args:
+            sprite: The sprite to check for collisions
+        """
+        return [s for s in self._sprites if sprite.collides_with(other=s, ignoreMode=ignoreMode)]
+
     @property
     def name(self) -> str:
         """Get the name of the level."""

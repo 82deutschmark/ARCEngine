@@ -487,6 +487,13 @@ class TestSprite(unittest.TestCase):
         sprite2.set_interaction(InteractionMode.INVISIBLE)
         self.assertTrue(sprite1.collides_with(sprite2))
 
+        # Test with intangible sprites
+        sprite2.set_interaction(InteractionMode.INTANGIBLE)
+        self.assertFalse(sprite1.collides_with(sprite2))
+
+        # Test with ignoring Mode
+        self.assertTrue(sprite1.collides_with(sprite2, True))
+
     def test_pixel_perfect_collision(self):
         """Test pixel-perfect collision detection."""
         # Create two sprites with transparent pixels (-1)
