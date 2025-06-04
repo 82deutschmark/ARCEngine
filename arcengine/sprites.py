@@ -583,6 +583,12 @@ class Sprite:
         self_x_start = self._x - min_x
         merged_pixels[self_y_start : self_y_start + self_pixels.shape[0], self_x_start : self_x_start + self_pixels.shape[1]] = self_pixels
 
+        ys = slice(self_y_start, self_y_start + self_pixels.shape[0])
+        xs = slice(self_x_start, self_x_start + self_pixels.shape[1])  # Using np.putmask (avoids the “view-then-boolean-index” copy issue)
+        np.putmask(merged_pixels[ys, xs], self_pixels >= 0, self_pixels)
+        # Or with np.where (creates the right-hand side, then assigns once)
+        merged_pixels[ys, xs] = np.where(self_pixels >= 0, self_pixels, merged_pixels[ys, xs])
+
         blocking = self._blocking
         if blocking == BlockingMode.NOT_BLOCKED:
             blocking = other._blocking
