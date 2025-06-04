@@ -26,9 +26,14 @@ class TestGame(ARCBaseGame):
 
     def step(self) -> None:
         """Step the game, completing after 3 steps."""
-        self._step_count += 1
-        if self._step_count >= 3:
+        if self.action.id == GameAction.ACTION5:
+            print("test game - next level")
+            self.next_level()
             self.complete_action()
+        else:
+            self._step_count += 1
+            if self._step_count >= 3:
+                self.complete_action()
 
     def on_set_level(self, level: Level) -> None:
         self._level_index = self._current_level_index
@@ -285,6 +290,7 @@ class TestARCBaseGame(unittest.TestCase):
         self.assertEqual(game._score, 100)
 
         game.next_level()
+        game._really_set_next_level()
 
         game_sprite_2 = game.current_level._sprites[0]
 
@@ -313,6 +319,7 @@ class TestARCBaseGame(unittest.TestCase):
         game = TestGame("test_game", [level1, level2])
 
         game.next_level()
+        game._really_set_next_level()
 
         # Perform an action and simulate a step
         game.perform_action(ActionInput(id=GameAction.ACTION1))
@@ -426,3 +433,19 @@ class TestARCBaseGame(unittest.TestCase):
         # Test getting pixels partially outside sprite area
         pixels = game.get_pixels(4, 4, 2, 2)
         self.assertEqual(pixels.tolist(), [[4, 5], [5, 6]])
+
+    def test_level_win_renders_two_frames(self):
+        sprite1 = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        sprite2 = Sprite([[2, 2], [2, 2]], x=0, y=0)
+        level1 = Level([sprite1])
+        level2 = Level([sprite2])
+
+        # Create a test game with both levels
+        game = TestGame("test_game", [level1, level2])
+
+        # Perform action on first level
+        action_input = ActionInput(id=GameAction.ACTION5)
+        frame_data1 = game.perform_action(action_input)
+
+        self.assertEqual(game._current_level_index, 1)
+        self.assertEqual(len(frame_data1.frame), 2)

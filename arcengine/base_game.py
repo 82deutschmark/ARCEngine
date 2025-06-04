@@ -33,6 +33,7 @@ class ARCBaseGame(ABC):
     _action_count: int
     _state: GameState
     _score: int
+    _next_level: bool
 
     def __init__(
         self,
@@ -71,6 +72,7 @@ class ARCBaseGame(ABC):
         # Game state
         self._state = GameState.NOT_PLAYED
         self._score = 0
+        self._next_level = False
         self._action = ActionInput()
         self._action_complete = False
         self._action_count = 0
@@ -188,7 +190,11 @@ class ARCBaseGame(ABC):
         frame_list: list[ndarray | list[list[int]]] = []
 
         while not self.is_action_complete():
-            self.step()
+            print(self._next_level)
+            if self._next_level:
+                self._really_set_next_level()
+            else:
+                self.step()
             frame = self.camera.render(self.current_level.get_sprites())
             if raw:
                 frame_list.append(frame)
@@ -244,7 +250,8 @@ class ARCBaseGame(ABC):
         Returns:
             bool: True if the action is complete, False otherwise
         """
-        return self._action_complete
+        print(self._next_level, self._action_complete)
+        return not self._next_level and self._action_complete
 
     @final
     def win(self) -> None:
@@ -364,9 +371,14 @@ class ARCBaseGame(ABC):
         """Move to the next level."""
         self._score += 1
         if not self.is_last_level():
-            self.set_level(self._current_level_index + 1)
+            self._next_level = True
         else:
             self.win()
+
+    def _really_set_next_level(self) -> None:
+        print("really set next level")
+        self.set_level(self._current_level_index + 1)
+        self._next_level = False
 
     def on_set_level(self, level: Level) -> None:
         """Called when the level is set, use this to set level specific data."""
