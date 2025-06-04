@@ -544,3 +544,66 @@ class Sprite:
         else:
             # Replace only pixels matching old_color
             self.pixels = np.where(self.pixels == old_color, new_color, self.pixels)
+
+    def merge(self, other: "Sprite") -> "Sprite":
+        """Merge two sprites together.
+
+        This method creates a new sprite that combines the pixels of both sprites.
+        When pixels overlap, non-negative pixels take precedence over negative ones.
+
+        Args:
+            other: The other sprite to merge with
+
+        Returns:
+            Sprite: A new sprite containing the merged pixels
+        """
+        # Get rendered versions of both sprites to handle scaling/rotation
+        self_pixels = self.render()
+        other_pixels = other.render()
+
+        # Calculate the bounds of the merged sprite
+        min_x = min(self._x, other._x)
+        min_y = min(self._y, other._y)
+        max_x = max(self._x + self_pixels.shape[1], other._x + other_pixels.shape[1])
+        max_y = max(self._y + self_pixels.shape[0], other._y + other_pixels.shape[0])
+
+        # Create a new array for the merged sprite
+        merged_height = max_y - min_y
+        merged_width = max_x - min_x
+        merged_pixels = np.full((merged_height, merged_width), -1, dtype=np.int8)
+
+        # Copy other's pixels, keeping non-negative pixels
+        other_y_start = other._y - min_y
+        other_x_start = other._x - min_x
+        other_region = merged_pixels[other_y_start : other_y_start + other_pixels.shape[0], other_x_start : other_x_start + other_pixels.shape[1]]
+        merged_pixels[other_y_start : other_y_start + other_pixels.shape[0], other_x_start : other_x_start + other_pixels.shape[1]] = np.where(other_pixels >= 0, other_pixels, other_region)
+
+        # Copy self's pixels
+        self_y_start = self._y - min_y
+        self_x_start = self._x - min_x
+        merged_pixels[self_y_start : self_y_start + self_pixels.shape[0], self_x_start : self_x_start + self_pixels.shape[1]] = self_pixels
+
+        blocking = self._blocking
+        if blocking == BlockingMode.NOT_BLOCKED:
+            blocking = other._blocking
+        elif blocking == BlockingMode.BOUNDING_BOX and other._blocking == BlockingMode.PIXEL_PERFECT:
+            blocking = BlockingMode.PIXEL_PERFECT
+
+        interaction = self._interaction
+        if interaction == InteractionMode.REMOVED:
+            interaction = other._interaction
+        elif interaction == InteractionMode.INVISIBLE and other._interaction == InteractionMode.TANGIBLE:
+            interaction = InteractionMode.TANGIBLE
+        elif interaction == InteractionMode.INTANGIBLE and other._interaction == InteractionMode.TANGIBLE:
+            interaction = InteractionMode.TANGIBLE
+
+        # Create and return new sprite
+        return Sprite(
+            pixels=merged_pixels.tolist(),
+            x=min_x,
+            y=min_y,
+            layer=max(self._layer, other._layer),  # Use higher layer
+            blocking=blocking,
+            interaction=interaction,
+            tags=list(set(self._tags + other._tags)),  # Combine unique tags
+        )

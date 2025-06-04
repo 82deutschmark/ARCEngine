@@ -616,3 +616,115 @@ class TestSprite(unittest.TestCase):
         sprite = Sprite([[1, 2, 3, -1]], x=0, y=0)
         sprite.color_remap(None, 4)
         self.assertTrue(np.array_equal(sprite.pixels, [[4, 4, 4, -1]]))
+
+    def test_merge_basic(self):
+        """Test basic sprite merging with overlapping pixels."""
+        # Create two sprites with some overlap
+        sprite1 = Sprite(pixels=[[1, 1, -1], [1, -1, 1], [-1, 1, 1]], x=0, y=0)
+        sprite2 = Sprite(pixels=[[-1, 2, 2], [2, 2, -1], [2, -1, 2]], x=1, y=1)
+
+        # Merge the sprites
+        merged = sprite1.merge(sprite2)
+
+        # Check the merged pixels
+        result = merged.pixels.tolist()
+        expected = [[1, 1, -1, -1], [1, -1, 1, 2], [-1, 1, 1, -1], [-1, 2, -1, 2]]
+        self.assertEqual(result, expected)
+        assert merged.x == 0
+        assert merged.y == 0
+
+    def test_merge_blocking_modes(self):
+        """Test merging sprites with different blocking modes."""
+        # Test NOT_BLOCKED + BOUNDING_BOX
+        sprite1 = Sprite(pixels=[[1]], blocking=BlockingMode.NOT_BLOCKED)
+        sprite2 = Sprite(pixels=[[2]], blocking=BlockingMode.BOUNDING_BOX)
+        merged = sprite1.merge(sprite2)
+        assert merged.blocking == BlockingMode.BOUNDING_BOX
+
+        # Test BOUNDING_BOX + PIXEL_PERFECT
+        sprite1 = Sprite(pixels=[[1]], blocking=BlockingMode.BOUNDING_BOX)
+        sprite2 = Sprite(pixels=[[2]], blocking=BlockingMode.PIXEL_PERFECT)
+        merged = sprite1.merge(sprite2)
+        assert merged.blocking == BlockingMode.PIXEL_PERFECT
+
+        # Test PIXEL_PERFECT + BOUNDING_BOX
+        sprite1 = Sprite(pixels=[[1]], blocking=BlockingMode.PIXEL_PERFECT)
+        sprite2 = Sprite(pixels=[[2]], blocking=BlockingMode.BOUNDING_BOX)
+        merged = sprite1.merge(sprite2)
+        assert merged.blocking == BlockingMode.PIXEL_PERFECT
+
+    def test_merge_interaction_modes(self):
+        """Test merging sprites with different interaction modes."""
+        # Test REMOVED + TANGIBLE
+        sprite1 = Sprite(pixels=[[1]], interaction=InteractionMode.REMOVED)
+        sprite2 = Sprite(pixels=[[2]], interaction=InteractionMode.TANGIBLE)
+        merged = sprite1.merge(sprite2)
+        assert merged.interaction == InteractionMode.TANGIBLE
+
+        # Test INVISIBLE + TANGIBLE
+        sprite1 = Sprite(pixels=[[1]], interaction=InteractionMode.INVISIBLE)
+        sprite2 = Sprite(pixels=[[2]], interaction=InteractionMode.TANGIBLE)
+        merged = sprite1.merge(sprite2)
+        assert merged.interaction == InteractionMode.TANGIBLE
+
+        # Test INTANGIBLE + TANGIBLE
+        sprite1 = Sprite(pixels=[[1]], interaction=InteractionMode.INTANGIBLE)
+        sprite2 = Sprite(pixels=[[2]], interaction=InteractionMode.TANGIBLE)
+        merged = sprite1.merge(sprite2)
+        assert merged.interaction == InteractionMode.TANGIBLE
+
+    def test_merge_positioning(self):
+        """Test merging sprites with different positions."""
+        # Test sprites at different positions
+        sprite1 = Sprite(pixels=[[1]], x=0, y=0)
+        sprite2 = Sprite(pixels=[[2]], x=2, y=2)
+        merged = sprite1.merge(sprite2)
+
+        # Check position and size
+        assert merged.x == 0
+        assert merged.y == 0
+        assert merged.width == 3
+        assert merged.height == 3
+
+        # Check pixels are in correct positions
+        assert merged.pixels[0, 0] == 1
+        assert merged.pixels[2, 2] == 2
+        assert merged.pixels[0, 1] == -1
+        assert merged.pixels[1, 0] == -1
+
+    def test_merge_mirror(self):
+        """Test merging sprites with render alterations works"""
+        # Test sprites at different positions
+        sprite1 = Sprite(pixels=[[1, 2]], x=0, y=0, mirror_lr=True)
+        sprite2 = Sprite(pixels=[[2], [3]], x=2, y=2, mirror_ud=True)
+        merged = sprite1.merge(sprite2)
+
+        # Check position and size
+        assert merged.x == 0
+        assert merged.y == 0
+        assert merged.width == 3
+        assert merged.height == 4
+
+        # Check pixels are in correct positions
+        assert merged.pixels[0, 0] == 2
+        assert merged.pixels[0, 1] == 1
+        assert merged.pixels[2, 2] == 3
+        assert merged.pixels[3, 2] == 2
+
+    def test_merge_tags(self):
+        """Test merging sprites with different tags."""
+        sprite1 = Sprite(pixels=[[1]], tags=["tag1", "tag2"])
+        sprite2 = Sprite(pixels=[[2]], tags=["tag2", "tag3"])
+        merged = sprite1.merge(sprite2)
+
+        # Check tags are combined and unique
+        assert set(merged.tags) == {"tag1", "tag2", "tag3"}
+
+    def test_merge_layers(self):
+        """Test merging sprites with different layers."""
+        sprite1 = Sprite(pixels=[[1]], layer=1)
+        sprite2 = Sprite(pixels=[[2]], layer=2)
+        merged = sprite1.merge(sprite2)
+
+        # Check layer is the maximum of the two
+        assert merged.layer == 2
