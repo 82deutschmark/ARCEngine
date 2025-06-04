@@ -606,3 +606,13 @@ class TestSprite(unittest.TestCase):
         )
         rendered = sprite.render()
         self.assertTrue(np.array_equal(rendered, expected))
+
+    def test_sprite_color_remap(self):
+        """Test sprite color remap functionality."""
+        sprite = Sprite([[1, 2, 3, -1]], x=0, y=0)
+        sprite.color_remap(1, 4)
+        self.assertTrue(np.array_equal(sprite.pixels, [[4, 2, 3, -1]]))
+
+        sprite = Sprite([[1, 2, 3, -1]], x=0, y=0)
+        sprite.color_remap(None, 4)
+        self.assertTrue(np.array_equal(sprite.pixels, [[4, 4, 4, -1]]))

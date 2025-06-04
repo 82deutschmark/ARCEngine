@@ -530,3 +530,17 @@ class Sprite:
         """
         self._x += int(dx)
         self._y += int(dy)
+
+    def color_remap(self, old_color: int | None, new_color: int) -> None:
+        """Remap the sprite's color.
+
+        Args:
+            old_color: The old color to remap, or None to remap all colors
+            new_color: The new color to remap to
+        """
+        if old_color is None:
+            # Replace all non-negative pixels with new_color
+            self.pixels = np.where(self.pixels >= 0, new_color, self.pixels)
+        else:
+            # Replace only pixels matching old_color
+            self.pixels = np.where(self.pixels == old_color, new_color, self.pixels)
