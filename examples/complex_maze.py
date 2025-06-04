@@ -249,7 +249,6 @@ class ComplexMaze(ARCBaseGame):
                     # If block collided with another block of same name, destroy both
                     if block_collided:
                         for other_sprite in block_collided:
-                            print(f"{other_sprite.name} vs {sprite.name}")
                             if sprite.name.startswith(other_sprite.name):
                                 sprite.set_interaction(InteractionMode.REMOVED)
                                 other_sprite.set_interaction(InteractionMode.REMOVED)

@@ -190,7 +190,6 @@ class ARCBaseGame(ABC):
         frame_list: list[ndarray | list[list[int]]] = []
 
         while not self.is_action_complete():
-            print(self._next_level)
             if self._next_level:
                 self._really_set_next_level()
             else:
@@ -250,7 +249,6 @@ class ARCBaseGame(ABC):
         Returns:
             bool: True if the action is complete, False otherwise
         """
-        print(self._next_level, self._action_complete)
         return not self._next_level and self._action_complete
 
     @final
@@ -376,7 +374,6 @@ class ARCBaseGame(ABC):
             self.win()
 
     def _really_set_next_level(self) -> None:
-        print("really set next level")
         self.set_level(self._current_level_index + 1)
         self._next_level = False
 
