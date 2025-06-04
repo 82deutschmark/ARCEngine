@@ -10,6 +10,32 @@ from arcengine import BlockingMode, InteractionMode, Sprite
 class TestSprite(unittest.TestCase):
     """Test cases for the Sprite class."""
 
+    def test_interaction_mode_from(self):
+        sprite = Sprite(pixels=[[1, 2], [3, 4]], visible=True, collidable=True)
+        self.assertEqual(sprite.interaction, InteractionMode.TANGIBLE)
+
+        sprite = Sprite(pixels=[[1, 2], [3, 4]], visible=True, collidable=False)
+        self.assertEqual(sprite.interaction, InteractionMode.INTANGIBLE)
+
+        sprite = Sprite(pixels=[[1, 2], [3, 4]], visible=False, collidable=True)
+        self.assertEqual(sprite.interaction, InteractionMode.INVISIBLE)
+
+        sprite = Sprite(pixels=[[1, 2], [3, 4]], visible=False, collidable=False)
+        self.assertEqual(sprite.interaction, InteractionMode.REMOVED)
+
+        # Now Test the setters
+        sprite.set_visible(True)
+        self.assertEqual(sprite.interaction, InteractionMode.INTANGIBLE)
+
+        sprite.set_collidable(True)
+        self.assertEqual(sprite.interaction, InteractionMode.TANGIBLE)
+
+        sprite.set_visible(False)
+        self.assertEqual(sprite.interaction, InteractionMode.INVISIBLE)
+
+        sprite.set_collidable(False)
+        self.assertEqual(sprite.interaction, InteractionMode.REMOVED)
+
     def test_sprite_initialization(self):
         """Test basic sprite initialization with different input types."""
         # Test with valid 2D list

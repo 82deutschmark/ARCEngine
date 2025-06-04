@@ -58,6 +58,17 @@ def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
     return out.reshape(H // factor, W // factor)
 
 
+def _interaction_mode_from(visible: bool, collidable: bool) -> InteractionMode:
+    if visible and collidable:
+        return InteractionMode.TANGIBLE
+    elif visible and not collidable:
+        return InteractionMode.INTANGIBLE
+    elif not visible and collidable:
+        return InteractionMode.INVISIBLE
+    else:
+        return InteractionMode.REMOVED
+
+
 class Sprite:
     """A 2D sprite that can be positioned and scaled in the game world."""
 
@@ -89,7 +100,9 @@ class Sprite:
         mirror_ud: bool = False,
         mirror_lr: bool = False,
         blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
-        interaction: InteractionMode = InteractionMode.TANGIBLE,
+        interaction: InteractionMode | None = None,
+        visible: bool = True,
+        collidable: bool = True,
         tags: list[str] = [],
     ):
         """Initialize a new Sprite.
@@ -125,7 +138,10 @@ class Sprite:
         self._mirror_lr = mirror_lr
         self._blocking = blocking
         self.set_scale(scale)  # Use set_scale to validate scale factor
-        self._interaction = interaction
+        if interaction is None:
+            self._interaction = _interaction_mode_from(visible, collidable)
+        else:
+            self._interaction = interaction
         self._tags = tags
 
     def clone(self, new_name: Optional[str] = None) -> "Sprite":
@@ -393,6 +409,15 @@ class Sprite:
             InteractionMode.INTANGIBLE,
         }
 
+    def set_visible(self, visible: bool) -> "Sprite":
+        """Set the sprite's visibility.
+
+        Args:
+            visible: The new visibility state
+        """
+        self._interaction = _interaction_mode_from(visible, self.is_collidable)
+        return self
+
     @property
     def width(self) -> int:
         """Get the sprite's width."""
@@ -414,6 +439,15 @@ class Sprite:
             InteractionMode.TANGIBLE,
             InteractionMode.INVISIBLE,
         }
+
+    def set_collidable(self, collidable: bool) -> "Sprite":
+        """Set the sprite's collidable state.
+
+        Args:
+            collidable: The new collidable state
+        """
+        self._interaction = _interaction_mode_from(self.is_visible, collidable)
+        return self
 
     def render(self) -> np.ndarray:
         """Render the sprite with current scale and rotation.
