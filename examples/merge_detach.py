@@ -197,7 +197,7 @@ class MergeDetatch(ARCBaseGame):
             moved = True
         elif self.action.id == GameAction.ACTION5:  # Detach All
             print("Detaching all sprites")
-            self.detatchAll()
+            self.detatch_all()
 
         # Try to move player and handle pushing
         if moved and (dx != 0 or dy != 0):
@@ -240,7 +240,7 @@ class MergeDetatch(ARCBaseGame):
         if not collide:
             self.move_detached(dx, dy)
 
-    def detatchAll(self) -> None:
+    def detatch_all(self) -> None:
         if not self._detached:
             print("No sprites to detach")
             return
