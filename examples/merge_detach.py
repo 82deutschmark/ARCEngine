@@ -1,14 +1,6 @@
 import numpy as np
 
-from arcengine import (
-    ARCBaseGame,
-    BlockingMode,
-    Camera,
-    GameAction,
-    InteractionMode,
-    Level,
-    Sprite,
-)
+from arcengine import ARCBaseGame, BlockingMode, Camera, GameAction, InteractionMode, Level, RenderableUserDisplay, Sprite
 
 # Create sprites dictionary with all sprite definitions
 sprites = {
@@ -107,6 +99,15 @@ sprites = {
         interaction=InteractionMode.TANGIBLE,
         tags=["target"],
     ),
+    "attaced": Sprite(
+        pixels=[
+            [0, 0],
+            [0, 0],
+        ],
+        name="link-x",
+        blocking=BlockingMode.NOT_BLOCKED,
+        interaction=InteractionMode.TANGIBLE,
+    ),
 }
 
 # Create levels array with all level definitions
@@ -151,20 +152,51 @@ BACKGROUND_COLOR = 1
 PADDING_COLOR = 3
 
 
+class AttachUI(RenderableUserDisplay):
+    """A simple UI to show the number of attached sprites."""
+
+    _attached: list[Sprite]
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        self._attached = []
+
+    def render_interface(self, frame: np.ndarray) -> np.ndarray:
+        for sprite in self._attached:
+            frame = self.draw_sprite(frame, sprite, sprite.x, sprite.y)
+
+        return frame
+
+    def clear(self) -> None:
+        self._attached.clear()
+
+    def add_attached(self, player: Sprite, ratio: int) -> None:
+        self._attached.append(sprites["attaced"].clone().set_position(player.x * ratio + 1, player.y * ratio + 1))
+
+    def move(self, dx: int, dy: int, ratio: int) -> None:
+        for sprite in self._attached:
+            sprite.move(dx * ratio, dy * ratio)
+
+
 class MergeDetatch(ARCBaseGame):
     """A simple maze game where the player navigates and pushes objects."""
 
     _player: Sprite
     _target: Sprite
     _detached: list[Sprite]
+    _ui: AttachUI
 
     def __init__(self) -> None:
+        self._ui = AttachUI()
+
         # Create camera with step counter UI
         camera = Camera(
             width=16,
             height=16,
             background=BACKGROUND_COLOR,
             letter_box=PADDING_COLOR,
+            interfaces=[self._ui],
         )
 
         # Initialize the base game
@@ -175,6 +207,7 @@ class MergeDetatch(ARCBaseGame):
         self._player = level.get_sprites_by_name("player")[0]
         self._target = level.get_sprites_by_tag("target")[0]
         self._detached = []
+        self._ui.clear()
 
     def step(self) -> None:
         """Step the game forward based on the current action."""
@@ -233,6 +266,7 @@ class MergeDetatch(ARCBaseGame):
 
         if not self._detached:
             self._detached.append(player)
+            self._ui.add_attached(player, 64 // max(self.camera.width, self.camera.height))
         self._detached.append(other)
 
         collide = self.try_move_sprite(self._player, dx, dy)
@@ -248,8 +282,10 @@ class MergeDetatch(ARCBaseGame):
             self.current_level.add_sprite(sprite)
 
         self._detached.clear()
+        self._ui.clear()
         self._player = self.current_level.get_sprites_by_name("player")[0]
 
     def move_detached(self, dx: int, dy: int) -> None:
         for sprite in self._detached:
             sprite.move(dx, dy)
+        self._ui.move(dx, dy, 64 // max(self.camera.width, self.camera.height))
