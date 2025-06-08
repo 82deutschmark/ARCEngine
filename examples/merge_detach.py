@@ -153,8 +153,6 @@ PADDING_COLOR = 3
 
 
 class AttachUI(RenderableUserDisplay):
-    """A simple UI to show the number of attached sprites."""
-
     _attached: list[Sprite]
 
     def __init__(self) -> None:
