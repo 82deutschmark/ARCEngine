@@ -565,7 +565,7 @@ class Sprite:
         self._x += int(dx)
         self._y += int(dy)
 
-    def color_remap(self, old_color: int | None, new_color: int) -> None:
+    def color_remap(self, old_color: int | None, new_color: int) -> "Sprite":
         """Remap the sprite's color.
 
         Args:
@@ -578,6 +578,7 @@ class Sprite:
         else:
             # Replace only pixels matching old_color
             self.pixels = np.where(self.pixels == old_color, new_color, self.pixels)
+        return self
 
     def merge(self, other: "Sprite") -> "Sprite":
         """Merge two sprites together.
