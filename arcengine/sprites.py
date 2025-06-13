@@ -99,7 +99,7 @@ class Sprite:
         rotation: int = 0,
         mirror_ud: bool = False,
         mirror_lr: bool = False,
-        blocking: BlockingMode = BlockingMode.NOT_BLOCKED,
+        blocking: BlockingMode = BlockingMode.PIXEL_PERFECT,
         interaction: InteractionMode | None = None,
         visible: bool = True,
         collidable: bool = True,
