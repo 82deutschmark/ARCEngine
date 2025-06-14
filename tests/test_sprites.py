@@ -46,7 +46,7 @@ class TestSprite(unittest.TestCase):
         self.assertEqual(sprite.y, 0)
         self.assertEqual(sprite.scale, 1)
         self.assertEqual(sprite.rotation, 0)
-        self.assertEqual(sprite.blocking, BlockingMode.NOT_BLOCKED)
+        self.assertEqual(sprite.blocking, BlockingMode.PIXEL_PERFECT)
         self.assertEqual(sprite.interaction, InteractionMode.TANGIBLE)
 
         # Test with custom parameters
