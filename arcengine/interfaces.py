@@ -18,13 +18,13 @@ class RenderableUserDisplay(ABC):
     """
 
     @abstractmethod
-    def render_interface(self, frame: np.ndarray) -> None:
+    def render_interface(self, frame: np.ndarray) -> np.ndarray:
         """Render this UI element onto the given frame.
 
         Args:
             frame: The 64x64 numpy array to render onto
         """
-        pass
+        return frame
 
     def draw_sprite(self, frame: np.ndarray, sprite: Sprite, start_x: int, start_y: int) -> np.ndarray:
         sprite_pixels = sprite.render()
