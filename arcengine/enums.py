@@ -116,6 +116,7 @@ class FrameData(BaseModel):
     score: int = Field(0, ge=0, le=254)
     action_input: ActionInput = Field(default_factory=lambda: ActionInput())
     guid: Optional[str] = None
+    full_reset: bool = False
 
     def is_empty(self) -> bool:
         return len(self.frame) == 0
@@ -128,6 +129,7 @@ class FrameDataRaw:
     score: int = 0
     action_input: ActionInput = Field(default_factory=lambda: ActionInput())
     guid: Optional[str] = None
+    full_reset: bool = False
 
     def is_empty(self) -> bool:
         return len(self.frame) == 0

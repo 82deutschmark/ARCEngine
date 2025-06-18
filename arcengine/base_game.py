@@ -34,6 +34,7 @@ class ARCBaseGame(ABC):
     _state: GameState
     _score: int
     _next_level: bool
+    _full_reset: bool
 
     def __init__(
         self,
@@ -76,6 +77,7 @@ class ARCBaseGame(ABC):
         self._action = ActionInput()
         self._action_complete = False
         self._action_count = 0
+        self._full_reset = False
         self.set_level(0)
 
     def debug(self, message: str) -> None:
@@ -174,6 +176,7 @@ class ARCBaseGame(ABC):
         Returns:
             FrameData: The resulting frame data
         """
+        self._full_reset = False
         if action_input.id == GameAction.RESET:
             self.handle_reset()
         elif self._state == GameState.GAME_OVER or self._state == GameState.WIN:
@@ -208,6 +211,7 @@ class ARCBaseGame(ABC):
             frame_raw.state = self._state
             frame_raw.score = self._score
             frame_raw.action_input = action_input
+            frame_raw.full_reset = self._full_reset
             return frame_raw
 
         return FrameData(
@@ -216,6 +220,7 @@ class ARCBaseGame(ABC):
             state=self._state,
             score=self._score,
             action_input=action_input,
+            full_reset=self._full_reset,
         )
 
     @property
@@ -276,6 +281,7 @@ class ARCBaseGame(ABC):
         self._levels = [level.clone() for level in self._clean_levels]
         self._score = 0
         self._action_count = 0
+        self._full_reset = True
         self.set_level(0)
         self._state = GameState.NOT_FINISHED
 

@@ -449,3 +449,22 @@ class TestARCBaseGame(unittest.TestCase):
 
         self.assertEqual(game._current_level_index, 1)
         self.assertEqual(len(frame_data1.frame), 2)
+
+    def test_full_reset(self):
+        """Test that the full reset is properly set."""
+        # Create a test level with a sprite
+        sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite])
+        game = TestGame("test_game", [level1])
+
+        action_input = ActionInput(id=GameAction.RESET)
+        frame_data1 = game.perform_action(action_input)
+
+        self.assertTrue(frame_data1.full_reset, "Full reset should be True on new game Reset")
+
+        action_input = ActionInput(id=GameAction.ACTION1)
+        frame_data1 = game.perform_action(action_input)
+        action_input = ActionInput(id=GameAction.RESET)
+        frame_data2 = game.perform_action(action_input)
+
+        self.assertFalse(frame_data2.full_reset, "Full reset should be False on level reset as an action has been taken")
