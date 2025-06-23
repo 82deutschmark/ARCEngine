@@ -5,6 +5,7 @@ Module for level-related functionality in the ARCEngine.
 import copy
 from typing import Any, List, Optional, Tuple
 
+from .enums import BlockingMode
 from .sprites import Sprite
 
 
@@ -136,10 +137,12 @@ class Level:
             y: The y coordinate
             tag: The tag to search for
         """
-        for sprite in self._sprites:
+        sprites = sorted(self._sprites, key=lambda sprite: sprite.layer, reverse=True)
+        for sprite in sprites:
             if x >= sprite.x and y >= sprite.y and x < sprite.x + sprite.width and y < sprite.y + sprite.height:
-                if tag is None or tag in sprite.tags:
-                    return sprite
+                if sprite.blocking != BlockingMode.PIXEL_PERFECT or (sprite.pixels[y - sprite.y][x - sprite.x] != -1):
+                    if tag is None or tag in sprite.tags:
+                        return sprite
         return None
 
     def collides_with(self, sprite: Sprite, ignoreMode: bool = False) -> List[Sprite]:

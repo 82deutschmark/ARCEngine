@@ -2,7 +2,7 @@
 
 import unittest
 
-from arcengine import Level, Sprite
+from arcengine import BlockingMode, Level, Sprite
 
 
 class TestLevel(unittest.TestCase):
@@ -162,14 +162,18 @@ class TestLevel(unittest.TestCase):
         self.assertEqual(level2.get_data("test"), "test")
 
     def test_sprite_at_location(self):
-        """Test getting sprit at a given location"""
+        """Test getting sprite at a given location"""
         # Create test sprites with various tags
         sprite1 = Sprite([[1, 1]], name="enemy1", tags=["enemy", "flying"], x=10, y=10)
         sprite2 = Sprite([[2], [2]], name="enemy2", tags=["enemy", "ground"], x=11, y=11)
         sprite3 = Sprite([[3]], name="player", tags=["player", "ground"], x=10, y=10)
         sprite4 = Sprite([[4]], name="obstacle", tags=["obstacle"], x=15, y=15)
+        sprite5 = Sprite([[-1, 5], [5, -1]], name="partial_pixel_perfect", x=20, y=20, blocking=BlockingMode.PIXEL_PERFECT)
+        sprite6 = Sprite([[-1, 6], [6, -1]], name="partial_bounding_box", x=22, y=22, blocking=BlockingMode.BOUNDING_BOX)
+        sprite7 = Sprite([[7]], "below", x=25, y=25, layer=0)
+        sprite8 = Sprite([[8]], "above", x=25, y=25, layer=1)
 
-        level = Level(sprites=[sprite1, sprite2, sprite3, sprite4])
+        level = Level(sprites=[sprite1, sprite2, sprite3, sprite4, sprite5, sprite6, sprite7, sprite8])
 
         self.assertEqual(level.get_sprite_at(5, 5), None)
         self.assertEqual(level.get_sprite_at(10, 10), sprite1)
@@ -182,6 +186,12 @@ class TestLevel(unittest.TestCase):
         self.assertEqual(level.get_sprite_at(11, 11, "enemy"), sprite2)
         self.assertEqual(level.get_sprite_at(10, 10, "player"), sprite3)
         self.assertEqual(level.get_sprite_at(15, 15, "obstacle"), sprite4)
+
+        self.assertEqual(level.get_sprite_at(20, 20), None)
+        self.assertEqual(level.get_sprite_at(21, 20), sprite5)
+        self.assertEqual(level.get_sprite_at(22, 22), sprite6)
+
+        self.assertEqual(level.get_sprite_at(25, 25), sprite8)
 
     def test_level_name_on_clone(self):
         """Test the name of a level is cloned correctly."""
