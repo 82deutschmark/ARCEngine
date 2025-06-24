@@ -194,7 +194,7 @@ class TestLevel(unittest.TestCase):
         self.assertEqual(level.get_sprite_at(25, 25), sprite8)
 
     def test_sprite_at_with_scaling_and_rotation(self):
-        """Test getting sprite at a given location"""
+        """Test getting sprite at a given location with scaling and rotation"""
         # Create test sprites with various tags
         sprite1 = Sprite([[-1, 5], [5, 5]], name="partial_pixel_perfect", x=0, y=0, blocking=BlockingMode.PIXEL_PERFECT)
 
@@ -224,6 +224,24 @@ class TestLevel(unittest.TestCase):
         self.assertEqual(level.get_sprite_at(3, 3), None)
         self.assertEqual(level.get_sprite_at(2, 0), sprite1)
         self.assertEqual(level.get_sprite_at(0, 2), sprite1)
+
+    def test_sprite_at_with_non_collidable(self):
+        """Test getting sprite at a given location with scaling and rotation"""
+        # Create test sprites with various tags
+        sprite1 = Sprite([[5, 5], [5, 5]], name="partial_pixel_perfect", x=0, y=0, blocking=BlockingMode.PIXEL_PERFECT)
+        sprite1.set_collidable(False)
+
+        level = Level(sprites=[sprite1])
+
+        self.assertEqual(level.get_sprite_at(0, 0), None)
+        self.assertEqual(level.get_sprite_at(1, 0), None)
+        self.assertEqual(level.get_sprite_at(0, 1), None)
+        self.assertEqual(level.get_sprite_at(1, 1), None)
+
+        self.assertEqual(level.get_sprite_at(0, 0, ignore_collidable=True), sprite1)
+        self.assertEqual(level.get_sprite_at(1, 0, ignore_collidable=True), sprite1)
+        self.assertEqual(level.get_sprite_at(0, 1, ignore_collidable=True), sprite1)
+        self.assertEqual(level.get_sprite_at(1, 1, ignore_collidable=True), sprite1)
 
     def test_level_name_on_clone(self):
         """Test the name of a level is cloned correctly."""

@@ -126,7 +126,7 @@ class Level:
             all_tags.update(sprite.tags)
         return all_tags
 
-    def get_sprite_at(self, x: int, y: int, tag: Optional[str] = None) -> Sprite | None:
+    def get_sprite_at(self, x: int, y: int, tag: Optional[str] = None, ignore_collidable: bool = False) -> Sprite | None:
         """Get the sprite at the given coordinates.
 
         This method returns the first sprite that is at the given coordinates.
@@ -139,7 +139,7 @@ class Level:
         """
         sprites = sorted(self._sprites, key=lambda sprite: sprite.layer, reverse=True)
         for sprite in sprites:
-            if sprite.is_collidable and x >= sprite.x and y >= sprite.y and x < sprite.x + sprite.width and y < sprite.y + sprite.height:
+            if (ignore_collidable or sprite.is_collidable) and x >= sprite.x and y >= sprite.y and x < sprite.x + sprite.width and y < sprite.y + sprite.height:
                 if sprite.blocking == BlockingMode.PIXEL_PERFECT:
                     pixels = sprite.render()
                     if pixels[y - sprite.y][x - sprite.x] == -1:
