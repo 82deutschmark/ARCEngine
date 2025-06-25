@@ -2,6 +2,7 @@
 
 from .test_base_game import TestARCBaseGame
 from .test_camera import TestCamera
+from .test_enums import TestActionInputReasoning
 from .test_interfaces import TestUserDisplays
 from .test_level import TestLevel
 from .test_sprites import TestSprite
@@ -12,4 +13,5 @@ __all__ = [
     "TestLevel",
     "TestARCBaseGame",
     "TestUserDisplays",
+    "TestActionInputReasoning",
 ]

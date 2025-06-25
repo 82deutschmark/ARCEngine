@@ -4,11 +4,14 @@ Module containing enums used throughout the ARCEngine.
 
 from __future__ import annotations
 
+import json
 from enum import Enum, auto
 from typing import Any, Optional, Type, Union
 
 from numpy import ndarray
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+MAX_REASONING_BYTES = 16 * 1024  # 16 KB guard-rail
 
 
 class BlockingMode(Enum):
@@ -107,6 +110,21 @@ class GameAction(Enum):
 class ActionInput(BaseModel):
     id: GameAction = GameAction.RESET
     data: dict[str, Any] = {}
+    reasoning: Optional[Any] = Field(default=None, description="Opaque client-supplied blob; stored & echoed back verbatim.")
+
+    # Optional size / serialisability guard
+    @field_validator("reasoning")
+    @classmethod
+    def _check_reasoning(cls, v: Any) -> Any:
+        if v is None:
+            return v  # field omitted → fine
+        try:
+            raw = json.dumps(v, separators=(",", ":")).encode("utf-8")
+        except (TypeError, ValueError):
+            raise ValueError("reasoning must be JSON-serialisable")
+        if len(raw) > MAX_REASONING_BYTES:
+            raise ValueError(f"reasoning exceeds {MAX_REASONING_BYTES} bytes")
+        return v
 
 
 class FrameData(BaseModel):
