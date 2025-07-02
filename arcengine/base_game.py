@@ -12,6 +12,8 @@ from .enums import ActionInput, FrameData, FrameDataRaw, GameAction, GameState
 from .level import Level
 from .sprites import Sprite
 
+MAX_LEVEL_RESET_COUNT = 50
+
 
 class ARCBaseGame(ABC):
     """Base class for ARCEngine games that manages levels and camera.
@@ -33,6 +35,7 @@ class ARCBaseGame(ABC):
     _action_count: int
     _state: GameState
     _score: int
+    _level_reset_count: int
     _next_level: bool
     _full_reset: bool
 
@@ -73,6 +76,7 @@ class ARCBaseGame(ABC):
         # Game state
         self._state = GameState.NOT_PLAYED
         self._score = 0
+        self._level_reset_count = 0
         self._next_level = False
         self._action = ActionInput()
         self._action_complete = False
@@ -272,7 +276,7 @@ class ARCBaseGame(ABC):
         If the action count is 0, perform a full reset.
         Otherwise, perform a level reset.
         """
-        if self._action_count == 0 or self._state == GameState.WIN:
+        if self._action_count == 0 or self._state == GameState.WIN or self._level_reset_count >= MAX_LEVEL_RESET_COUNT:
             self.full_reset()
         else:
             self.level_reset()
@@ -287,6 +291,7 @@ class ARCBaseGame(ABC):
 
     def level_reset(self) -> None:
         self._levels[self._current_level_index] = self._clean_levels[self._current_level_index].clone()
+        self._level_reset_count += 1
         self.set_level(self._current_level_index)
         self._state = GameState.NOT_FINISHED
 
