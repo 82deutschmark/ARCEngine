@@ -469,7 +469,7 @@ class TestARCBaseGame(unittest.TestCase):
 
         self.assertFalse(frame_data2.full_reset, "Full reset should be False on level reset as an action has been taken")
 
-    def test_full_reset_after_50_level_resets(self):
+    def test_full_reset_after_50_level_resets_does_not_reset_game(self):
         """Test that the full reset is properly set."""
         # Create a test level with a sprite
         sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
@@ -491,5 +491,5 @@ class TestARCBaseGame(unittest.TestCase):
         game.perform_action(action_input)
         action_input = ActionInput(id=GameAction.RESET)
         frame_data2 = game.perform_action(action_input)
-        self.assertTrue(frame_data2.full_reset, "Only giving 50 resets on a level, this should be a full reset")
-        self.assertEqual(game._current_level_index, 0)
+        self.assertFalse(frame_data2.full_reset, "Full reset should be False on level reset as an action has been taken")
+        self.assertEqual(game._current_level_index, 1)
