@@ -35,6 +35,7 @@ class ARCBaseGame(ABC):
     _score: int
     _next_level: bool
     _full_reset: bool
+    _win_score: int
 
     def __init__(
         self,
@@ -42,6 +43,7 @@ class ARCBaseGame(ABC):
         levels: List[Level],
         camera: Optional[Camera] = None,
         debug: bool = False,
+        win_score: int = 1,
     ) -> None:
         """Initialize a new game.
 
@@ -78,6 +80,7 @@ class ARCBaseGame(ABC):
         self._action_complete = False
         self._action_count = 0
         self._full_reset = False
+        self._win_score = win_score
         self.set_level(0)
 
     def debug(self, message: str) -> None:
@@ -118,6 +121,16 @@ class ARCBaseGame(ABC):
             str: The game's ID
         """
         return self._game_id
+
+    @property
+    @final
+    def win_score(self) -> int:
+        """Get the game's max score.
+
+        Returns:
+            int: The game's max score
+        """
+        return self._win_score
 
     @final
     def set_level(self, index: int) -> None:
@@ -185,6 +198,7 @@ class ARCBaseGame(ABC):
                 frame=[],
                 state=self._state,
                 score=self._score,
+                win_score=self._win_score,
                 action_input=action_input,
             )
 
@@ -210,6 +224,7 @@ class ARCBaseGame(ABC):
             frame_raw.frame = frame_list
             frame_raw.state = self._state
             frame_raw.score = self._score
+            frame_raw.win_score = self._win_score
             frame_raw.action_input = action_input
             frame_raw.full_reset = self._full_reset
             return frame_raw
@@ -219,6 +234,7 @@ class ARCBaseGame(ABC):
             frame=frame_list,
             state=self._state,
             score=self._score,
+            win_score=self._win_score,
             action_input=action_input,
             full_reset=self._full_reset,
         )

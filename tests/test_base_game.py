@@ -39,6 +39,29 @@ class TestGame(ARCBaseGame):
         self._level_index = self._current_level_index
 
 
+class TestGameWithWinScore(ARCBaseGame):
+    """Test implementation of TestGame."""
+
+    def __init__(self, game_id: str, levels: list[Level], camera: Camera | None = None, win_score: int = 1) -> None:
+        super().__init__(game_id=game_id, levels=levels, camera=camera, win_score=win_score)
+        self._step_count = 0
+        self._level_index = -1
+
+    def step(self) -> None:
+        """Step the game, completing after 3 steps."""
+        if self.action.id == GameAction.ACTION5:
+            print("test game - next level")
+            self.next_level()
+            self.complete_action()
+        else:
+            self._step_count += 1
+            if self._step_count >= 3:
+                self.complete_action()
+
+    def on_set_level(self, level: Level) -> None:
+        self._level_index = self._current_level_index
+
+
 class TestARCBaseGame(unittest.TestCase):
     """Test cases for the TestGame class."""
 
@@ -493,3 +516,24 @@ class TestARCBaseGame(unittest.TestCase):
         frame_data2 = game.perform_action(action_input)
         self.assertFalse(frame_data2.full_reset, "Full reset should be False on level reset as an action has been taken")
         self.assertEqual(game._current_level_index, 1)
+
+    def test_win_score(self):
+        """Test that the max score is properly set."""
+
+        # Test not providing a max score does not break existing games
+        sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite])
+        game1 = TestGame("test_game", [level1])
+        action_input = ActionInput(id=GameAction.ACTION1)
+        frame1 = game1.perform_action(action_input)
+
+        self.assertEqual(game1.win_score, 1)
+        self.assertEqual(frame1.win_score, 1)
+
+        # Test providing a max score
+        game2 = TestGameWithWinScore("test_game", [level1], win_score=10)
+        action_input = ActionInput(id=GameAction.ACTION1)
+        frame2 = game2.perform_action(action_input)
+
+        self.assertEqual(game2.win_score, 10)
+        self.assertEqual(frame2.win_score, 10)
