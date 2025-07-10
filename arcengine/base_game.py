@@ -80,7 +80,7 @@ class ARCBaseGame(ABC):
         self._action_complete = False
         self._action_count = 0
         self._full_reset = False
-        self._win_score = win_score
+        self._win_score = win_score if win_score > 1 else len(levels)
         self.set_level(0)
 
     def debug(self, message: str) -> None:
