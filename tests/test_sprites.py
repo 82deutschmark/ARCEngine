@@ -765,3 +765,51 @@ class TestSprite(unittest.TestCase):
 
         # Check layer is the maximum of the two
         assert merged.layer == 2
+
+    def test_downscale_transparent(self):
+        sprite = Sprite(
+            pixels=[
+                [-1, -1, 8, 8],
+                [-1, 8, 8, 8],
+                [8, 8, 8, 8],
+                [8, 8, 8, 8],
+            ],
+            x=0,
+            y=0,
+            scale=-1,
+        )
+
+        rendered = sprite.render()
+        expected = np.array(
+            [
+                [-1, 8],
+                [8, 8],
+            ],
+            dtype=np.int8,
+        )
+        self.assertTrue(np.array_equal(rendered, expected))
+
+        # Make sure it also works with rotation
+        sprite.set_rotation(90)
+        rendered = sprite.render()
+        expected = np.array(
+            [
+                [8, -1],
+                [8, 8],
+            ],
+            dtype=np.int8,
+        )
+        self.assertTrue(np.array_equal(rendered, expected))
+
+        # Make sure it also works with mirroring
+        sprite.set_rotation(0)
+        sprite.set_mirror_ud(True)
+        rendered = sprite.render()
+        expected = np.array(
+            [
+                [8, 8],
+                [-1, 8],
+            ],
+            dtype=np.int8,
+        )
+        self.assertTrue(np.array_equal(rendered, expected))

@@ -16,11 +16,14 @@ def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
     Nearest-neighbor style down-scaling for palette images.
     For each non-overlapping block it keeps the dominant color
     (mode), breaking ties by the highest palette index.
+    Transparent pixels (-1) are ignored, but if all pixels are
+    transparent, the block remains transparent.
 
     Parameters
     ----------
     arr : 2-D np.ndarray
         Input image of dtype int8 / uint8 holding palette indices.
+        Transparency is denoted by -1.
     factor : int
         The integer scale factor (e.g. 2 turns 64×64 → 32×32).
 
@@ -28,11 +31,6 @@ def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
     -------
     np.ndarray
         The down-scaled image, same dtype as the input.
-
-    Raises
-    ------
-    ValueError
-        If the array dimensions are not divisible by the scale factor.
     """
     H, W = arr.shape
     if H % factor != 0 or W % factor != 0:
@@ -43,16 +41,19 @@ def _downscale_mode(arr: np.ndarray, factor: int) -> np.ndarray:
     blocks = blocks.reshape(-1, factor * factor)
 
     # Step 2: find dominant color for each block
-    max_index = arr.max()  # upper bound for palette indices
     out = np.empty(len(blocks), dtype=arr.dtype)
 
     for i, blk in enumerate(blocks):
-        cnts = np.bincount(blk.astype(np.int16), minlength=max_index + 1)
-        # Get the indices where we have the maximum count
-        max_count = cnts.max()
-        max_indices = np.where(cnts == max_count)[0]
-        # Among the most frequent values, pick the highest
-        out[i] = max_indices[-1]
+        non_transparent = blk[blk != -1]
+        transparent = blk[blk < 0]
+        # Check to see if this is majority transparent
+        if transparent.size > non_transparent.size:
+            out[i] = -1  # if all values are -1, keep block transparent
+        else:
+            cnts = np.bincount(non_transparent.astype(np.int16))
+            max_count = cnts.max()
+            max_indices = np.where(cnts == max_count)[0]
+            out[i] = max_indices[-1]  # break ties by highest index
 
     # Step 3: reshape to 2-D image
     return out.reshape(H // factor, W // factor)
