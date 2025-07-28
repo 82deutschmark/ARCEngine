@@ -136,12 +136,13 @@ class FrameData(BaseModel):
     action_input: ActionInput = Field(default_factory=lambda: ActionInput())
     guid: Optional[str] = None
     full_reset: bool = False
+    available_actions: list[int] = []
 
     def is_empty(self) -> bool:
         return len(self.frame) == 0
 
 
-class FrameDataRaw:
+class FrameDataRaw(BaseModel):
     game_id: str = ""
     frame: list[ndarray] = []
     state: GameState = GameState.NOT_PLAYED
@@ -150,6 +151,7 @@ class FrameDataRaw:
     action_input: ActionInput = Field(default_factory=lambda: ActionInput())
     guid: Optional[str] = None
     full_reset: bool = False
+    available_actions: list[int] = []
 
     def is_empty(self) -> bool:
         return len(self.frame) == 0

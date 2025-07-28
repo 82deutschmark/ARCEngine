@@ -36,6 +36,7 @@ class ARCBaseGame(ABC):
     _next_level: bool
     _full_reset: bool
     _win_score: int
+    _available_actions: list[int]
 
     def __init__(
         self,
@@ -44,6 +45,7 @@ class ARCBaseGame(ABC):
         camera: Optional[Camera] = None,
         debug: bool = False,
         win_score: int = 1,
+        available_actions: list[int] = [1, 2, 3, 4, 5, 6],
     ) -> None:
         """Initialize a new game.
 
@@ -82,6 +84,7 @@ class ARCBaseGame(ABC):
         self._full_reset = False
         self._win_score = win_score if win_score > 1 else len(levels)
         self.set_level(0)
+        self._available_actions = available_actions
 
     def debug(self, message: str) -> None:
         """Debug mode.
@@ -200,6 +203,7 @@ class ARCBaseGame(ABC):
                 score=self._score,
                 win_score=self._win_score,
                 action_input=action_input,
+                available_actions=self._available_actions,
             )
 
         self._set_action(action_input)
@@ -219,15 +223,16 @@ class ARCBaseGame(ABC):
 
         # Create and return FrameData
         if raw:
-            frame_raw = FrameDataRaw()
-            frame_raw.game_id = self._game_id
-            frame_raw.frame = frame_list
-            frame_raw.state = self._state
-            frame_raw.score = self._score
-            frame_raw.win_score = self._win_score
-            frame_raw.action_input = action_input
-            frame_raw.full_reset = self._full_reset
-            return frame_raw
+            return FrameDataRaw(
+                game_id=self._game_id,
+                frame=frame_list,
+                state=self._state,
+                score=self._score,
+                win_score=self._win_score,
+                action_input=action_input,
+                full_reset=self._full_reset,
+                available_actions=self._available_actions,
+            )
 
         return FrameData(
             game_id=self._game_id,
@@ -237,6 +242,7 @@ class ARCBaseGame(ABC):
             win_score=self._win_score,
             action_input=action_input,
             full_reset=self._full_reset,
+            available_actions=self._available_actions,
         )
 
     @property

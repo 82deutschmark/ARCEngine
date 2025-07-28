@@ -19,8 +19,8 @@ from arcengine import (
 class TestGame(ARCBaseGame):
     """Test implementation of TestGame."""
 
-    def __init__(self, game_id: str, levels: list[Level], camera: Camera | None = None) -> None:
-        super().__init__(game_id=game_id, levels=levels, camera=camera)
+    def __init__(self, game_id: str, levels: list[Level], camera: Camera | None = None, available_actions: list[int] = [1, 2, 3, 4, 5, 6]) -> None:
+        super().__init__(game_id=game_id, levels=levels, camera=camera, available_actions=available_actions)
         self._step_count = 0
         self._level_index = -1
 
@@ -537,3 +537,21 @@ class TestARCBaseGame(unittest.TestCase):
 
         self.assertEqual(game2.win_score, 10)
         self.assertEqual(frame2.win_score, 10)
+
+    def test_available_actions(self):
+        """Test that the available actions are properly set."""
+        # Create a test level with a sprite
+        sprite = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        level1 = Level([sprite])
+        game1 = TestGame("test_game", [level1])
+        action_input = ActionInput(id=GameAction.ACTION1)
+        frame1 = game1.perform_action(action_input)
+        self.assertEqual(frame1.available_actions, [1, 2, 3, 4, 5, 6])
+
+        game2 = TestGame("test_game", [level1], available_actions=[1, 2, 3, 4])
+        frame2 = game2.perform_action(action_input)
+        self.assertEqual(frame2.available_actions, [1, 2, 3, 4])
+
+        game3 = TestGame("test_game", [level1], available_actions=[6])
+        frame3 = game3.perform_action(action_input)
+        self.assertEqual(frame3.available_actions, [6])
