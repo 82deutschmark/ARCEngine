@@ -223,16 +223,16 @@ class ARCBaseGame(ABC):
 
         # Create and return FrameData
         if raw:
-            return FrameDataRaw(
-                game_id=self._game_id,
-                frame=frame_list,
-                state=self._state,
-                score=self._score,
-                win_score=self._win_score,
-                action_input=action_input,
-                full_reset=self._full_reset,
-                available_actions=self._available_actions,
-            )
+            frame_raw = FrameDataRaw()
+            frame_raw.game_id = self._game_id
+            frame_raw.frame = frame_list
+            frame_raw.state = self._state
+            frame_raw.score = self._score
+            frame_raw.win_score = self._win_score
+            frame_raw.action_input = action_input
+            frame_raw.full_reset = self._full_reset
+            frame_raw.available_actions = self._available_actions
+            return frame_raw
 
         return FrameData(
             game_id=self._game_id,

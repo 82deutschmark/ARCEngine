@@ -142,7 +142,7 @@ class FrameData(BaseModel):
         return len(self.frame) == 0
 
 
-class FrameDataRaw(BaseModel):
+class FrameDataRaw:
     game_id: str = ""
     frame: list[ndarray] = []
     state: GameState = GameState.NOT_PLAYED
