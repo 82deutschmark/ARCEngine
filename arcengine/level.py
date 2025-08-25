@@ -5,7 +5,7 @@ Module for level-related functionality in the ARCEngine.
 import copy
 from typing import Any, List, Optional, Tuple
 
-from .enums import BlockingMode
+from .enums import BlockingMode, PlaceableArea
 from .sprites import Sprite
 
 
@@ -16,14 +16,9 @@ class Level:
     _grid_size: Tuple[int, int] | None
     _data: dict[str, Any]
     _name: str
+    _placeable_areas: List[PlaceableArea]
 
-    def __init__(
-        self,
-        sprites: Optional[List[Sprite]] = None,
-        grid_size: Tuple[int, int] | None = None,
-        data: dict[str, Any] = {},
-        name: str = "Level",
-    ):
+    def __init__(self, sprites: Optional[List[Sprite]] = None, grid_size: Tuple[int, int] | None = None, data: dict[str, Any] = {}, name: str = "Level", placeable_areas: List[PlaceableArea] = []):
         """Initialize a new Level.
 
         Args:
@@ -36,6 +31,7 @@ class Level:
         self._grid_size = grid_size
         self._data = data
         self._name = name
+        self._placeable_areas = placeable_areas
 
     def remove_all_sprites(self) -> None:
         """Remove all sprites from the level."""
@@ -173,6 +169,11 @@ class Level:
         """
         return self._grid_size
 
+    @property
+    def placeable_areas(self) -> List[PlaceableArea]:
+        """Get the placeable areas of the level."""
+        return self._placeable_areas
+
     def clone(self) -> "Level":
         """Create a deep copy of this level.
 
@@ -181,4 +182,4 @@ class Level:
         """
         # Clone each sprite and create new level
         cloned_sprites = [sprite.clone() for sprite in self._sprites]
-        return Level(name=self._name, sprites=cloned_sprites, grid_size=self._grid_size, data=copy.deepcopy(self._data))
+        return Level(name=self._name, sprites=cloned_sprites, grid_size=self._grid_size, data=copy.deepcopy(self._data), placeable_areas=self._placeable_areas)

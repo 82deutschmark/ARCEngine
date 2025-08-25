@@ -328,7 +328,7 @@ class Camera:
             display_y: Y coordinate in display space (0-63)
 
         Returns:
-            tuple[int, int]: The corresponding grid coordinates (x, y)
+            tuple[int, int] | None: The corresponding grid coordinates (x, y) or None if the display coordinates are within the letterbox
         """
         # Calculate scaling factor
         scale_x = int(64 / self.width)

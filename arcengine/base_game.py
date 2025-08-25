@@ -37,6 +37,7 @@ class ARCBaseGame(ABC):
     _full_reset: bool
     _win_score: int
     _available_actions: list[int]
+    _placeable_sprite: Optional[Sprite]
 
     def __init__(
         self,
@@ -85,6 +86,7 @@ class ARCBaseGame(ABC):
         self._win_score = win_score if win_score > 1 else len(levels)
         self.set_level(0)
         self._available_actions = available_actions
+        self._placeable_sprite = None
 
     def debug(self, message: str) -> None:
         """Debug mode.
@@ -435,3 +437,126 @@ class ARCBaseGame(ABC):
 
         frame = self.camera._raw_render(self.current_level.get_sprites())
         return frame[y : y + height, x : x + width]
+
+    def set_placeable_sprite(self, sprite: Sprite) -> None:
+        """Set the placeable sprite.
+
+        Args:
+            sprite: The sprite to set as placeable
+        """
+        self._placeable_sprite = sprite
+
+    def _get_valid_actions(self) -> list[ActionInput]:
+        """Get the valid actions for the current game state.
+
+        Note: This method is for internal use only, the data here is never exposed
+        via the API or to Users/Agents.
+
+        Returns:
+            list[int]: The valid actions for the current game state
+        """
+        valid_actions: list[ActionInput] = []
+
+        for action in self._available_actions:
+            match action:
+                case 1 | 2 | 3 | 4 | 5:
+                    valid_actions.append(ActionInput(id=GameAction.from_id(action)))
+                case 6:
+                    if self._placeable_sprite:
+                        valid_actions.extend(self._get_valid_placeble_actions())
+                    else:
+                        valid_actions.extend(self._get_valid_clickable_actions())
+
+        return valid_actions
+
+    def _get_valid_placeble_actions(self) -> list[ActionInput]:
+        """Get valid placeable actions from placeable areas.
+
+        Returns:
+            list[ActionInput]: List of valid placeable actions with screen coordinates
+        """
+
+        scale, x_offset, y_offset = self.camera._calculate_scale_and_offset()
+
+        valid_actions: list[ActionInput] = []
+
+        for area in self.current_level.placeable_areas:
+            for y in range(area.y, area.y + area.height, area.y_scale):
+                for x in range(area.x, area.x + area.width, area.x_scale):
+                    action_input = ActionInput(id=GameAction.ACTION6.value, data={"x": x * scale + x_offset, "y": y * scale + y_offset})
+                    valid_actions.append(action_input)
+
+        return valid_actions
+
+    def _get_valid_clickable_actions(self) -> list[ActionInput]:
+        """Get valid clickable actions from sprites with the 'sys_click' tag.
+
+        This method finds all sprites tagged with 'sys_click' and generates clickable actions
+        based on their pixel data and the presence of the 'sys_every_pixel' tag.
+
+        Returns:
+            list[ActionInput]: List of valid clickable actions with screen coordinates
+        """
+        valid_actions: list[ActionInput] = []
+
+        # Get all sprites with the 'sys_click' tag
+        clickable_sprites = self.current_level.get_sprites_by_tag("sys_click")
+        clickable_sprites.extend(self.current_level.get_sprites_by_tag("sys_place"))
+
+        scale, x_offset, y_offset = self.camera._calculate_scale_and_offset()
+
+        for sprite in clickable_sprites:
+            if not self._is_sprite_clickable_now(sprite):
+                continue
+
+            # Check if sprite has the 'sys_every_pixel' tag
+            has_every_pixel = "sys_every_pixel" in sprite._tags
+
+            # Get the rendered sprite pixels (accounts for scale, rotation, etc.)
+            rendered_pixels = sprite.render()
+
+            if has_every_pixel:
+                # Every non-negative pixel is a valid action
+                for y in range(rendered_pixels.shape[0]):
+                    for x in range(rendered_pixels.shape[1]):
+                        if rendered_pixels[y, x] >= 0:
+                            # Convert sprite-relative coordinates to screen coordinates
+                            screen_x = (sprite._x + x) * scale + x_offset
+                            screen_y = (sprite._y + y) * scale + y_offset
+
+                            # Create ActionInput with ACTION6 (ComplexAction) and coordinates
+                            action_input = ActionInput(id=GameAction.ACTION6.value, data={"x": screen_x, "y": screen_y})
+                            valid_actions.append(action_input)
+            else:
+                # Find any single non-negative pixel to represent the entire sprite
+                found_pixel = False
+                for y in range(rendered_pixels.shape[0]):
+                    for x in range(rendered_pixels.shape[1]):
+                        if rendered_pixels[y, x] >= 0:
+                            # Convert sprite-relative coordinates to screen coordinates
+                            screen_x = (sprite._x + x) * scale + x_offset
+                            screen_y = (sprite._y + y) * scale + y_offset
+
+                            # Create ActionInput with ACTION6 (ComplexAction) and coordinates
+                            action_input = ActionInput(id=GameAction.ACTION6.value, data={"x": screen_x, "y": screen_y})
+                            valid_actions.append(action_input)
+                            found_pixel = True
+                            break
+                    if found_pixel:
+                        break
+
+        return valid_actions
+
+    def _is_sprite_clickable_now(self, sprite: Sprite) -> bool:
+        """
+        Check if a sprite is clickable now.  This method is designed to be overridden by games
+        that have more complex clickable logic. (e.g. not all sprites flagged with 'sys_click'
+        are clickable at all times)
+
+        Args:
+            sprite: The sprite to check
+
+        Returns:
+            bool: True if the sprite is clickable now, False otherwise
+        """
+        return True

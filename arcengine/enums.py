@@ -156,3 +156,20 @@ class FrameDataRaw:
 
     def is_empty(self) -> bool:
         return len(self.frame) == 0
+
+
+class PlaceableArea:
+    x: int = 0
+    y: int = 0
+    width: int = 0
+    height: int = 0
+    x_scale: int = 1
+    y_scale: int = 1
+
+    def __init__(self, x: int, y: int, width: int, height: int, x_scale: int = 1, y_scale: int = 1):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.x_scale = x_scale
+        self.y_scale = y_scale
