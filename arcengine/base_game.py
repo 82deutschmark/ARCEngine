@@ -438,7 +438,7 @@ class ARCBaseGame(ABC):
         frame = self.camera._raw_render(self.current_level.get_sprites())
         return frame[y : y + height, x : x + width]
 
-    def set_placeable_sprite(self, sprite: Sprite) -> None:
+    def set_placeable_sprite(self, sprite: Sprite | None) -> None:
         """Set the placeable sprite.
 
         Args:
