@@ -1,191 +1,237 @@
 """A simple maze game implementation."""
 
-from arcengine import ARCBaseGame, BlockingMode, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
+from arcengine import ARCBaseGame, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
 
-# Global sprite definitions
-PLAYER_SPRITE = Sprite(pixels=[[8]], name="player", blocking=BlockingMode.PIXEL_PERFECT, interaction=InteractionMode.TANGIBLE, tags=["fixed"])
+# Create sprites dictionary with all sprite definitions
+sprites = {
+    "block_orange": Sprite(
+        pixels=[
+            [12],
+        ],
+        name="block_orange",
+        visible=True,
+        collidable=True,
+        tags=["fixed"],
+    ),
+    "block_orange_flex": Sprite(
+        pixels=[
+            [12],
+        ],
+        name="block_orange_flex",
+        visible=True,
+        collidable=True,
+        tags=["floating"],
+    ),
+    "energy_pill": Sprite(
+        pixels=[
+            [6, 6],
+            [6, 6],
+        ],
+        name="energy_pill",
+        visible=True,
+        collidable=False,
+        tags=["energy"],
+    ),
+    "energy_pill_off": Sprite(
+        pixels=[
+            [3, 3],
+            [3, 3],
+        ],
+        name="energy_pill_off",
+        visible=False,
+        collidable=False,
+    ),
+    "exit": Sprite(
+        pixels=[
+            [9],
+        ],
+        name="exit",
+        visible=True,
+        collidable=True,
+        tags=["fixed"],
+    ),
+    "maze_1": Sprite(
+        pixels=[
+            [5, 5, 5, 5, 5, 5, 5, 5],
+            [5, -1, -1, -1, 5, -1, -1, 5],
+            [5, -1, 5, -1, 5, -1, 5, 5],
+            [5, -1, 5, -1, -1, -1, -1, 5],
+            [5, -1, 5, 5, 5, 5, -1, 5],
+            [5, -1, -1, -1, -1, 5, -1, 5],
+            [5, 5, 5, 5, -1, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5],
+        ],
+        name="maze_1",
+        visible=True,
+        collidable=True,
+        layer=-1,
+    ),
+    "maze_2": Sprite(
+        pixels=[
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, -1, -1, -1, 5, -1, -1, -1, -1, -1, -1, 5],
+            [5, -1, 5, -1, 5, -1, 5, 5, 5, 5, -1, 5],
+            [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, -1, -1, -1, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, -1, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 4, 4, -1, 5, -1, 5],
+            [5, -1, -1, -1, -1, -1, -1, -1, -1, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+        ],
+        name="maze_2",
+        visible=True,
+        collidable=True,
+        layer=-1,
+    ),
+    "maze_3": Sprite(
+        pixels=[
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, -1, -1, -1, -1, -2, -1, -1, -1, -1, -1, 5],
+            [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, -1, -1, -1, 5, -1, -1, -1, 5],
+            [5, 5, 5, 5, -1, -2, -2, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+        ],
+        name="maze_3",
+        visible=True,
+        collidable=True,
+        layer=-1,
+    ),
+    "maze_4": Sprite(
+        pixels=[
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, -1, 5, -1, -1, -1, -1, -1, -1, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, -1, -2, -2, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
+            [5, -1, -1, -1, 5, 5, 5, -1, 5, 5, -1, 5],
+            [5, -1, -1, -1, 5, 5, 5, -1, 5, 5, -1, 5],
+            [5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+        ],
+        name="maze_4",
+        visible=True,
+        collidable=True,
+        layer=-1,
+    ),
+    "maze_5": Sprite(
+        pixels=[
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
+            [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+        ],
+        name="maze_5",
+        visible=True,
+        collidable=True,
+        layer=-1,
+    ),
+    "player": Sprite(
+        pixels=[
+            [8],
+        ],
+        name="player",
+        visible=True,
+        collidable=True,
+        tags=["fixed"],
+    ),
+}
 
-ENERGY_PILL_ON_SPRITE = Sprite(pixels=[[6, 6], [6, 6]], name="energy_pill", blocking=BlockingMode.NOT_BLOCKED, interaction=InteractionMode.INTANGIBLE, tags=["energy"])
+# Create levels array with all level definitions
+levels = [
+    # Level 1
+    Level(
+        sprites=[
+            sprites["exit"].clone().set_position(6, 6),
+            sprites["maze_1"].clone(),
+            sprites["player"].clone().set_position(1, 1),
+        ],
+        grid_size=(8, 8),
+        data={
+            "move_maze": False,
+        },
+    ),
+    # Level 2
+    Level(
+        sprites=[
+            sprites["exit"].clone().set_position(10, 10),
+            sprites["maze_2"].clone(),
+            sprites["player"].clone().set_position(1, 1),
+        ],
+        grid_size=(12, 12),
+        data={
+            "move_maze": False,
+        },
+    ),
+    # Level 3
+    Level(
+        sprites=[
+            sprites["block_orange"].clone().set_position(4, 2),
+            sprites["block_orange"].clone().set_position(10, 2),
+            sprites["exit"].clone().set_position(8, 9),
+            sprites["maze_3"].clone(),
+            sprites["player"].clone().set_position(1, 1),
+        ],
+        grid_size=(12, 12),
+        data={
+            "move_maze": False,
+        },
+    ),
+    # Level 4
+    Level(
+        sprites=[
+            sprites["block_orange"].clone().set_position(3, 8),
+            sprites["block_orange"].clone().set_position(10, 8),
+            sprites["exit"].clone().set_position(10, 1),
+            sprites["maze_4"].clone(),
+            sprites["player"].clone().set_position(1, 1),
+        ],
+        grid_size=(12, 12),
+        data={
+            "move_maze": False,
+        },
+    ),
+    # Level 5
+    Level(
+        sprites=[
+            sprites["block_orange"].clone().set_position(10, 6),
+            sprites["block_orange_flex"].clone().set_position(5, 8),
+            sprites["exit"].clone().set_position(10, 1),
+            sprites["maze_5"].clone(),
+            sprites["player"].clone().set_position(1, 1),
+        ],
+        grid_size=(12, 12),
+        data={
+            "move_maze": True,
+            "max_delta_x": 0,
+            "max_delta_y": 2,
+        },
+    ),
+]
 
-ENERGY_PILL_OFF_SPRITE = Sprite(
-    pixels=[[3, 3], [3, 3]],
-    name="energy_pill_off",
-    blocking=BlockingMode.NOT_BLOCKED,
-    interaction=InteractionMode.REMOVED,
-)
+BACKGROUND_COLOR = 0
 
-# Create the levels with all sprites
-EXIT_SPRITE = Sprite(
-    pixels=[[9]],
-    name="exit",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    tags=["fixed"],  # Render below player and exit
-)
-
-MAZE_1_SPRITE = Sprite(
-    pixels=[[5, 5, 5, 5, 5, 5, 5, 5], [5, -1, -1, -1, 5, -1, -1, 5], [5, -1, 5, -1, 5, -1, 5, 5], [5, -1, 5, -1, -1, -1, -1, 5], [5, -1, 5, 5, 5, 5, -1, 5], [5, -1, -1, -1, -1, 5, -1, 5], [5, 5, 5, 5, -1, 5, -1, 5], [5, 5, 5, 5, 5, 5, 5, 5]],
-    name="maze_1",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-)
-
-MAZE_2_SPRITE = Sprite(
-    pixels=[
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, -1, -1, -1, 5, -1, -1, -1, -1, -1, -1, 5],
-        [5, -1, 5, -1, 5, -1, 5, 5, 5, 5, -1, 5],
-        [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, -1, -2, -1, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, -1, -1, -1, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, -1, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 4, 4, -1, 5, -1, 5],
-        [5, -1, -1, -1, -1, -1, -1, -1, -1, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    ],
-    name="maze_2",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-)
-
-MAZE_3_SPRITE = Sprite(
-    pixels=[
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, -1, -1, -1, -1, -2, -1, -1, -1, -1, -1, 5],
-        [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, 5, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, -2, -1, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, -1, -1, -1, 5, -1, -1, -1, 5],
-        [5, 5, 5, 5, -1, -2, -2, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    ],
-    name="maze_3",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-)
-
-BLOCK_ORANGE_SPRITE = Sprite(
-    pixels=[[12]],
-    name="block_orange",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    tags=["fixed"],  # Render below player and exit
-)
-
-MAZE_4_SPRITE = Sprite(
-    pixels=[
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, -1, 5, -1, -1, -1, -1, -1, -1, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, -1, -2, -2, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, -1, 5, 5, -1, 5],
-        [5, -1, -1, -1, 5, 5, 5, -1, 5, 5, -1, 5],
-        [5, -1, -1, -1, 5, 5, 5, -1, 5, 5, -1, 5],
-        [5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    ],
-    name="maze_4",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-)
-
-MAZE_5_SPRITE = Sprite(
-    pixels=[
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, -1, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, 5],
-        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    ],
-    name="maze_5",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-)
-
-ORANGE_BLOCK_FLEX_SPRITE = Sprite(
-    pixels=[[12]],
-    name="block_orange_flex",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    tags=["floating"],  # Render below player and exit
-)
-
-LEVEL_1 = Level(
-    sprites=[
-        PLAYER_SPRITE.clone().set_position(1, 1),  # Layer: -1
-        MAZE_1_SPRITE.clone().set_position(0, 0),  # Layer: 0
-        EXIT_SPRITE.clone().set_position(6, 6),  # Layer: 0
-    ],
-    grid_size=(8, 8),
-    data={"move_maze": False},
-)
-
-LEVEL_2 = Level(
-    sprites=[
-        PLAYER_SPRITE.clone().set_position(1, 1),  # Layer: -1
-        MAZE_2_SPRITE.clone().set_position(0, 0),  # Layer: 0
-        EXIT_SPRITE.clone().set_position(10, 10),  # Layer: 0
-    ],
-    grid_size=(12, 12),
-    data={"move_maze": False},
-)
-
-LEVEL_3 = Level(
-    sprites=[
-        MAZE_3_SPRITE.clone().set_position(0, 0),  # Layer: 0
-        EXIT_SPRITE.clone().set_position(8, 9),  # Layer: 0
-        PLAYER_SPRITE.clone().set_position(1, 1),  # Layer: 0
-        BLOCK_ORANGE_SPRITE.clone().set_position(4, 2),  # Layer: 0
-        BLOCK_ORANGE_SPRITE.clone().set_position(10, 2),  # Layer: 0
-    ],
-    grid_size=(12, 12),
-    data={"move_maze": False},
-)
-
-LEVEL_4 = Level(
-    sprites=[
-        MAZE_4_SPRITE.clone().set_position(0, 0),  # Layer: 0
-        PLAYER_SPRITE.clone().set_position(1, 1),  # Layer: 0
-        EXIT_SPRITE.clone().set_position(10, 1),  # Layer: 0
-        BLOCK_ORANGE_SPRITE.clone().set_position(3, 8),  # Layer: 0
-        BLOCK_ORANGE_SPRITE.clone().set_position(10, 8),  # Layer: 0
-    ],
-    grid_size=(12, 12),
-    data={"move_maze": False},
-)
-
-LEVEL_5 = Level(
-    sprites=[
-        MAZE_5_SPRITE.clone().set_position(0, 0),  # Layer: 0
-        PLAYER_SPRITE.clone().set_position(1, 1),  # Layer: 0
-        EXIT_SPRITE.clone().set_position(10, 1),  # Layer: 0
-        BLOCK_ORANGE_SPRITE.clone().set_position(10, 6),  # Layer: 0
-        ORANGE_BLOCK_FLEX_SPRITE.clone().set_position(5, 8),  # Layer: 0
-    ],
-    grid_size=(12, 12),
-    data={"move_maze": True, "max_delta_x": 0, "max_delta_y": 2},
-)
+PADDING_COLOR = 0
 
 
 class ComplexMaze(ARCBaseGame):
@@ -197,16 +243,16 @@ class ComplexMaze(ARCBaseGame):
         # Create our UI
         sprite_pairs = []
         for i in range(32):
-            sprite_pairs.append((ENERGY_PILL_ON_SPRITE.clone().set_position(i * 2, 0), ENERGY_PILL_OFF_SPRITE.clone().set_position(i * 2, 0)))
+            sprite_pairs.append((sprites["energy_pill"].clone().set_position(i * 2, 0), sprites["energy_pill_off"].clone().set_position(i * 2, 0)))
         for i in range(31):
-            sprite_pairs.append((ENERGY_PILL_ON_SPRITE.clone().set_position(62, i * 2 + 2), ENERGY_PILL_OFF_SPRITE.clone().set_position(62, i * 2 + 2)))
+            sprite_pairs.append((sprites["energy_pill"].clone().set_position(62, i * 2 + 2), sprites["energy_pill_off"].clone().set_position(62, i * 2 + 2)))
         self._ui = ToggleableUserDisplay(sprite_pairs)
 
         # Create camera with white background and letterbox
-        camera = Camera(width=8, height=8, background=0, letter_box=0, interfaces=[self._ui])  # White background and letterbox
+        camera = Camera(width=8, height=8, background=BACKGROUND_COLOR, letter_box=PADDING_COLOR, interfaces=[self._ui])  # White background and letterbox
 
         # Initialize the base game
-        super().__init__(game_id="simple_maze", levels=[LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5], camera=camera)
+        super().__init__(game_id="simple_maze", levels=levels, camera=camera)
 
     def step(self) -> None:
         """Step the game forward based on the current action."""
