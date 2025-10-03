@@ -612,13 +612,13 @@ class Sprite:
         other_y_start = other._y - min_y
         other_x_start = other._x - min_x
         other_region = merged_pixels[other_y_start : other_y_start + other_pixels.shape[0], other_x_start : other_x_start + other_pixels.shape[1]]
-        merged_pixels[other_y_start : other_y_start + other_pixels.shape[0], other_x_start : other_x_start + other_pixels.shape[1]] = np.where(other_pixels >= 0, other_pixels, other_region)
+        merged_pixels[other_y_start : other_y_start + other_pixels.shape[0], other_x_start : other_x_start + other_pixels.shape[1]] = np.where(other_pixels != -1, other_pixels, other_region)
 
         # Copy self's pixels
         self_y_start = self._y - min_y
         self_x_start = self._x - min_x
         merged_pixels[self_y_start : self_y_start + self_pixels.shape[0], self_x_start : self_x_start + self_pixels.shape[1]] = np.where(
-            self_pixels >= 0, self_pixels, merged_pixels[self_y_start : self_y_start + self_pixels.shape[0], self_x_start : self_x_start + self_pixels.shape[1]]
+            self_pixels != -1, self_pixels, merged_pixels[self_y_start : self_y_start + self_pixels.shape[0], self_x_start : self_x_start + self_pixels.shape[1]]
         )
 
         blocking = self._blocking

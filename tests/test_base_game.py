@@ -1,6 +1,8 @@
 """Tests for the base game module."""
 
+import os
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -30,6 +32,9 @@ class TestGame(ARCBaseGame):
         if self.action.id == GameAction.ACTION5:
             print("test game - next level")
             self.next_level()
+            self.complete_action()
+        elif self.action.id == GameAction.ACTION7:
+            self.lose()
             self.complete_action()
         else:
             self._step_count += 1
@@ -560,6 +565,87 @@ class TestARCBaseGame(unittest.TestCase):
         game3 = TestGame("test_game", [level1], available_actions=[6])
         frame3 = game3.perform_action(action_input)
         self.assertEqual(frame3.available_actions, [6])
+
+    def test_lose_game_and_then_reset(self):
+        """Test that if the game is lost on the first move then reset does not result in a full reset"""
+        # Create a test level with a sprite
+        sprite1 = Sprite([[1, 1], [1, 1]], x=0, y=0)
+        sprite2 = Sprite([[1, 1], [1, 1]], x=2, y=2)
+        level1 = Level([sprite1])
+        level2 = Level([sprite2])
+        game = TestGame("test_game", [level1, level2])
+
+        # Start Game with Reset
+        action_input = ActionInput(id=GameAction.RESET)
+        game.perform_action(action_input)
+        self.assertEqual(game.level_index, 0)
+
+        # Perform Action 5 to get to the next level
+        action_input = ActionInput(id=GameAction.ACTION5)
+        frame1 = game.perform_action(action_input)
+        self.assertEqual(frame1.score, 1)
+        self.assertEqual(game.level_index, 1)
+
+        # Perform Action 7 which results in a game over
+        action_input = ActionInput(id=GameAction.ACTION7)
+        frame2 = game.perform_action(action_input)
+        self.assertEqual(frame2.state, GameState.GAME_OVER)
+
+        # Perform a Reset which should not be a full reset
+        action_input = ActionInput(id=GameAction.RESET)
+        frame3 = game.perform_action(action_input)
+        self.assertFalse(frame3.full_reset)
+        self.assertEqual(frame3.score, 1)
+        self.assertEqual(game.level_index, 1)
+
+        # Perform a second Reset which should be a full reset
+        action_input = ActionInput(id=GameAction.RESET)
+        frame3 = game.perform_action(action_input)
+        self.assertTrue(frame3.full_reset)
+        self.assertEqual(frame3.score, 0)
+        self.assertEqual(game.level_index, 0)
+
+    def test_env_flag_only_allows_level_resets(self):
+        """if ONLY_RESET_LEVELS is true, then the game should only allow level resets"""
+        with patch.dict(os.environ, {"ONLY_RESET_LEVELS": "true"}, clear=False):
+            # Create a test level with a sprite
+            sprite1 = Sprite([[1, 1], [1, 1]], x=0, y=0)
+            sprite2 = Sprite([[1, 1], [1, 1]], x=2, y=2)
+            level1 = Level([sprite1])
+            level2 = Level([sprite2])
+
+            game = TestGame("test_game", [level1, level2])
+            # Start Game with Reset
+            action_input = ActionInput(id=GameAction.RESET)
+            game.perform_action(action_input)
+            self.assertEqual(game.level_index, 0)
+
+            # Perform Action 5 to get to the next level
+            action_input = ActionInput(id=GameAction.ACTION5)
+            frame1 = game.perform_action(action_input)
+            self.assertEqual(frame1.score, 1)
+            self.assertEqual(game.level_index, 1)
+
+            # Perform Reset 1 which should not be a full reset
+            action_input = ActionInput(id=GameAction.RESET)
+            frame3 = game.perform_action(action_input)
+            self.assertFalse(frame3.full_reset)
+            self.assertEqual(frame3.score, 1)
+            self.assertEqual(game.level_index, 1)
+
+            # Perform Reset 2 which should not be a full reset
+            action_input = ActionInput(id=GameAction.RESET)
+            frame4 = game.perform_action(action_input)
+            self.assertFalse(frame4.full_reset)
+            self.assertEqual(frame4.score, 1)
+            self.assertEqual(game.level_index, 1)
+
+            # Perform Reset 3 which should not be a full reset
+            action_input = ActionInput(id=GameAction.RESET)
+            frame5 = game.perform_action(action_input)
+            self.assertFalse(frame5.full_reset)
+            self.assertEqual(frame5.score, 1)
+            self.assertEqual(game.level_index, 1)
 
     def test_get_valid_actions(self):
         """Test the _get_valid_actions method returns correct actions based on available_actions."""

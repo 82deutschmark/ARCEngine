@@ -766,6 +766,19 @@ class TestSprite(unittest.TestCase):
         # Check layer is the maximum of the two
         assert merged.layer == 2
 
+    def test_merge_sprint_with_negative_two(self):
+        """Test merging sprites with a -2 value."""
+        sprite1 = Sprite(pixels=[[-2, 1], [1, 1]])
+        sprite2 = Sprite(pixels=[[2]], x=2, y=2)
+        merged1 = sprite1.merge(sprite2)
+        merged2 = sprite2.merge(sprite1)
+
+        result1 = merged1.pixels.tolist()
+        result2 = merged2.pixels.tolist()
+        expected = [[-2, 1, -1], [1, 1, -1], [-1, -1, 2]]
+        self.assertEqual(result1, expected)
+        self.assertEqual(result2, expected)
+
     def test_downscale_transparent(self):
         sprite = Sprite(
             pixels=[
