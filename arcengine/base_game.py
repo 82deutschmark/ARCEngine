@@ -6,6 +6,7 @@ import os
 from abc import ABC
 from typing import List, Optional, final
 
+import numpy as np
 from numpy import ndarray
 
 from .camera import Camera
@@ -448,6 +449,23 @@ class ARCBaseGame(ABC):
             sprite: The sprite to set as placeable
         """
         self._placeable_sprite = sprite
+
+    def _get_graph_location(self) -> tuple[float, float, float] | None:
+        """Get the location for the graph builder to use for this state.
+
+        Returns:
+            tuple[float, float, float] | None: The location this state should report as its location in the graph,
+                or None if the graph builder should calculate the location.
+        """
+        return None
+
+    def _get_hidden_state(self) -> ndarray:
+        """Get the hidden state for the graph builder to use for this state.
+
+        Returns:
+            ndarray: Hidden state for the graph builder to use for this state.
+        """
+        return np.zeros((4, 4), dtype=np.int8)
 
     def _get_valid_actions(self) -> list[ActionInput]:
         """Get the valid actions for the current game state.
