@@ -17,21 +17,83 @@ class Level:
     _data: dict[str, Any]
     _name: str
     _placeable_areas: List[PlaceableArea]
+    _need_sort: bool
 
-    def __init__(self, sprites: Optional[List[Sprite]] = None, grid_size: Tuple[int, int] | None = None, data: dict[str, Any] = {}, name: str = "Level", placeable_areas: List[PlaceableArea] = []):
-        """Initialize a new Level.
+    def __init__(
+        self,
+        sprites: Optional[List[Sprite]] = None,
+        grid_size: Tuple[int, int] | None = None,
+        data: dict[str, Any] = {},
+        name: str = "Level",
+        placeable_areas: Optional[List[PlaceableArea]] = None,
+    ):
+        """Initialize a new level.
 
         Args:
-            sprites: Optional list of sprites to initialize the level with
+            sprites: List of sprites to add to the level
+            grid_size: Tuple of width and height of the grid
+            data: Dictionary of data to store in the level
+            name: Name of the level
+            placeable_areas: List of placeable areas in the level
         """
-        self._sprites: List[Sprite] = []
-        if sprites:
-            for sprite in sprites:
-                self.add_sprite(sprite)
+        self._sprites = []
         self._grid_size = grid_size
         self._data = data
         self._name = name
-        self._placeable_areas = placeable_areas
+        self._placeable_areas = placeable_areas if placeable_areas is not None else []
+        self._need_sort = True
+
+        if sprites:
+            # Add first (fast path), then do one-time merge+sort.
+            self._sprites.extend(sprites)
+            self._merge_sys_static_pixel_perfect_on_init()
+
+    def _merge_sys_static_pixel_perfect_on_init(self) -> None:
+        """
+        Merge any sprites that are:
+          - PIXEL_PERFECT
+          - have tag "sys_static"
+        into ONE sprite per layer.
+
+        This runs only during construction.
+        """
+        if not self._sprites:
+            return
+
+        # Partition sprites into merge-candidates (by layer) and others.
+        by_layer: dict[int, List[Sprite]] = {}
+        others: List[Sprite] = []
+
+        for s in self._sprites:
+            if s.blocking == BlockingMode.PIXEL_PERFECT and "sys_static" in s.tags:
+                by_layer.setdefault(s.layer, []).append(s)
+            else:
+                others.append(s)
+
+        merged: List[Sprite] = []
+        for layer, group in by_layer.items():
+            if not group:
+                continue
+            if len(group) == 1:
+                merged.append(group[0])
+                continue
+
+            # Merge left-to-right; merge() returns a NEW Sprite each time.
+            base = group[0]
+            for nxt in group[1:]:
+                base = base.merge(nxt)
+
+            # Ensure the merged sprite stays on this layer.
+            # (merge() uses max layer, but all are same layer anyway; set explicitly for safety.)
+            base.set_layer(layer)
+
+            # Ensure sys_static remains (merge unions tags, so it should already be present)
+            if "sys_static" not in base.tags:
+                base.tags.append("sys_static")
+
+            merged.append(base)
+
+        self._sprites = others + merged
 
     def remove_all_sprites(self) -> None:
         """Remove all sprites from the level."""
@@ -44,6 +106,7 @@ class Level:
             sprite: The sprite to add
         """
         self._sprites.append(sprite)
+        self._need_sort = True
 
     def remove_sprite(self, sprite: Sprite) -> None:
         """Remove a sprite from the level.
@@ -133,8 +196,10 @@ class Level:
             y: The y coordinate
             tag: The tag to search for
         """
-        sprites = sorted(self._sprites, key=lambda sprite: sprite.layer, reverse=True)
-        for sprite in sprites:
+        if self._need_sort:
+            self._sprites = sorted(self._sprites, key=lambda sprite: sprite.layer, reverse=True)
+            self._need_sort = False
+        for sprite in self._sprites:
             if (ignore_collidable or sprite.is_collidable) and x >= sprite.x and y >= sprite.y and x < sprite.x + sprite.width and y < sprite.y + sprite.height:
                 if sprite.blocking == BlockingMode.PIXEL_PERFECT:
                     pixels = sprite.render()
