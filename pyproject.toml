@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build >= 0.9.26, <0.10.0"]
+requires = ["uv_build >= 0.9.18, <0.10.0"]
 build-backend = "uv_build"
 
 [project]
@@ -39,5 +39,12 @@ extend-select = ["I"]
 [tool.ruff]
 line-length = 280
 
+[tool.setuptools]
+packages = ["arcengine"]
+
 [tool.setuptools.package-data]
 "arcengine" = ["py.typed"]
+
+[tool.uv.build-backend]
+module-name = "arcengine"
+module-root = ""
