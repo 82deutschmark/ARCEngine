@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = {file = "LICENSE"}
 authors = [
-    {name = "arcprizefoundation", email = "team@arcprize.org"},
+    {name = "arcprizefoundation", email = ""},
 ]
 dependencies = [
     "numpy>=1.24.0",
