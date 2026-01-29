@@ -6,9 +6,10 @@ A Python library for 2D sprite-based game development.
 
 Add ARCEngine to your project using one of these methods:
 
-### Using uv (Recommended)
+### Using uv (recommended)
 
 Add ARCEngine to your `pyproject.toml`:
+
 ```toml
 [project]
 dependencies = [
@@ -17,89 +18,128 @@ dependencies = [
 ```
 
 Then install with uv:
+
 ```bash
 uv sync
 ```
 
-## API Documentation
+## Quick Start
 
-### ARCBaseGame
-
-The base class for ARCEngine games that manages levels and camera.
+`ARCBaseGame` is the base class for ARCEngine games. Create a game by subclassing it and overriding `step()`:
 
 ```python
-from arcengine import ARCBaseGame, Level, Camera
+from arcengine import ARCBaseGame, ActionInput, Camera, GameAction, Level, Sprite
 
-# Create a game with levels and optional custom camera
-game = ARCBaseGame(game_id="my_gane", levels=[level1, level2], camera=camera)  # camera is optional
+class MyGame(ARCBaseGame):
+    def step(self) -> None:
+        # Your game logic here.
+        # Call complete_action() when you are done handling the input.
+        self.complete_action()
+
+level = Level([Sprite([[1]], name="player")])
+
+# Camera is optional (defaults to 64x64).
+game = MyGame(game_id="my_game", levels=[level], camera=Camera())
+
+# Multiple frames are returned if an animation was played as a result of the action
+frames = game.perform_action(ActionInput(id=GameAction.ACTION1))
 ```
+
+## API Documentation
+
+### `ARCBaseGame`
+Base class for games. Subclass this and implement `step()`.
 
 #### Properties
 
 - `current_level` (Level): The current active level
 - `camera` (Camera): The game's camera
 - `game_id` (str): The game's identifier (should be set by subclasses)
-- `action` (GameAction): The current action being performed
+- `action` (ActionInput): The current action being performed
+- `level_index: int` - current level index
 
 #### Methods
 
-##### `__init__(levels, camera=None)`
+##### `__init__(game_id, levels, camera=None, debug=False, win_score=1, available_actions=[1,2,3,4,5,6], seed=0)`
 Initialize a new game.
 
-- `levels`: List of levels to initialize the game with. Each level will be cloned.
-- `camera`: Optional camera to use. If not provided, a default 64x64 camera will be created.
+- `game_id`: Game identifier
+- `levels`: List of levels to initialize the game with (each level is cloned)
+- `camera`: Optional camera to use. If not provided, a default 64x64 camera is created
+- `debug`: Enable debug logging
+- `available_actions`: List of numeric action IDs
+- `seed`: Optional seed value for game logic
 
-Raises `ValueError` if levels list is empty.
+Raises `ValueError` if `levels` is empty.
+
+##### `debug(message)`
+Print a debug message if debug mode is enabled.
+
+- `message`: Message to print
 
 ##### `set_level(index)`
 Set the current level by index.
 
 - `index`: The index of the level to set as current
+- Raises `IndexError` if index is out of range
 
-Raises `IndexError` if index is out of range.
+##### `set_level_by_name(name)`
+Set the current level by name.
 
-##### `perform_action(action_input)`
+- `name`: The level name to match
+- Raises `ValueError` if no level matches
+
+##### `perform_action(action_input, raw=False)`
 Perform an action and return the resulting frame data.
 
-This method should not be overridden. Game logic should be implemented in the `step()` method.
+This method runs `step()` in a loop until `complete_action()` is called, rendering each frame. It should not be overridden; implement game logic in `step()`.
 
 - `action_input`: The action to perform
-- Returns: FrameData containing the rendered frames and game state
+- `raw`: If True, returns `FrameDataRaw` with numpy frames
+- Returns: `FrameData` or `FrameDataRaw`
+- Raises `ValueError` if an action exceeds 1000 frames
 
 ##### `complete_action()`
-"""Complete the action. Call this when the provided action is fully resolved"""
-
-##### `win()`
-"""Call this when the player has beaten the game."""
-
-##### `lose`
-"""Complete the action. Call this when the provided action is fully resolved"""
-
-##### `step()`
-Step the game. This is where your game logic should be implemented.
-
-REQUIRED: Call `complete_action()` when the action is complete. It does not need to be called every step, but once the action is complete. The engine will keep calling step and rendering frames until the action is complete.
+Mark the current action as complete. Call this when the provided action is fully resolved.
 
 ##### `is_action_complete()`
 Check if the current action is complete.
 
 - Returns: True if the action is complete, False otherwise
 
+##### `win()`
+Call this when the player has beaten the game.
+
+##### `lose()`
+Call this when the player has lost the game.
+
+##### `handle_reset()`
+Handle RESET actions, choosing between `level_reset()` and `full_reset()` based on action count and `ONLY_RESET_LEVELS`.
+
+##### `full_reset()`
+Reset the entire game back to its initial state.
+
+##### `level_reset()`
+Reset only the current level back to its initial state.
+
+##### `step()`
+Step the game. This is where your game logic should be implemented.
+
+REQUIRED: Call `complete_action()` when the action is complete. It does not need to be called every step, but once the action is complete. The engine will keep calling `step()` and rendering frames until the action is complete.
+
 ##### `try_move(sprite_name, dx, dy)`
 Try to move a sprite and return a list of sprites it collides with.
 
-This method attempts to move the sprite by the given deltas and checks for collisions.
-If any collisions are detected, the sprite is not moved and the method returns a list
-of sprites that were collided with.
+This method attempts to move the sprite by the given deltas and checks for collisions. If any collisions are detected, the sprite is not moved and the method returns a list of collided sprites.
 
 - `sprite_name`: The name of the sprite to move
 - `dx`: The change in x position (positive = right, negative = left)
 - `dy`: The change in y position (positive = down, negative = up)
-- Returns: A list of sprites that the sprite collided with. If no collisions occurred,
-  the sprite is moved and an empty list is returned
-- Raises: ValueError if no sprite with the given name is found
+- Returns: A list of sprites collided with. If no collisions occur, the sprite is moved and an empty list is returned
+- Raises `ValueError` if no sprite with the given name is found
 
-Example:
+Example (`try_move`):
+
 ```python
 # Try to move a sprite right by 1 pixel
 collisions = game.try_move("player", 1, 0)
@@ -109,68 +149,153 @@ else:
     print(f"Collided with: {[sprite.name for sprite in collisions]}")
 ```
 
-### Sprite
+##### `try_move_sprite(sprite, dx, dy)`
+Try to move a specific sprite and return a list of sprites it collides with.
 
-The `Sprite` class represents a 2D sprite that can be positioned and scaled in the game world.
+- `sprite`: The sprite to move
+- `dx`: The change in x position (positive = right, negative = left)
+- `dy`: The change in y position (positive = down, negative = up)
+- Returns: A list of sprites collided with. If no collisions occur, the sprite is moved and an empty list is returned
+
+##### `next_level()`
+Advance to the next level or mark the game as won if the last level is complete.
+
+##### `on_set_level(level)`
+Hook called when the level is set. Override to apply level-specific setup.
+
+- `level`: The level being set
+
+##### `get_pixels_at_sprite(sprite)`
+Get the camera pixels at a sprite's location.
+
+- `sprite`: The sprite to sample
+- Returns: A numpy array of pixels covering the sprite's area
+
+##### `get_pixels(x, y, width, height)`
+Get the camera pixels at a given position.
+
+- `x`, `y`: Top-left position in camera space
+- `width`, `height`: Dimensions of the sample area
+- Returns: A numpy array of pixels for the given region
+
+#### Notes
+
+- `perform_action` runs `step()` in a loop until `complete_action()` is called. It raises
+  `ValueError` if an action exceeds 1000 frames.
+
+
+## API
+
+The public API is exported from `arcengine.__init__`:
+
+Import necessary components from arcengine:
+
+```python
+from arcengine import (
+    ARCBaseGame,
+    Camera,
+    Level,
+)
+```
+
+#### `GameAction`
+Enum of available actions with attached data model types.
+
+- `RESET` (id 0) uses `SimpleAction`.
+- `ACTION1`-`ACTION5` and `ACTION7` use `SimpleAction`.
+- `ACTION6` uses `ComplexAction` to encode screen coordinates `x` and `y` (0,0 is the top left pixel). Used for click inputs
+
+Common client/UI conventions:
+- `ACTION1`: Up or W or 1
+- `ACTION2`: Down or S or 2
+- `ACTION3`: Left or A or 3
+- `ACTION4`: Right or D or 4
+- `ACTION5`: Spacebar
+- `ACTION7`: Z - Used for Undo
+
+### `Sprite`
+A 2D sprite with position, rotation, scale, and collision behavior.
 
 ```python
 from arcengine import Sprite, BlockingMode, InteractionMode
 
 # Create a simple 2x2 sprite
-sprite = Sprite([
+sprite_simple = Sprite([
     [1, 2],
     [3, 4]
 ])
 
 # Create a sprite with custom properties
-sprite = Sprite(
+sprite_custom = Sprite(
     pixels=[[1, 2], [3, 4]],
     name="player",
     x=10,
     y=20,
+    layer=1,
     scale=2,
     rotation=90,
-    blocking=BlockingMode.BOUNDING_BOX,
-    layer=1,  # Higher values render on top
-    interaction=InteractionMode.TANGIBLE
+    mirror_ud=False,
+    mirror_lr=False,
+    blocking=BlockingMode.PIXEL_PERFECT,
+    interaction=InteractionMode.TANGIBLE,
+    # If interaction is None, visible/collidable determine the mode.
+    # visible=True, collidable=True are the defaults.
+    tags=["player"],
 )
 ```
 
+#### Notes
+
+- Pixels are palette indices. Any negative value is treated as transparent when rendering. -1 is treated as transparent and not blocking/non-colliding (applies to BlockingMode.PIXEL_PERFECT) while other negative values are considered blocking.
+
+- Rotation is limited to `0`, `90`, `180`, `270` degrees.
+- `scale`:
+  - Positive values upscale (2 = double size, 3 = triple size).
+  - Negative values downscale by a divisor: `-1` => divide by 2, `-2` => divide by 3, etc.
+  - `0` is invalid and raises `ValueError`.
+- If `interaction` is `None`, `visible` and `collidable` determine the interaction mode.
+
 #### Properties
 
-- `name` (str): The sprite's unique identifier
-- `x` (int): X coordinate in pixels
-- `y` (int): Y coordinate in pixels
-- `scale` (int): Scale factor. Positive values scale up (2 = double size, 3 = triple size). Negative values scale down (-1 = half size, -2 = one-third size, -3 = one-fourth size).
-- `rotation` (int): Rotation in degrees (0, 90, 180, or 270)
-- `blocking` (BlockingMode): Collision detection method
-- `pixels` (numpy.ndarray): The sprite's pixel data
-- `layer` (int): Z-order layer for rendering (higher values render on top)
-- `interaction` (InteractionMode): How the sprite interacts with the game world
-- `is_visible` (bool): Whether the sprite should be rendered
-- `is_collidable` (bool): Whether the sprite should participate in collisions
+- `name: str`
+- `x: int`, `y: int`
+- `layer: int`
+- `scale: int`
+- `rotation: int`
+- `blocking: BlockingMode`
+- `pixels: np.ndarray`
+- `interaction: InteractionMode`
+- `tags: list[str]`
+- `mirror_ud: bool`, `mirror_lr: bool`
+- `is_visible: bool`
+- `is_collidable: bool`
+- `width: int`, `height: int` (based on rendered size)
 
 #### Methods
 
-##### `__init__(pixels, name=None, x=0, y=0, scale=1, rotation=0, blocking=BlockingMode.NOT_BLOCKED, layer=0, interaction=InteractionMode.TANGIBLE)`
+##### `__init__(pixels, name=None, x=0, y=0, layer=0, scale=1, rotation=0, mirror_ud=False, mirror_lr=False, blocking=BlockingMode.PIXEL_PERFECT, interaction=None, visible=True, collidable=True, tags=[])`
 Initialize a new Sprite.
 
-- `pixels`: 2D list representing the sprite's pixels
+- `pixels`: 2D list or 2D numpy array representing the sprite's pixels
 - `name`: Optional sprite name (default: generates UUID)
 - `x`: X coordinate in pixels (default: 0)
 - `y`: Y coordinate in pixels (default: 0)
+- `layer`: Z-order layer for rendering (default: 0, higher values render on top)
 - `scale`: Scale factor (default: 1)
 - `rotation`: Rotation in degrees (default: 0)
-- `blocking`: Collision detection method (default: NOT_BLOCKED)
-- `layer`: Z-order layer for rendering (default: 0, higher values render on top)
-- `interaction`: How the sprite interacts with the game world (default: TANGIBLE)
+- `mirror_ud`, `mirror_lr`: Optional vertical/horizontal mirroring
+- `blocking`: Collision detection method (default: PIXEL_PERFECT)
+- `interaction`: Optional interaction mode override. If `None`, `visible`/`collidable` determine the mode
+- `visible`, `collidable`: Used only when `interaction` is `None`
+- `tags`: Optional list of string tags
 
-Raises `ValueError` if scale is 0, pixels is not a 2D list, rotation is invalid, or if downscaling factor doesn't evenly divide sprite dimensions.
+Raises `ValueError` if scale is 0, pixels is not a 2D list/array, rotation is invalid,
+or if downscaling factor doesn't evenly divide sprite dimensions.
 
 ##### `clone(new_name=None)`
 Create an independent copy of this sprite.
 
-- `new_name`: Optional name for the cloned sprite (default: generates UUID)
+- `new_name`: Optional name for the cloned sprite (default: reuses current name)
 - Returns: A new Sprite instance with the same properties but independent state
 
 ##### `set_position(x, y)`
@@ -237,28 +362,11 @@ Rotate the sprite by a given amount.
 - `delta`: The change in rotation in degrees (must result in a valid rotation)
 - Raises `ValueError` if resulting rotation is not a valid 90-degree increment
 
-##### `render()`
-Render the sprite with current scale and rotation.
-
-- Returns: A 2D numpy array representing the rendered sprite
-- Raises `ValueError` if downscaling factor doesn't evenly divide the sprite dimensions
-
-##### `set_layer(layer)`
-Set the sprite's rendering layer.
-
-- `layer`: New layer value. Higher values render on top.
-
 ##### `set_blocking(blocking)`
 Set the sprite's blocking behavior.
 
 - `blocking`: The new blocking behavior (BlockingMode enum value)
 - Raises `ValueError` if blocking is not a BlockingMode enum value
-
-##### `set_name(name)`
-Set the sprite's name.
-
-- `name`: New name for the sprite
-- Raises `ValueError` if name is empty
 
 ##### `set_interaction(interaction)`
 Set the sprite's interaction mode.
@@ -266,19 +374,72 @@ Set the sprite's interaction mode.
 - `interaction`: The new interaction mode (InteractionMode enum value)
 - Raises `ValueError` if interaction is not an InteractionMode enum value
 
-##### `collides_with(other)`
+##### `set_visible(visible)`
+Set the sprite's visibility.
+
+- `visible`: The new visibility state
+
+##### `set_collidable(collidable)`
+Set the sprite's collidable state.
+
+- `collidable`: The new collidable state
+
+##### `set_layer(layer)`
+Set the sprite's rendering layer.
+
+- `layer`: New layer value. Higher values render on top.
+
+##### `set_mirror_ud(mirror_ud)`
+Set the sprite's mirror up/down state.
+
+- `mirror_ud`: True to flip vertically
+
+##### `set_mirror_lr(mirror_lr)`
+Set the sprite's mirror left/right state.
+
+- `mirror_lr`: True to flip horizontally
+
+##### `set_name(name)`
+Set the sprite's name.
+
+- `name`: New name for the sprite
+- Raises `ValueError` if name is empty
+
+##### `render()`
+Render the sprite with current scale and rotation.
+
+- Returns: A 2D numpy array representing the rendered sprite
+- Raises `ValueError` if downscaling factor doesn't evenly divide the sprite dimensions
+
+##### `collides_with(other, ignoreMode=False)`
 Check if this sprite collides with another sprite.
 
 The collision check follows these rules:
 1. A sprite cannot collide with itself
-2. Non-collidable sprites (based on interaction mode) never collide
+2. Non-collidable sprites (based on interaction mode) never collide (unless `ignoreMode=True`)
 3. For collidable sprites, the collision detection method is based on their blocking mode:
    - NOT_BLOCKED: Always returns False
    - BOUNDING_BOX: Simple rectangular collision check
    - PIXEL_PERFECT: Precise pixel-level collision detection
 
 - `other`: The other sprite to check collision with
+- `ignoreMode`: If True, bypasses interaction and blocking checks
 - Returns: True if the sprites collide, False otherwise
+
+##### `color_remap(old_color, new_color)`
+Remap the sprite's color.
+
+- `old_color`: The old color to remap, or None to remap all colors
+- `new_color`: The new color to remap to
+
+##### `merge(other)`
+Merge two sprites together.
+
+This method creates a new sprite that combines the pixels of both sprites.
+When pixels overlap, the non -1 pixels are prioritized 
+
+- `other`: The other sprite to merge with
+- Returns: A new Sprite instance containing the merged pixels
 
 ### BlockingMode
 
@@ -297,12 +458,11 @@ An enumeration defining how a sprite interacts with the game world:
 - `INVISIBLE`: Not visible but can be collided with (invisible wall)
 - `REMOVED`: Not visible and cannot be collided with (effectively removed)
 
-### Camera
-
-A camera that defines the viewport into the game world.
+### `Camera`
+Defines the viewport and renders sprites to a 64x64 output.
 
 ```python
-from arcengine import Camera, RenderableUserDisplay
+from arcengine import Camera
 
 # Create a default camera (64x64 viewport)
 camera = Camera()
@@ -319,12 +479,18 @@ camera = Camera(
 )
 ```
 
+#### Notes
+
+- Output is always 64x64. The camera view is uniformly upscaled (nearest neighbor) and
+  letterboxed with `letter_box` color as needed.
+- The scale factor is `min(64 // width, 64 // height)`.
+- `interfaces` is an optional list of `RenderableUserDisplay` overlays.
+
 #### Properties
 
-- `x` (int): X coordinate in pixels
-- `y` (int): Y coordinate in pixels
-- `width` (int): Viewport width in pixels (max: 64)
-- `height` (int): Viewport height in pixels (max: 64)
+- `x: int`, `y: int`
+- `width: int`, `height: int` (max 64)
+- `background: int`, `letter_box: int`
 
 #### Methods
 
@@ -345,16 +511,20 @@ Raises:
 - `ValueError`: If width or height exceed 64 pixels or are negative
 
 ##### `move(dx, dy)`
-
 Move the camera by the specified delta.
 
-Args:
-- `dx` (int): The change in x position
-- `dy` (int): The change in y position
+- `dx`: Change in x position
+- `dy`: Change in y position
+
+##### `resize(width, height)`
+Resize the camera viewport.
+
+- `width`, `height`: New dimensions (max 64)
 
 ##### `render(sprites)`
+Render the camera view.
 
-Render the camera view. The rendered output is always 64x64 pixels. If the camera's viewport is smaller, the view will be scaled up uniformly (maintaining aspect ratio) to fit within 64x64, and the remaining space will be filled with the letter_box color.
+The rendered output is always 64x64 pixels. If the camera's viewport is smaller, the view is scaled up uniformly (nearest neighbor) to fit within 64x64, and the remaining space is filled with the letter_box color.
 
 Args:
 - `sprites` (list[Sprite]): List of sprites to render
@@ -363,33 +533,45 @@ Returns:
 - `np.ndarray`: The rendered view as a 64x64 numpy array
 
 ##### `replace_interface(new_interfaces)`
-
-Replace the current interfaces with new ones. This method replaces all current interfaces with the provided ones. Each interface in the new list will be cloned to prevent external modification.
+Replace the current interfaces with new ones. This method replaces all current interfaces with the provided ones and stores them as-is (no cloning).
 
 Args:
 - `new_interfaces` (list[RenderableUserDisplay]): List of new interfaces to use. These should be cloned before passing them in.
 
-### RenderableUserDisplay
+##### `display_to_grid(display_x, display_y)`
+Convert display coordinates (64x64) to camera grid coordinates.
 
+- `display_x`, `display_y`: Display-space coordinates (0-63)
+- Returns: `(x, y)` grid coordinates, or `None` if the point lies in the letterbox area
+
+### `RenderableUserDisplay`
 The `RenderableUserDisplay` class is an abstract base class that defines the interface for UI elements that can be rendered by the camera. It is used as the final step in the camera's rendering pipeline to produce the 64x64 output frame.
 
 ```python
-from abc import ABC, abstractmethod
-from arcengine import RenderableUserDisplay
+import numpy as np
+from arcengine import RenderableUserDisplay, Sprite
 
-class MyCustomUI(RenderableUserDisplay):
-    def render_interface(self, frame: np.ndarray) -> None:
-        # Implement custom rendering logic here
-        pass
+class MyUI(RenderableUserDisplay):
+    def render_interface(self, frame: np.ndarray) -> np.ndarray:
+        # Modify the frame in-place and return it
+        return frame
 ```
 
 #### Methods
+
 ##### `render_interface(frame)`
 Render this UI element onto the given frame.
 
 - `frame`: The 64x64 numpy array to render onto
+- Returns: The modified frame (implementations should modify in-place)
 
-This method is called by the camera during the final step of rendering. Implementations should modify the frame directly.
+##### `draw_sprite(frame, sprite, start_x, start_y)`
+Helper to draw a sprite onto a frame with clipping.
+
+- `frame`: The 64x64 numpy array to draw onto
+- `sprite`: The sprite to draw
+- `start_x`, `start_y`: Top-left position in frame coordinates
+- Returns: The modified frame
 
 ### ToggleableUserDisplay
 
@@ -410,33 +592,60 @@ ui_element.disable(1)  # Disable second pair
 
 # Check if a pair is enabled
 is_enabled = ui_element.is_enabled(0)
-```
 
+```
 #### Methods
 
 ##### `__init__(sprite_pairs)`
 Initialize a new ToggleableUserDisplay.
 
-- `sprite_pairs`: List of (enabled_sprite, disabled_sprite) tuples
+- `sprite_pairs`: List of `(enabled_sprite, disabled_sprite)` tuples. Each sprite is cloned.
+
+##### `clone()`
+Create a deep copy of this UI element.
+
+- Returns: A new ToggleableUserDisplay instance with cloned sprite pairs
 
 ##### `is_enabled(index)`
 Check if a sprite pair is enabled.
 
 - `index`: Index of the sprite pair to check
 - Returns: True if the pair is enabled, False otherwise
-- Raises: IndexError if index is out of range
+- Raises `ValueError` if index is out of range
 
 ##### `enable(index)`
 Enable a sprite pair.
 
 - `index`: Index of the sprite pair to enable
-- Raises: IndexError if index is out of range
+- Raises `ValueError` if index is out of range
 
 ##### `disable(index)`
 Disable a sprite pair.
 
 - `index`: Index of the sprite pair to disable
-- Raises: IndexError if index is out of range
+- Raises `ValueError` if index is out of range
+
+##### `enable_all_by_tag(tag)`
+Enable all sprite pairs that have the given tag.
+
+- `tag`: Tag to search for
+
+##### `disabled_all_by_tag(tag)`
+Disable all sprite pairs that have the given tag.
+
+- `tag`: Tag to search for
+
+##### `enable_first_by_tag(tag)`
+Enable the first disabled sprite pair with the given tag.
+
+- `tag`: Tag to search for
+- Returns: True if a pair was enabled, False otherwise
+
+##### `disabled_first_by_tag(tag)`
+Disable the first enabled sprite pair with the given tag.
+
+- `tag`: Tag to search for
+- Returns: True if a pair was disabled, False otherwise
 
 ##### `render_interface(frame)`
 Render the UI element onto the given frame.
@@ -445,35 +654,43 @@ Render the UI element onto the given frame.
 
 This method renders all sprite pairs, using the enabled sprite if the pair is enabled, and the disabled sprite if the pair is disabled.
 
-##### `clone()`
-Create a deep copy of this UI element.
-
-- Returns: A new ToggleableUserDisplay instance with cloned sprite pairs
-
-### Level
-
-The `Level` class manages a collection of sprites, providing methods to add, remove, and query sprites.
+### `Level`
+Manages a collection of sprites and level metadata.
 
 ```python
-from arcengine import Level, Sprite
+from arcengine import Level, Sprite, PlaceableArea
 
-# Create an empty level
-level = Level()
-
-# Create a level with initial sprites
 sprites = [
     Sprite([[1]], name="player"),
     Sprite([[2]], name="enemy")
 ]
-level = Level(sprites=sprites)
+
+# Create an empty level
+level_empty = Level()
+
+# Create a level with initial sprites
+level = Level(
+    sprites=sprites,
+    grid_size=(16, 16),
+    data={"difficulty": "easy"},
+    name="level_1",
+)
 ```
+
+#### Properties
+
+- `name: str`
+- `grid_size: tuple[int, int] | None`
 
 #### Methods
 
-##### `__init__(sprites=None)`
+##### `__init__(sprites=None, grid_size=None, data={}, name="Level", placeable_areas=None)`
 Initialize a new Level.
 
 - `sprites`: Optional list of sprites to initialize the level with
+- `grid_size`: Optional `(width, height)` tuple for grid sizing
+- `data`: Optional metadata dictionary
+- `name`: Level name
 
 ##### `add_sprite(sprite)`
 Add a sprite to the level.
@@ -485,10 +702,13 @@ Remove a sprite from the level.
 
 - `sprite`: The sprite to remove
 
+##### `remove_all_sprites()`
+Remove all sprites from the level.
+
 ##### `get_sprites()`
 Get all sprites in the level.
 
-- Returns: A copy of the list of all sprites in the level
+- Returns: A copy of the sprite list
 
 ##### `get_sprites_by_name(name)`
 Get all sprites with the given name.
@@ -496,18 +716,52 @@ Get all sprites with the given name.
 - `name`: The name to search for
 - Returns: List of sprites with the given name
 
+##### `get_sprites_by_tag(tag)`
+Get all sprites that have the given tag.
+
+- `tag`: The tag to search for
+- Returns: List of sprites that have the tag
+
+##### `get_sprites_by_tags(tags)`
+Get all sprites that have all of the given tags (AND).
+
+- `tags`: Tags to search for
+- Returns: List of sprites with all tags
+
+##### `get_sprites_by_any_tag(tags)`
+Get all sprites that have any of the specified tags (OR).
+
+- `tags`: Tags to search for
+- Returns: List of sprites that have any tag
+
+##### `get_all_tags()`
+Get all unique tags from all sprites in the level.
+
+- Returns: A set of tag strings
+
+##### `get_sprite_at(x, y, tag=None, ignore_collidable=False)`
+Get the top-most sprite at the given coordinates.
+
+- `x`, `y`: Coordinates to search
+- `tag`: Optional tag filter
+- `ignore_collidable`: If True, includes non-collidable sprites
+- Returns: The first matching sprite or `None`
+
+##### `collides_with(sprite, ignoreMode=False)`
+Return all sprites in the level that collide with the given sprite.
+
+- `sprite`: The sprite to check for collisions
+- `ignoreMode`: If True, bypasses interaction/blocking checks
+
+##### `get_data(key)`
+Get metadata by key.
+
+- Returns: The stored value or `None`
+
 ##### `clone()`
 Create a deep copy of this level.
 
-- Returns: A new Level instance with cloned sprites
-
-## Usage
-
-```python
-from arcengine import example
-
-# Add usage examples here
-```
+- Returns: A new `Level` instance with cloned sprites
 
 ## Development
 
@@ -515,7 +769,7 @@ To set up the development environment:
 
 1. Clone the repository:
    ```bash
-   git clone git@github.com:yourusername/ARCEngine.git
+   git clone git@github.com:arcprize/ARCEngine.git
    cd ARCEngine
    ```
 
@@ -531,19 +785,57 @@ To set up the development environment:
    ```
 
 4. Install git hooks:
+   ```bash
+   pre-commit install
+   ```
 
-```bash
-pre-commit install
-```
-
-You're now ready to contribute! This repo uses [`ruff`](https://github.com/astral-sh/ruff) to lint and format code and [`mypy`](https://github.com/python/mypy) for static type checking. You can run all of the tools manually like this:
+This repo uses `ruff` to lint/format and `mypy` for type checking:
 
 ```bash
 pre-commit run --all-files
 ```
 
-Note: by default these tools will run automatically before `git commit`. It's also recommended to set up `ruff` [inside your IDE](https://docs.astral.sh/ruff/editors/setup/).
+Note: by default these tools run automatically before `git commit`. It's also recommended
+to set up `ruff` inside your IDE (https://docs.astral.sh/ruff/editors/setup/).
+
+## Contributions
+
+This project does not accept external contributions.
+
+## Citation
+
+If you use this project in your research, please cite it as:
+
+```bibtex
+@software{arc_agi,
+  author       = {ARC Prize Foundation},
+  title        = {ARC Game Engine},
+  year         = {2026},
+  url          = {https://github.com/arcprize/ARCEngine},
+  version      = {0.9.3}
+}
+```
 
 ## License
 
-TBD - Currently for Internal Use Only.
+MIT License
+
+Copyright (c) 2026 ARC Prize Foundation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
