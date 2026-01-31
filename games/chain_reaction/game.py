@@ -6,7 +6,7 @@
 
 """Chain Reaction game implementation - Full 64x64 canvas design."""
 
-from arcengine import ARCBaseGame, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
+from arcengine import ARCBaseGame, BlockingMode, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
 from games.chain_reaction.levels import LEVELS
 from games.chain_reaction.sprites import MOVE_COUNTER, MOVE_COUNTER_OFF
 
@@ -145,7 +145,7 @@ class ChainReaction(ARCBaseGame):
                 continue
             if sprite == self._player:
                 continue
-            if sprite.blocking == sprite.blocking.NONE:
+            if sprite.blocking == BlockingMode.NOT_BLOCKED:
                 continue
 
             # Check if sprite occupies this position
