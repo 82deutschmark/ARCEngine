@@ -1,10 +1,10 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Sprite definitions for World Shifter game. Contains player, exit, maze sprites,
-#          and energy UI sprites for all 10 levels. Sprites tagged "moveable" shift on input.
-# SRP/DRY check: Pass - game sprites with energy UI, using ARC3 color palette
+# PURPOSE: Sprite definitions for World Shifter game using FULL 64x64 canvas.
+#          Large visible sprites, energy bar at bottom row, proper ARC3 layout.
+# SRP/DRY check: Pass - game sprites designed for 64x64 canvas like official ARC3 games
 
-"""Sprite definitions for World Shifter."""
+"""Sprite definitions for World Shifter - Full 64x64 canvas design."""
 
 from arcengine import BlockingMode, InteractionMode, Sprite
 
@@ -12,15 +12,16 @@ from arcengine import BlockingMode, InteractionMode, Sprite
 # ARC3 Color Reference (from shared/config/arc3Colors.ts)
 # 0: White, 1: Light Gray, 2: Gray, 3: Dark Gray, 4: Darker Gray, 5: Black
 # 6: Pink (#E53AA3), 7: Light Pink, 8: Red, 9: Blue, 10: Light Blue
-# 11: Yellow, 12: Orange, 13: Dark Red, 14: Green, 15: Purple
+# 11: Yellow (#FFDC00), 12: Orange (#FF851B), 13: Dark Red, 14: Green (#4FCC30), 15: Purple
 # =============================================================================
 
-# Energy UI sprites - displayed along top of 64x64 canvas
+# Energy UI sprites - displayed at BOTTOM of 64x64 canvas (row 62-63)
+# Each pill is 2x2, total 30 pills = 60 pixels wide
 ENERGY_PILL = Sprite(
     pixels=[
-        [6, 6],
-        [6, 6],
-    ],  # Pink 2x2 - vibrant energy indicator
+        [11, 11],
+        [11, 11],
+    ],  # Yellow 2x2 - energy remaining
     name="energy_pill",
     visible=True,
     collidable=False,
@@ -29,18 +30,22 @@ ENERGY_PILL = Sprite(
 
 ENERGY_PILL_OFF = Sprite(
     pixels=[
-        [3, 3],
-        [3, 3],
-    ],  # Dark Gray 2x2 - depleted energy
+        [13, 13],
+        [13, 13],
+    ],  # Dark Red 2x2 - energy depleted
     name="energy_pill_off",
     visible=False,
     collidable=False,
 )
 
-# Player sprite - fixed position, renders on top
-# Using bright Orange for high visibility
+# Player sprite - 3x3 for visibility, bright Orange
+# Fixed position in center of viewport, world moves around it
 PLAYER = Sprite(
-    pixels=[[12]],  # Orange 1x1 (ARC3 color 12)
+    pixels=[
+        [12, 12, 12],
+        [12, 0, 12],   # White center for crosshair effect
+        [12, 12, 12],
+    ],
     name="player",
     blocking=BlockingMode.BOUNDING_BOX,
     interaction=InteractionMode.TANGIBLE,
@@ -48,10 +53,14 @@ PLAYER = Sprite(
     tags=["player"],
 )
 
-# Exit sprite - part of moveable world
-# Bright Green indicates goal/success
+# Exit sprite - 4x4 Green target
 EXIT = Sprite(
-    pixels=[[14]],  # Green 1x1 (ARC3 color 14)
+    pixels=[
+        [14, 14, 14, 14],
+        [14, 0, 0, 14],
+        [14, 0, 0, 14],
+        [14, 14, 14, 14],
+    ],  # Green border with white center
     name="exit",
     blocking=BlockingMode.BOUNDING_BOX,
     interaction=InteractionMode.TANGIBLE,

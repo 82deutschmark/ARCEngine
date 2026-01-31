@@ -1,11 +1,10 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Main game logic for Chain Reaction. Implements Sokoban-style block pushing
-#          where matching colored blocks annihilate each other. Clear all blocks to unlock exit.
-#          Includes move counter UI for tracking remaining moves.
-# SRP/DRY check: Pass - game class with move UI, follows ARCBaseGame pattern
+# PURPOSE: Main game logic for Chain Reaction using FULL 64x64 canvas.
+#          Sokoban-style block pushing with move counter at bottom.
+# SRP/DRY check: Pass - game class designed for 64x64 canvas like official ARC3 games
 
-"""Chain Reaction game implementation."""
+"""Chain Reaction game implementation - Full 64x64 canvas design."""
 
 from arcengine import ARCBaseGame, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
 from games.chain_reaction.levels import LEVELS
@@ -13,14 +12,14 @@ from games.chain_reaction.sprites import MOVE_COUNTER, MOVE_COUNTER_OFF
 
 # Game identification
 GAME_ID = "chain_reaction"
-VERSION = "1.0.0"
+VERSION = "1.1.0"  # Major redesign for full 64x64 canvas
 
 # ARC3 Colors
-BACKGROUND_COLOR = 5  # Black
-LETTERBOX_COLOR = 3   # Dark Gray - creates nice contrast
+BACKGROUND_COLOR = 3  # Dark Gray - floor color like official games
+LETTERBOX_COLOR = 5   # Black - outer border
 
-# Move configuration - varies by difficulty
-MAX_MOVES = 25  # Total moves before losing
+# Move configuration - bar at BOTTOM of 64x64 canvas
+MAX_MOVES = 25  # 25 pills = 50 pixels wide at bottom
 
 # Color tags used for matching
 COLOR_TAGS = {"red", "blue", "yellow", "purple", "pink", "lightblue"}
@@ -45,16 +44,20 @@ class ChainReaction(ARCBaseGame):
 
     def __init__(self) -> None:
         """Initialize the game with camera, move UI, and levels."""
-        # Create move counter UI - pills along top edge
+        # Create move counter UI - pills along BOTTOM edge (row 62-63)
+        # 25 pills * 2 pixels = 50 pixels, centered with 7px padding each side
         sprite_pairs = []
         for i in range(MAX_MOVES):
-            on_counter = MOVE_COUNTER.clone().set_position(i * 2 + 4, 0)  # Offset by 4 for spacing
-            off_counter = MOVE_COUNTER_OFF.clone().set_position(i * 2 + 4, 0)
+            on_counter = MOVE_COUNTER.clone().set_position(7 + i * 2, 62)
+            off_counter = MOVE_COUNTER_OFF.clone().set_position(7 + i * 2, 62)
             sprite_pairs.append((on_counter, off_counter))
 
         self._move_ui = ToggleableUserDisplay(sprite_pairs)
 
+        # Full 64x64 camera - no letterboxing
         camera = Camera(
+            width=64,
+            height=64,
             background=BACKGROUND_COLOR,
             letter_box=LETTERBOX_COLOR,
             interfaces=[self._move_ui],

@@ -1,11 +1,10 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Main game logic for World Shifter. Implements inverse movement where player input
-#          moves the world in the opposite direction. Player is conceptually fixed while
-#          walls, exit, and obstacles shift around them. Includes energy tracking UI.
-# SRP/DRY check: Pass - game class with energy UI, follows ARCBaseGame pattern
+# PURPOSE: Main game logic for World Shifter using FULL 64x64 canvas.
+#          Inverse movement mechanic with scaled sprites and energy bar at bottom.
+# SRP/DRY check: Pass - game class designed for 64x64 canvas like official ARC3 games
 
-"""World Shifter game implementation."""
+"""World Shifter game implementation - Full 64x64 canvas design."""
 
 from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite, ToggleableUserDisplay
 from games.world_shifter.levels import LEVELS
@@ -13,14 +12,14 @@ from games.world_shifter.sprites import ENERGY_PILL, ENERGY_PILL_OFF
 
 # Game identification
 GAME_ID = "world_shifter"
-VERSION = "1.0.0"
+VERSION = "1.1.0"  # Major redesign for full 64x64 canvas
 
 # ARC3 Colors
-BACKGROUND_COLOR = 5  # Black
-LETTERBOX_COLOR = 3   # Dark Gray - creates nice contrast
+BACKGROUND_COLOR = 3  # Dark Gray - floor color like official games
+LETTERBOX_COLOR = 5   # Black - outer border
 
-# Energy configuration
-MAX_ENERGY = 30  # Moves before losing
+# Energy configuration - bar at BOTTOM of 64x64 canvas
+MAX_ENERGY = 30  # 30 pills = 60 pixels wide at bottom
 
 
 class WorldShifter(ARCBaseGame):
@@ -43,16 +42,20 @@ class WorldShifter(ARCBaseGame):
 
     def __init__(self) -> None:
         """Initialize the game with camera, energy UI, and levels."""
-        # Create energy UI - pills along top edge (30 total)
+        # Create energy UI - pills along BOTTOM edge (row 62-63)
+        # 30 pills * 2 pixels = 60 pixels, centered with 2px padding each side
         sprite_pairs = []
         for i in range(MAX_ENERGY):
-            on_pill = ENERGY_PILL.clone().set_position(i * 2, 0)
-            off_pill = ENERGY_PILL_OFF.clone().set_position(i * 2, 0)
+            on_pill = ENERGY_PILL.clone().set_position(2 + i * 2, 62)
+            off_pill = ENERGY_PILL_OFF.clone().set_position(2 + i * 2, 62)
             sprite_pairs.append((on_pill, off_pill))
 
         self._energy_ui = ToggleableUserDisplay(sprite_pairs)
 
+        # Full 64x64 camera - no letterboxing
         camera = Camera(
+            width=64,
+            height=64,
             background=BACKGROUND_COLOR,
             letter_box=LETTERBOX_COLOR,
             interfaces=[self._energy_ui],
