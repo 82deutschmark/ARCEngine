@@ -1,10 +1,11 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Main game logic for World Shifter using FULL 64x64 canvas.
-#          Inverse movement mechanic with scaled sprites and energy bar at bottom.
-# SRP/DRY check: Pass - game class designed for 64x64 canvas like official ARC3 games
+# PURPOSE: World Shifter game logic - creative redesign.
+#          Core mechanic: world moves around FIXED player position.
+#          Floating platforms on dark background, energy bar at bottom.
+# SRP/DRY check: Pass - clean game logic for world-shifting mechanic
 
-"""World Shifter game implementation - Full 64x64 canvas design."""
+"""World Shifter game implementation - Creative Redesign."""
 
 from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite, ToggleableUserDisplay
 from games.world_shifter.levels import LEVELS
@@ -14,9 +15,9 @@ from games.world_shifter.sprites import ENERGY_PILL, ENERGY_PILL_OFF
 GAME_ID = "world_shifter"
 VERSION = "0.01"  # Initial release
 
-# ARC3 Colors
-BACKGROUND_COLOR = 3  # Dark Gray - floor color like official games
-LETTERBOX_COLOR = 5   # Black - outer border
+# ARC3 Colors - dark background makes floating platforms pop
+BACKGROUND_COLOR = 5  # Black - dark void behind floating platforms
+LETTERBOX_COLOR = 5   # Black - seamless border
 
 # Energy configuration - bar at BOTTOM of 64x64 canvas
 MAX_ENERGY = 30  # 30 pills = 60 pixels wide at bottom
@@ -27,12 +28,13 @@ class WorldShifter(ARCBaseGame):
     The world moves around you, not the other way around.
 
     A puzzle game where player input moves the entire world in the opposite direction.
-    Navigate mazes by shifting walls and the exit toward your fixed position.
+    Navigate floating platforms by shifting them toward your fixed position.
+    Bring the exit TO you - you cannot move to it.
 
     Features:
     - Energy tracking: Each move costs 1 energy. Run out and you lose!
-    - 10 levels of increasing difficulty
-    - Unique game_id-version identifier: world_shifter-1.0.0
+    - 6 creative levels with unique floating platform designs
+    - Inverse movement creates mind-bending spatial puzzles
     """
 
     _player: Sprite

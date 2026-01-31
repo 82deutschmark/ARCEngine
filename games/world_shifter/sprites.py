@@ -1,27 +1,28 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Sprite definitions for World Shifter game using FULL 64x64 canvas.
-#          Large visible sprites, energy bar at bottom row, proper ARC3 layout.
-# SRP/DRY check: Pass - game sprites designed for 64x64 canvas like official ARC3 games
+# PURPOSE: World Shifter sprites - complete creative redesign.
+#          Core mechanic: world moves around FIXED player position.
+#          Design: floating colorful platforms on dark background.
+# SRP/DRY check: Pass - creative sprite designs for world-shifting mechanic
 
-"""Sprite definitions for World Shifter - Full 64x64 canvas design."""
+"""Sprite definitions for World Shifter - Creative Redesign."""
 
 from arcengine import BlockingMode, InteractionMode, Sprite
 
 # =============================================================================
-# ARC3 Color Reference (from shared/config/arc3Colors.ts)
+# ARC3 Color Palette
 # 0: White, 1: Light Gray, 2: Gray, 3: Dark Gray, 4: Darker Gray, 5: Black
-# 6: Pink (#E53AA3), 7: Light Pink, 8: Red, 9: Blue, 10: Light Blue
-# 11: Yellow (#FFDC00), 12: Orange (#FF851B), 13: Dark Red, 14: Green (#4FCC30), 15: Purple
+# 6: Pink (#E53AA3), 7: Light Pink, 8: Red (#F93C31), 9: Blue (#1E93FF)
+# 10: Light Blue (#88D8F1), 11: Yellow (#FFDC00), 12: Orange (#FF851B)
+# 13: Dark Red (#921231), 14: Green (#4FCC30), 15: Purple (#A356D0)
 # =============================================================================
 
-# Energy UI sprites - displayed at BOTTOM of 64x64 canvas (row 62-63)
-# Each pill is 2x2, total 30 pills = 60 pixels wide
+# Energy UI - yellow pills that deplete to dark red
 ENERGY_PILL = Sprite(
     pixels=[
         [11, 11],
         [11, 11],
-    ],  # Yellow 2x2 - energy remaining
+    ],
     name="energy_pill",
     visible=True,
     collidable=False,
@@ -32,19 +33,19 @@ ENERGY_PILL_OFF = Sprite(
     pixels=[
         [13, 13],
         [13, 13],
-    ],  # Dark Red 2x2 - energy depleted
+    ],
     name="energy_pill_off",
     visible=False,
     collidable=False,
 )
 
-# Player sprite - 3x3 for visibility, bright Orange
-# Fixed position in center of viewport, world moves around it
+# Player - FIXED crosshair position (white arms, orange center)
+# This is the anchor point - the world moves, not the player
 PLAYER = Sprite(
     pixels=[
-        [12, 12, 12],
-        [12, 0, 12],   # White center for crosshair effect
-        [12, 12, 12],
+        [-1, 0, -1],
+        [0, 12, 0],
+        [-1, 0, -1],
     ],
     name="player",
     blocking=BlockingMode.BOUNDING_BOX,
@@ -53,14 +54,13 @@ PLAYER = Sprite(
     tags=["player"],
 )
 
-# Exit sprite - 4x4 Green target
+# Exit - Blue beacon goal (the world brings this TO you)
 EXIT = Sprite(
     pixels=[
-        [14, 14, 14, 14],
-        [14, 0, 0, 14],
-        [14, 0, 0, 14],
-        [14, 14, 14, 14],
-    ],  # Green border with white center
+        [9, 10, 9],
+        [10, 9, 10],
+        [9, 10, 9],
+    ],
     name="exit",
     blocking=BlockingMode.BOUNDING_BOX,
     interaction=InteractionMode.TANGIBLE,
@@ -68,243 +68,160 @@ EXIT = Sprite(
     tags=["moveable", "exit"],
 )
 
-# Level 1 Maze (8x8 - Tutorial)
-# ARC3 color 2 = Gray for walls
-MAZE_1 = Sprite(
+# =============================================================================
+# FLOATING WORLD PLATFORMS - Creative shapes that shift around the player
+# Gray (2) = solid walls/edges, -1 = walkable transparent space
+# Design principle: interesting shapes, not boring rectangles
+# =============================================================================
+
+# Level 1: "The Island" - Organic floating platform shape
+WORLD_1 = Sprite(
     pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, 2, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, 2, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2],
+        [-1, -1, 2, 2, 2, 2, 2, -1, -1, -1],
+        [-1, 2, 2, 2, 2, 2, 2, 2, -1, -1],
+        [2, 2, 2, -1, -1, -1, 2, 2, 2, -1],
+        [2, 2, -1, -1, -1, -1, -1, 2, 2, -1],
+        [2, 2, -1, -1, -1, -1, -1, 2, 2, 2],
+        [2, 2, -1, -1, -1, -1, -1, -1, 2, 2],
+        [2, 2, 2, -1, -1, -1, -1, 2, 2, 2],
+        [-1, 2, 2, 2, 2, 2, 2, 2, 2, -1],
+        [-1, -1, 2, 2, 2, 2, 2, 2, -1, -1],
+        [-1, -1, -1, 2, 2, 2, -1, -1, -1, -1],
     ],
-    name="maze_1",
+    name="world_1",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Level 2 Maze (8x8 - Longer Path)
-MAZE_2 = Sprite(
+# Level 2: "Twin Peaks" - Two connected chambers
+WORLD_2 = Sprite(
     pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, 2, -1, -1, 2],
-        [2, 2, 2, -1, 2, -1, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, 2, -1, 2],
-        [2, 2, 2, 2, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2],
-    ],
-    name="maze_2",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-    tags=["moveable", "maze"],
-)
-
-# Level 3 Maze (10x10 - Intermediate)
-MAZE_3 = Sprite(
-    pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, -1, 2, -1, -1, -1, 2],
-        [2, -1, 2, 2, -1, 2, -1, 2, -1, 2],
-        [2, -1, 2, -1, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, -1, 2, 2, 2, 2, -1, 2],
+        [2, 2, 2, 2, -1, -1, 2, 2, 2, 2],
+        [2, -1, -1, 2, -1, -1, 2, -1, -1, 2],
+        [2, -1, -1, 2, 2, 2, 2, -1, -1, 2],
         [2, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, -1, 2, 2, -1, 2],
+        [2, 2, 2, -1, -1, -1, -1, 2, 2, 2],
+        [-1, -1, 2, -1, -1, -1, -1, 2, -1, -1],
+        [-1, -1, 2, -1, -1, -1, -1, 2, -1, -1],
+        [2, 2, 2, -1, -1, -1, -1, 2, 2, 2],
         [2, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, -1, -1, 2, 2, 2, 2, -1, -1, 2],
+        [2, -1, -1, 2, -1, -1, 2, -1, -1, 2],
+        [2, 2, 2, 2, -1, -1, 2, 2, 2, 2],
     ],
-    name="maze_3",
+    name="world_2",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Level 4 Maze (10x10 - Winding Path)
-MAZE_4 = Sprite(
-    pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, 2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, 2, -1, 2, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, -1, 2, 2, 2, 2],
-        [2, -1, 2, -1, 2, -1, -1, -1, -1, 2],
-        [2, -1, -1, -1, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, -1, -1, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    ],
-    name="maze_4",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-    tags=["moveable", "maze"],
-)
-
-# Level 5 Maze (12x12 - Complex)
-MAZE_5 = Sprite(
+# Level 3: "The Spiral" - Spiral path to center
+WORLD_3 = Sprite(
     pixels=[
         [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, -1, 2, 2, 2, 2, -1, 2],
+        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
+        [2, -1, 2, 2, 2, 2, 2, 2, 2, 2, -1, 2],
         [2, -1, 2, -1, -1, -1, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, -1, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, 2, 2, -1, 2, 2, 2, 2, 2, -1, 2, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    ],
-    name="maze_5",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-    tags=["moveable", "maze"],
-)
-
-# Level 6 Maze (12x12 - Master)
-MAZE_6 = Sprite(
-    pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, -1, 2, -1, 2, 2, -1, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, 2],
-        [2, 2, 2, 2, 2, -1, 2, 2, 2, -1, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, -1, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, 2],
-        [2, 2, -1, 2, 2, -1, 2, 2, 2, 2, -1, 2],
+        [2, -1, 2, -1, 2, 2, 2, 2, -1, 2, -1, 2],
+        [2, -1, 2, -1, 2, -1, -1, 2, -1, 2, -1, 2],
+        [2, -1, 2, -1, 2, -1, -1, 2, -1, 2, -1, 2],
+        [2, -1, 2, -1, 2, 2, -1, 2, -1, 2, -1, 2],
+        [2, -1, 2, -1, -1, -1, -1, 2, -1, 2, -1, 2],
+        [2, -1, 2, 2, 2, 2, 2, 2, -1, 2, -1, 2],
         [2, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, 2, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, 2],
     ],
-    name="maze_6",
+    name="world_3",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Level 7 Maze (10x10 - The Gauntlet)
-# Narrow corridors requiring precise navigation
-MAZE_7 = Sprite(
+# Level 4: "Four Rooms" - Connected chambers with central hub
+WORLD_4 = Sprite(
     pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, 2, -1, -1, -1, -1, -1, 2],
-        [2, 2, -1, 2, -1, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2, -1, 2],
-        [2, -1, 2, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    ],
-    name="maze_7",
-    blocking=BlockingMode.PIXEL_PERFECT,
-    interaction=InteractionMode.TANGIBLE,
-    layer=-1,
-    tags=["moveable", "maze"],
-)
-
-# Level 8 Maze (12x12 - Crossroads)
-# Multiple intersection points requiring careful planning
-MAZE_8 = Sprite(
-    pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [-1, 2, 2, 2, 2, -1, -1, 2, 2, 2, 2, -1],
+        [2, 2, -1, -1, 2, 2, 2, 2, -1, -1, 2, 2],
         [2, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, -1, -1, -1, -1, 2, 2, -1, 2],
-        [2, -1, 2, -1, -1, 2, 2, -1, -1, 2, -1, 2],
-        [2, -1, -1, -1, 2, 2, 2, 2, -1, -1, -1, 2],
-        [2, 2, 2, -1, -1, -1, -1, -1, -1, 2, 2, 2],
-        [2, 2, 2, -1, -1, -1, -1, -1, -1, 2, 2, 2],
-        [2, -1, -1, -1, 2, 2, 2, 2, -1, -1, -1, 2],
-        [2, -1, 2, -1, -1, 2, 2, -1, -1, 2, -1, 2],
-        [2, -1, 2, 2, -1, -1, -1, -1, 2, 2, -1, 2],
+        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
+        [2, 2, -1, -1, 2, 2, 2, 2, -1, -1, 2, 2],
+        [-1, 2, 2, -1, 2, -1, -1, 2, -1, 2, 2, -1],
+        [-1, 2, 2, -1, 2, -1, -1, 2, -1, 2, 2, -1],
+        [2, 2, -1, -1, 2, 2, 2, 2, -1, -1, 2, 2],
+        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
         [2, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, -1, -1, 2, 2, 2, 2, -1, -1, 2, 2],
+        [-1, 2, 2, 2, 2, -1, -1, 2, 2, 2, 2, -1],
     ],
-    name="maze_8",
+    name="world_4",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Level 9 Maze (14x14 - The Labyrinth)
-# Large maze with winding paths
-MAZE_9 = Sprite(
+# Level 5: "The Archipelago" - Scattered islands with narrow passages
+WORLD_5 = Sprite(
     pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, -1, 2, -1, -1, -1, 2],
-        [2, -1, 2, -1, 2, -1, 2, 2, -1, 2, -1, 2, -1, 2],
-        [2, -1, 2, -1, -1, -1, 2, -1, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, 2, 2, -1, 2, 2, 2, 2, 2, 2, -1, 2, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2, 2, 2, 2, 2, -1, 2],
-        [2, -1, 2, -1, -1, -1, -1, 2, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, -1, 2, 2, -1, 2, -1, 2, -1, 2, -1, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, -1, 2, -1, -1, -1, 2],
-        [2, 2, 2, 2, 2, -1, 2, 2, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, -1, -1, -1, -1, -1, -1, 2, 2, 2, 2, 2],
+        [2, -1, 2, 2, -1, -1, -1, -1, 2, 2, -1, -1, -1, 2],
+        [2, -1, -1, 2, 2, 2, -1, 2, 2, -1, -1, -1, -1, 2],
+        [-1, -1, -1, -1, -1, 2, -1, 2, -1, -1, -1, -1, 2, 2],
+        [-1, -1, -1, -1, -1, 2, 2, 2, -1, -1, -1, -1, -1, -1],
+        [-1, -1, 2, 2, 2, 2, -1, 2, 2, 2, 2, -1, -1, -1],
+        [-1, 2, 2, -1, -1, -1, -1, -1, -1, -1, 2, 2, -1, -1],
+        [-1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1],
+        [2, 2, -1, -1, 2, 2, -1, 2, 2, -1, -1, 2, 2, -1],
+        [2, -1, -1, 2, 2, -1, -1, -1, 2, 2, -1, -1, 2, 2],
+        [2, -1, -1, 2, -1, -1, -1, -1, -1, 2, -1, -1, -1, 2],
+        [2, 2, -1, 2, -1, -1, -1, -1, -1, 2, -1, -1, -1, 2],
+        [-1, 2, 2, 2, 2, -1, -1, -1, 2, 2, -1, -1, 2, 2],
+        [-1, -1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1],
     ],
-    name="maze_9",
+    name="world_5",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Level 10 Maze (14x14 - The Ultimate Challenge)
-# Most complex maze with multiple dead ends
-MAZE_10 = Sprite(
+# Level 6: "The Fortress" - Symmetrical structure with winding path
+WORLD_6 = Sprite(
     pixels=[
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, -1, 2, -1, -1, -1, 2, 2, -1, -1, -1, 2, -1, 2],
-        [2, -1, 2, -1, 2, -1, -1, -1, -1, 2, -1, 2, -1, 2],
-        [2, -1, -1, -1, 2, 2, 2, -1, 2, 2, -1, -1, -1, 2],
-        [2, 2, 2, -1, -1, -1, 2, -1, 2, -1, -1, 2, 2, 2],
-        [2, -1, -1, -1, 2, -1, -1, -1, -1, -1, 2, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, -1, 2, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, -1, 2, 2, 2, 2, 2, -1, 2],
-        [2, -1, -1, -1, -1, 2, -1, -1, -1, 2, -1, -1, -1, 2],
-        [2, 2, 2, 2, -1, 2, -1, 2, -1, 2, -1, 2, 2, 2],
-        [2, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, 2],
-        [2, -1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, 2],
-        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [-1, -1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, -1],
+        [-1, 2, 2, -1, -1, -1, 2, 2, -1, -1, -1, 2, 2, -1],
+        [2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 2],
+        [2, -1, -1, -1, 2, 2, -1, -1, 2, 2, -1, -1, -1, 2],
+        [2, -1, -1, 2, 2, -1, -1, -1, -1, 2, 2, -1, -1, 2],
+        [2, -1, -1, 2, -1, -1, -1, -1, -1, -1, 2, -1, -1, 2],
+        [2, 2, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, 2, 2],
+        [2, 2, -1, -1, -1, -1, 2, 2, -1, -1, -1, -1, 2, 2],
+        [2, -1, -1, 2, -1, -1, -1, -1, -1, -1, 2, -1, -1, 2],
+        [2, -1, -1, 2, 2, -1, -1, -1, -1, 2, 2, -1, -1, 2],
+        [2, -1, -1, -1, 2, 2, -1, -1, 2, 2, -1, -1, -1, 2],
+        [2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, 2],
+        [-1, 2, 2, -1, -1, -1, 2, 2, -1, -1, -1, 2, 2, -1],
+        [-1, -1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, -1, -1],
     ],
-    name="maze_10",
+    name="world_6",
     blocking=BlockingMode.PIXEL_PERFECT,
     interaction=InteractionMode.TANGIBLE,
     layer=-1,
     tags=["moveable", "maze"],
 )
 
-# Dictionary for easy access by level
+# Dictionary for access
 SPRITES = {
     "player": PLAYER,
     "exit": EXIT,
-    "maze_1": MAZE_1,
-    "maze_2": MAZE_2,
-    "maze_3": MAZE_3,
-    "maze_4": MAZE_4,
-    "maze_5": MAZE_5,
-    "maze_6": MAZE_6,
-    "maze_7": MAZE_7,
-    "maze_8": MAZE_8,
-    "maze_9": MAZE_9,
-    "maze_10": MAZE_10,
+    "world_1": WORLD_1,
+    "world_2": WORLD_2,
+    "world_3": WORLD_3,
+    "world_4": WORLD_4,
+    "world_5": WORLD_5,
+    "world_6": WORLD_6,
 }

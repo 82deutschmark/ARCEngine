@@ -89,16 +89,20 @@ The world's origin position is tracked, and movement is clamped to these bounds.
 
 | Element | Color Index | Color Name | Rationale |
 |---------|-------------|------------|-----------|
-| Background | 5 | Black | Clean contrast |
-| Player | 12 | Orange | Warm, focal point |
-| Walls | 2 | Gray | Neutral, structural |
-| Exit | 14 | Green | Goal = positive color |
-| Letterbox | 4 | Darker Gray | Frame the action |
+| Background | 5 | Black | Dark void - platforms float on it |
+| Player | 0+12 | White arms + Orange center | Fixed crosshair anchor point |
+| Platform walls | 2 | Gray | Floating world structure |
+| Exit | 9+10 | Blue + Light Blue | Beacon goal - bring it TO you |
+| Energy bar | 11/13 | Yellow/Dark Red | Remaining/depleted moves |
+| Letterbox | 5 | Black | Seamless with background |
 
-### 3.2 Grid Sizes
-- **Levels 1-2**: 8x8 (tutorial)
-- **Levels 3-4**: 10x10 (intermediate)
-- **Levels 5-6**: 12x12 (advanced)
+### 3.2 Level Designs (Creative Floating Platforms)
+- **Level 1 "The Island"**: 10x10 organic floating platform shape
+- **Level 2 "Twin Peaks"**: 10x12 two connected chambers  
+- **Level 3 "The Spiral"**: 12x12 spiral path to center
+- **Level 4 "Four Rooms"**: 12x12 connected chambers with central hub
+- **Level 5 "The Archipelago"**: 14x14 scattered islands with narrow passages
+- **Level 6 "The Fortress"**: 14x14 symmetrical structure with winding path
 
 ### 3.3 Camera
 - Camera viewport matches grid size

@@ -1,44 +1,61 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Level definitions for World Shifter using FULL 64x64 canvas.
-#          Mazes are scaled 4x to fill the canvas. Energy bar at bottom (row 62-63).
-# SRP/DRY check: Pass - levels designed for 64x64 canvas like official ARC3 games
+# PURPOSE: World Shifter level definitions - complete redesign.
+#          NO SCALING - native resolution for clean visuals.
+#          Player fixed at center, world platforms shift around them.
+# SRP/DRY check: Pass - clean level definitions with creative world layouts
 
-"""Level definitions for World Shifter - Full 64x64 canvas design."""
+"""Level definitions for World Shifter - Creative Redesign."""
 
 from arcengine import Level
 from games.world_shifter.sprites import SPRITES
 
-# MAZE SCALE FACTOR - multiply base maze by this to fill 64x64 canvas
-# 8x8 maze * 4 = 32x32, positioned to fill playable area (leaving room for energy bar)
-# 12x12 maze * 4 = 48x48, fills most of canvas
-MAZE_SCALE = 4
+# Player is always fixed at center of 64x64 canvas (accounting for energy bar)
+# Position: (31, 29) puts 3x3 player centered in playable area
+PLAYER_X = 31
+PLAYER_Y = 29
 
-# Level 1: Tutorial (8x8 base * 4 = 32x32)
-# Simple L-shaped path, teaches inverse movement
-# Player fixed at center (30, 28), world moves around them
+# Level 1: "The Island" - Simple floating platform (10x10)
+# Teaches the basic mechanic: world moves, you stay fixed
 LEVEL_1 = Level(
     sprites=[
-        SPRITES["maze_1"].clone().set_position(16, 14).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(40, 18),
-        SPRITES["player"].clone().set_position(30, 28),
+        SPRITES["world_1"].clone().set_position(27, 25),
+        SPRITES["exit"].clone().set_position(34, 26),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
     data={
-        "min_x": -12,
-        "max_x": 12,
-        "min_y": -16,
-        "max_y": 16,
+        "min_x": -8,
+        "max_x": 8,
+        "min_y": -8,
+        "max_y": 8,
     },
 )
 
-# Level 2: Longer Journey (8x8 base * 4 = 32x32)
-# More winding path, builds comfort with inverse movement
+# Level 2: "Twin Peaks" - Two chambers connected (10x12)
+# Learn to navigate between distinct areas
 LEVEL_2 = Level(
     sprites=[
-        SPRITES["maze_2"].clone().set_position(16, 14).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(40, 38),
-        SPRITES["player"].clone().set_position(30, 28),
+        SPRITES["world_2"].clone().set_position(27, 23),
+        SPRITES["exit"].clone().set_position(35, 25),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
+    ],
+    grid_size=(64, 64),
+    data={
+        "min_x": -10,
+        "max_x": 10,
+        "min_y": -10,
+        "max_y": 10,
+    },
+)
+
+# Level 3: "The Spiral" - Wind your way to the center (12x12)
+# Exit is at spiral center - must think in reverse
+LEVEL_3 = Level(
+    sprites=[
+        SPRITES["world_3"].clone().set_position(26, 23),
+        SPRITES["exit"].clone().set_position(31, 28),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
     data={
@@ -49,75 +66,58 @@ LEVEL_2 = Level(
     },
 )
 
-# Level 3: The Corridor (10x10 base * 4 = 40x40)
-# Tighter spaces, requires precise sequence
-LEVEL_3 = Level(
-    sprites=[
-        SPRITES["maze_3"].clone().set_position(12, 10).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(44, 42),
-        SPRITES["player"].clone().set_position(30, 28),
-    ],
-    grid_size=(64, 64),
-    data={
-        "min_x": -16,
-        "max_x": 16,
-        "min_y": -16,
-        "max_y": 16,
-    },
-)
-
-# Level 4: The Spiral (10x10 base * 4 = 40x40)
-# Spiral-like structure, tests mental rotation
+# Level 4: "Four Rooms" - Navigate connected chambers (12x12)
+# Multiple paths, must choose wisely
 LEVEL_4 = Level(
     sprites=[
-        SPRITES["maze_4"].clone().set_position(12, 10).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(44, 14),
-        SPRITES["player"].clone().set_position(30, 28),
+        SPRITES["world_4"].clone().set_position(26, 23),
+        SPRITES["exit"].clone().set_position(36, 26),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
     data={
-        "min_x": -16,
-        "max_x": 16,
-        "min_y": -16,
-        "max_y": 16,
+        "min_x": -12,
+        "max_x": 12,
+        "min_y": -12,
+        "max_y": 12,
     },
 )
 
-# Level 5: The Maze (12x12 base * 4 = 48x48)
-# Complex navigation with multiple paths
+# Level 5: "The Archipelago" - Island hopping (14x14)
+# Scattered platforms with narrow passages
 LEVEL_5 = Level(
     sprites=[
-        SPRITES["maze_5"].clone().set_position(8, 6).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(48, 46),
-        SPRITES["player"].clone().set_position(30, 28),
+        SPRITES["world_5"].clone().set_position(25, 22),
+        SPRITES["exit"].clone().set_position(36, 29),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
     data={
-        "min_x": -20,
-        "max_x": 20,
-        "min_y": -20,
-        "max_y": 20,
+        "min_x": -14,
+        "max_x": 14,
+        "min_y": -14,
+        "max_y": 14,
     },
 )
 
-# Level 6: The Master (12x12 base * 4 = 48x48)
-# Final challenge, most complex maze
+# Level 6: "The Fortress" - Final challenge (14x14)
+# Symmetrical fortress with winding interior path
 LEVEL_6 = Level(
     sprites=[
-        SPRITES["maze_6"].clone().set_position(8, 6).set_scale(MAZE_SCALE),
-        SPRITES["exit"].clone().set_position(48, 46),
-        SPRITES["player"].clone().set_position(30, 28),
+        SPRITES["world_6"].clone().set_position(25, 22),
+        SPRITES["exit"].clone().set_position(31, 28),
+        SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
     data={
-        "min_x": -20,
-        "max_x": 20,
-        "min_y": -20,
-        "max_y": 20,
+        "min_x": -14,
+        "max_x": 14,
+        "min_y": -14,
+        "max_y": 14,
     },
 )
 
-# All levels in order (6 levels for now, all using 64x64 canvas)
+# All levels in progression order
 LEVELS = [
     LEVEL_1,
     LEVEL_2,
