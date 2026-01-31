@@ -1,17 +1,26 @@
-# Author: Claude Opus 4.5
+# Author: Claude Sonnet 4
 # Date: 2026-01-31
 # PURPOSE: Main game logic for World Shifter. Implements inverse movement where player input
 #          moves the world in the opposite direction. Player is conceptually fixed while
-#          walls, exit, and obstacles shift around them.
-# SRP/DRY check: Pass - new game class, follows ARCBaseGame pattern from examples
+#          walls, exit, and obstacles shift around them. Includes energy tracking UI.
+# SRP/DRY check: Pass - game class with energy UI, follows ARCBaseGame pattern
 
 """World Shifter game implementation."""
 
-from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite
+from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite, ToggleableUserDisplay
 from games.world_shifter.levels import LEVELS
+from games.world_shifter.sprites import ENERGY_PILL, ENERGY_PILL_OFF
 
-BACKGROUND_COLOR = 5  # Black (ARC3 color 5)
-LETTERBOX_COLOR = 4   # Darker Gray (ARC3 color 4)
+# Game identification
+GAME_ID = "world_shifter"
+VERSION = "1.0.0"
+
+# ARC3 Colors
+BACKGROUND_COLOR = 5  # Black
+LETTERBOX_COLOR = 3   # Dark Gray - creates nice contrast
+
+# Energy configuration
+MAX_ENERGY = 30  # Moves before losing
 
 
 class WorldShifter(ARCBaseGame):
@@ -20,20 +29,36 @@ class WorldShifter(ARCBaseGame):
 
     A puzzle game where player input moves the entire world in the opposite direction.
     Navigate mazes by shifting walls and the exit toward your fixed position.
+
+    Features:
+    - Energy tracking: Each move costs 1 energy. Run out and you lose!
+    - 10 levels of increasing difficulty
+    - Unique game_id-version identifier: world_shifter-1.0.0
     """
 
     _player: Sprite
     _world_origin_x: int
     _world_origin_y: int
+    _energy_ui: ToggleableUserDisplay
 
     def __init__(self) -> None:
-        """Initialize the game with camera and levels."""
+        """Initialize the game with camera, energy UI, and levels."""
+        # Create energy UI - pills along top edge (30 total)
+        sprite_pairs = []
+        for i in range(MAX_ENERGY):
+            on_pill = ENERGY_PILL.clone().set_position(i * 2, 0)
+            off_pill = ENERGY_PILL_OFF.clone().set_position(i * 2, 0)
+            sprite_pairs.append((on_pill, off_pill))
+
+        self._energy_ui = ToggleableUserDisplay(sprite_pairs)
+
         camera = Camera(
             background=BACKGROUND_COLOR,
             letter_box=LETTERBOX_COLOR,
+            interfaces=[self._energy_ui],
         )
         super().__init__(
-            game_id="world_shifter",
+            game_id=f"{GAME_ID}-{VERSION}",
             levels=LEVELS,
             camera=camera,
         )
@@ -46,6 +71,9 @@ class WorldShifter(ARCBaseGame):
         maze = level.get_sprites_by_tag("maze")[0]
         self._world_origin_x = maze.x
         self._world_origin_y = maze.y
+
+        # Reset energy for new level
+        self._energy_ui.enable_all_by_tag("energy")
 
     def step(self) -> None:
         """Process one game step with inverse movement."""
@@ -61,9 +89,19 @@ class WorldShifter(ARCBaseGame):
             dx = -1  # World moves LEFT (opposite)
 
         # Try to move world if there's movement input
+        moved = False
         if dx != 0 or dy != 0:
             if self._can_move_world(dx, dy):
                 self._move_world(dx, dy)
+                moved = True
+                # Consume energy on successful move
+                self._energy_ui.disabled_first_by_tag("energy")
+
+        # Check lose condition (out of energy)
+        if moved and self._is_out_of_energy():
+            self.lose()
+            self.complete_action()
+            return
 
         # Check win condition (exit reached player)
         if self._check_exit_collision():
@@ -73,6 +111,11 @@ class WorldShifter(ARCBaseGame):
                 self.next_level()
 
         self.complete_action()
+
+    def _is_out_of_energy(self) -> bool:
+        """Check if all energy has been consumed."""
+        # Check if any energy pills are still enabled
+        return not self._energy_ui.disabled_first_by_tag("energy", disable=False)
 
     def _get_world_offset(self) -> tuple[int, int]:
         """Calculate current world offset from origin."""

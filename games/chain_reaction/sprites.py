@@ -1,17 +1,43 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
 # PURPOSE: Sprite definitions for Chain Reaction game. Contains player, exit, colored blocks,
-#          and wall sprites for all 6 levels. Colored blocks annihilate when matching colors collide.
-# SRP/DRY check: Pass - new game sprites following ARC3 color palette
+#          wall sprites, and move counter UI for all 6 levels. Blocks annihilate on color match.
+# SRP/DRY check: Pass - game sprites with move UI, using ARC3 color palette
 
 """Sprite definitions for Chain Reaction."""
 
 from arcengine import BlockingMode, InteractionMode, Sprite
 
-# ARC3 Color Reference:
+# =============================================================================
+# ARC3 Color Reference (from shared/config/arc3Colors.ts)
 # 0: White, 1: Light Gray, 2: Gray, 3: Dark Gray, 4: Darker Gray, 5: Black
-# 6: Pink, 7: Light Pink, 8: Red, 9: Blue, 10: Light Blue, 11: Yellow
-# 12: Orange, 13: Dark Red, 14: Green, 15: Purple
+# 6: Pink (#E53AA3), 7: Light Pink, 8: Red (#F93C31), 9: Blue (#1E93FF)
+# 10: Light Blue (#88D8F1), 11: Yellow (#FFDC00), 12: Orange (#FF851B)
+# 13: Dark Red (#921231), 14: Green (#4FCC30), 15: Purple (#A356D0)
+# =============================================================================
+
+# Move counter UI sprites - displayed along top of 64x64 canvas
+# Uses Yellow (11) for active moves, Darker Gray (4) for used moves
+MOVE_COUNTER = Sprite(
+    pixels=[
+        [11, 11],
+        [11, 11],
+    ],  # Yellow 2x2 - remaining moves
+    name="move_counter",
+    visible=True,
+    collidable=False,
+    tags=["moves"],
+)
+
+MOVE_COUNTER_OFF = Sprite(
+    pixels=[
+        [4, 4],
+        [4, 4],
+    ],  # Darker Gray 2x2 - used moves
+    name="move_counter_off",
+    visible=False,
+    collidable=False,
+)
 
 # Player sprite - 1x1 orange
 PLAYER = Sprite(

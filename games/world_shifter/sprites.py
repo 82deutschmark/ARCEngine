@@ -1,14 +1,44 @@
-# Author: Claude Opus 4.5
+# Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Sprite definitions for World Shifter game. Contains player, exit, and maze sprites
-#          for all 6 levels. Sprites tagged "moveable" shift when player provides input.
-# SRP/DRY check: Pass - new game sprites, no existing world shifter assets
+# PURPOSE: Sprite definitions for World Shifter game. Contains player, exit, maze sprites,
+#          and energy UI sprites for all 10 levels. Sprites tagged "moveable" shift on input.
+# SRP/DRY check: Pass - game sprites with energy UI, using ARC3 color palette
 
 """Sprite definitions for World Shifter."""
 
 from arcengine import BlockingMode, InteractionMode, Sprite
 
+# =============================================================================
+# ARC3 Color Reference (from shared/config/arc3Colors.ts)
+# 0: White, 1: Light Gray, 2: Gray, 3: Dark Gray, 4: Darker Gray, 5: Black
+# 6: Pink (#E53AA3), 7: Light Pink, 8: Red, 9: Blue, 10: Light Blue
+# 11: Yellow, 12: Orange, 13: Dark Red, 14: Green, 15: Purple
+# =============================================================================
+
+# Energy UI sprites - displayed along top of 64x64 canvas
+ENERGY_PILL = Sprite(
+    pixels=[
+        [6, 6],
+        [6, 6],
+    ],  # Pink 2x2 - vibrant energy indicator
+    name="energy_pill",
+    visible=True,
+    collidable=False,
+    tags=["energy"],
+)
+
+ENERGY_PILL_OFF = Sprite(
+    pixels=[
+        [3, 3],
+        [3, 3],
+    ],  # Dark Gray 2x2 - depleted energy
+    name="energy_pill_off",
+    visible=False,
+    collidable=False,
+)
+
 # Player sprite - fixed position, renders on top
+# Using bright Orange for high visibility
 PLAYER = Sprite(
     pixels=[[12]],  # Orange 1x1 (ARC3 color 12)
     name="player",
@@ -19,6 +49,7 @@ PLAYER = Sprite(
 )
 
 # Exit sprite - part of moveable world
+# Bright Green indicates goal/success
 EXIT = Sprite(
     pixels=[[14]],  # Green 1x1 (ARC3 color 14)
     name="exit",

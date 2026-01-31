@@ -2,15 +2,25 @@
 # Date: 2026-01-31
 # PURPOSE: Main game logic for Chain Reaction. Implements Sokoban-style block pushing
 #          where matching colored blocks annihilate each other. Clear all blocks to unlock exit.
-# SRP/DRY check: Pass - new game class following ARCBaseGame pattern
+#          Includes move counter UI for tracking remaining moves.
+# SRP/DRY check: Pass - game class with move UI, follows ARCBaseGame pattern
 
 """Chain Reaction game implementation."""
 
-from arcengine import ARCBaseGame, Camera, GameAction, InteractionMode, Level, Sprite
+from arcengine import ARCBaseGame, Camera, GameAction, InteractionMode, Level, Sprite, ToggleableUserDisplay
 from games.chain_reaction.levels import LEVELS
+from games.chain_reaction.sprites import MOVE_COUNTER, MOVE_COUNTER_OFF
 
-BACKGROUND_COLOR = 5  # Black (ARC3 color 5)
-LETTERBOX_COLOR = 4   # Darker Gray (ARC3 color 4)
+# Game identification
+GAME_ID = "chain_reaction"
+VERSION = "1.0.0"
+
+# ARC3 Colors
+BACKGROUND_COLOR = 5  # Black
+LETTERBOX_COLOR = 3   # Dark Gray - creates nice contrast
+
+# Move configuration - varies by difficulty
+MAX_MOVES = 25  # Total moves before losing
 
 # Color tags used for matching
 COLOR_TAGS = {"red", "blue", "yellow", "purple", "pink", "lightblue"}
@@ -22,19 +32,35 @@ class ChainReaction(ARCBaseGame):
 
     A Sokoban-style puzzle game where pushing colored blocks into matching
     blocks destroys both. Clear all colored blocks to unlock the exit.
+
+    Features:
+    - Move tracking: Each move costs 1 from your move budget. Run out and you lose!
+    - 6 levels of increasing difficulty with more color pairs
+    - Unique game_id-version identifier: chain_reaction-1.0.0
     """
 
     _player: Sprite
     _exit: Sprite
+    _move_ui: ToggleableUserDisplay
 
     def __init__(self) -> None:
-        """Initialize the game with camera and levels."""
+        """Initialize the game with camera, move UI, and levels."""
+        # Create move counter UI - pills along top edge
+        sprite_pairs = []
+        for i in range(MAX_MOVES):
+            on_counter = MOVE_COUNTER.clone().set_position(i * 2 + 4, 0)  # Offset by 4 for spacing
+            off_counter = MOVE_COUNTER_OFF.clone().set_position(i * 2 + 4, 0)
+            sprite_pairs.append((on_counter, off_counter))
+
+        self._move_ui = ToggleableUserDisplay(sprite_pairs)
+
         camera = Camera(
             background=BACKGROUND_COLOR,
             letter_box=LETTERBOX_COLOR,
+            interfaces=[self._move_ui],
         )
         super().__init__(
-            game_id="chain_reaction",
+            game_id=f"{GAME_ID}-{VERSION}",
             levels=LEVELS,
             camera=camera,
         )
@@ -45,6 +71,9 @@ class ChainReaction(ARCBaseGame):
         exit_sprites = level.get_sprites_by_tag("exit")
         if exit_sprites:
             self._exit = exit_sprites[0]
+
+        # Reset move counter for new level
+        self._move_ui.enable_all_by_tag("moves")
 
     def step(self) -> None:
         """Process one game step."""
@@ -60,8 +89,18 @@ class ChainReaction(ARCBaseGame):
             dx = 1
 
         # Try to move player
+        moved = False
         if dx != 0 or dy != 0:
-            self._try_move_player(dx, dy)
+            moved = self._try_move_player(dx, dy)
+            if moved:
+                # Consume a move
+                self._move_ui.disabled_first_by_tag("moves")
+
+        # Check lose condition (out of moves)
+        if moved and self._is_out_of_moves():
+            self.lose()
+            self.complete_action()
+            return
 
         # Update exit state based on remaining blocks
         self._update_exit_state()
@@ -75,8 +114,12 @@ class ChainReaction(ARCBaseGame):
 
         self.complete_action()
 
-    def _try_move_player(self, dx: int, dy: int) -> None:
-        """Attempt to move player, handling block pushing."""
+    def _is_out_of_moves(self) -> bool:
+        """Check if all moves have been consumed."""
+        return not self._move_ui.disabled_first_by_tag("moves", disable=False)
+
+    def _try_move_player(self, dx: int, dy: int) -> bool:
+        """Attempt to move player, handling block pushing. Returns True if moved."""
         target_x = self._player.x + dx
         target_y = self._player.y + dy
 
@@ -86,14 +129,16 @@ class ChainReaction(ARCBaseGame):
         if blocking_sprite is None:
             # Empty space - just move
             self._player.move(dx, dy)
+            return True
         elif "pushable" in blocking_sprite.tags:
             # Found a pushable block - try to push it
-            self._try_push_block(blocking_sprite, dx, dy)
+            return self._try_push_block(blocking_sprite, dx, dy)
         # If blocked by wall or non-pushable, do nothing
+        return False
 
     def _get_blocking_sprite_at(self, x: int, y: int) -> Sprite | None:
         """Get blocking sprite at position, if any."""
-        for sprite in self.current_level.sprites:
+        for sprite in self.current_level.get_sprites():
             if sprite.interaction == InteractionMode.REMOVED:
                 continue
             if sprite == self._player:
@@ -116,8 +161,8 @@ class ChainReaction(ARCBaseGame):
 
         return sprite_left <= x <= sprite_right and sprite_top <= y <= sprite_bottom
 
-    def _try_push_block(self, block: Sprite, dx: int, dy: int) -> None:
-        """Attempt to push a block, handling matches."""
+    def _try_push_block(self, block: Sprite, dx: int, dy: int) -> bool:
+        """Attempt to push a block, handling matches. Returns True if player moved."""
         # Calculate where block would move
         block_target_x = block.x + dx
         block_target_y = block.y + dy
@@ -129,6 +174,7 @@ class ChainReaction(ARCBaseGame):
             # Empty space - move block and player
             block.move(dx, dy)
             self._player.move(dx, dy)
+            return True
         elif "colored" in target_sprite.tags:
             # Check if colors match
             if self._check_match(block, target_sprite):
@@ -136,8 +182,10 @@ class ChainReaction(ARCBaseGame):
                 self._destroy_pair(block, target_sprite)
                 # Player moves into now-empty space
                 self._player.move(dx, dy)
+                return True
             # If colors don't match, block can't move
         # If blocked by wall or other non-matching obstacle, do nothing
+        return False
 
     def _check_match(self, block1: Sprite, block2: Sprite) -> bool:
         """Check if two blocks have the same color tag."""
@@ -165,7 +213,7 @@ class ChainReaction(ARCBaseGame):
     def _count_remaining_blocks(self) -> int:
         """Count how many colored blocks remain."""
         count = 0
-        for sprite in self.current_level.sprites:
+        for sprite in self.current_level.get_sprites():
             if "colored" in sprite.tags and sprite.interaction != InteractionMode.REMOVED:
                 count += 1
         return count
