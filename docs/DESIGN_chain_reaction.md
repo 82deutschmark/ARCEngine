@@ -86,22 +86,22 @@ if sprite.name.startswith(other_sprite.name):
 
 ## 3. Visual Design
 
-### 3.1 Color Palette Usage
+### 3.1 Color Palette Usage (ARC3)
 
 | Element | Color Index | Color Name | Tag |
 |---------|-------------|------------|-----|
-| Background | 0 | Black | - |
-| Walls | 5 | Gray | `"fixed"` |
-| Player | 8 | Orange | `"player"` |
-| Exit (locked) | 7 | White | `"exit"` |
-| Exit (unlocked) | 6 | Green | `"exit"` |
-| Block Red | 2 | Red | `"red"` |
-| Block Blue | 9 | Light Blue | `"blue"` |
-| Block Yellow | 4 | Yellow | `"yellow"` |
-| Block Cyan | 3 | Cyan | `"cyan"` |
-| Block Purple | 12 | Purple | `"purple"` |
-| Block Green | 6 | Green | `"green"` |
-| Letterbox | 1 | Dark Blue | - |
+| Background | 5 | Black | - |
+| Walls | 2 | Gray | `"fixed"` |
+| Player | 12 | Orange | `"player"` |
+| Exit (locked) | 0 | White | `"exit"` |
+| Exit (unlocked) | 14 | Green | `"exit"` |
+| Block Red | 8 | Red | `"red"` |
+| Block Blue | 9 | Blue | `"blue"` |
+| Block Yellow | 11 | Yellow | `"yellow"` |
+| Block Light Blue | 10 | Light Blue | `"lightblue"` |
+| Block Purple | 15 | Purple | `"purple"` |
+| Block Pink | 6 | Pink | `"pink"` |
+| Letterbox | 4 | Darker Gray | - |
 
 ### 3.2 Block Visual Design
 Each block is 2x2 pixels for visibility:

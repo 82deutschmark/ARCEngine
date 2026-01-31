@@ -112,6 +112,74 @@ LEVEL_6 = Level(
     },
 )
 
+# Level 7: The Gauntlet (10x10)
+# Narrow corridors requiring precise navigation
+LEVEL_7 = Level(
+    sprites=[
+        SPRITES["maze_7"].clone().set_position(0, 0),
+        SPRITES["exit"].clone().set_position(8, 8),
+        SPRITES["player"].clone().set_position(1, 1),
+    ],
+    grid_size=(10, 10),
+    data={
+        "min_x": -5,
+        "max_x": 5,
+        "min_y": -5,
+        "max_y": 5,
+    },
+)
+
+# Level 8: Crossroads (12x12)
+# Multiple intersection points requiring careful planning
+LEVEL_8 = Level(
+    sprites=[
+        SPRITES["maze_8"].clone().set_position(0, 0),
+        SPRITES["exit"].clone().set_position(10, 10),
+        SPRITES["player"].clone().set_position(5, 5),
+    ],
+    grid_size=(12, 12),
+    data={
+        "min_x": -6,
+        "max_x": 6,
+        "min_y": -6,
+        "max_y": 6,
+    },
+)
+
+# Level 9: The Labyrinth (14x14)
+# Large maze with winding paths
+LEVEL_9 = Level(
+    sprites=[
+        SPRITES["maze_9"].clone().set_position(0, 0),
+        SPRITES["exit"].clone().set_position(12, 12),
+        SPRITES["player"].clone().set_position(6, 6),
+    ],
+    grid_size=(14, 14),
+    data={
+        "min_x": -7,
+        "max_x": 7,
+        "min_y": -7,
+        "max_y": 7,
+    },
+)
+
+# Level 10: The Ultimate Challenge (14x14)
+# Most complex maze with multiple dead ends
+LEVEL_10 = Level(
+    sprites=[
+        SPRITES["maze_10"].clone().set_position(0, 0),
+        SPRITES["exit"].clone().set_position(12, 12),
+        SPRITES["player"].clone().set_position(6, 6),
+    ],
+    grid_size=(14, 14),
+    data={
+        "min_x": -7,
+        "max_x": 7,
+        "min_y": -7,
+        "max_y": 7,
+    },
+)
+
 # All levels in order
 LEVELS = [
     LEVEL_1,
@@ -120,4 +188,8 @@ LEVELS = [
     LEVEL_4,
     LEVEL_5,
     LEVEL_6,
+    LEVEL_7,
+    LEVEL_8,
+    LEVEL_9,
+    LEVEL_10,
 ]

@@ -1,37 +1,18 @@
-# Author: Claude Opus 4.5
+# Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: Chain Reaction game package stub. Full implementation pending.
-# SRP/DRY check: Pass - placeholder for future game
+# PURPOSE: Chain Reaction game package. Exports the game class and metadata.
+# SRP/DRY check: Pass - exports game implementation from game.py
 
 """
 Chain Reaction: Match colors. Clear the board. Escape.
 
 A Sokoban-style puzzle game where pushing colored blocks into matching blocks
 destroys both. Clear all colored blocks to unlock the exit.
-
-Status: Not yet implemented
 """
 
-# Placeholder - will be implemented after World Shifter
-from arcengine import ARCBaseGame, Camera, Level
+from games.chain_reaction.game import ChainReaction
 
 GAME_ID = "chain_reaction"
-VERSION = "0.0.1"  # Not yet implemented
+VERSION = "1.0.0"
 
-
-class ChainReaction(ARCBaseGame):
-    """Placeholder for Chain Reaction game."""
-
-    def __init__(self) -> None:
-        """Initialize placeholder game."""
-        camera = Camera(background=0, letter_box=1)
-        # Empty level as placeholder
-        levels = [Level(sprites=[], grid_size=(8, 8))]
-        super().__init__(game_id="chain_reaction", levels=levels, camera=camera)
-
-    def step(self) -> None:
-        """Placeholder step - immediately completes."""
-        self.complete_action()
-
-
-__all__ = ["ChainReaction"]
+__all__ = ["ChainReaction", "GAME_ID", "VERSION"]

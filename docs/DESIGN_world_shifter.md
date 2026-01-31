@@ -85,15 +85,15 @@ The world's origin position is tracked, and movement is clamped to these bounds.
 
 ## 3. Visual Design
 
-### 3.1 Color Palette Usage
+### 3.1 Color Palette Usage (ARC3)
 
 | Element | Color Index | Color Name | Rationale |
 |---------|-------------|------------|-----------|
-| Background | 0 | Black | Clean contrast |
-| Player | 8 | Orange | Warm, focal point |
-| Walls | 5 | Gray | Neutral, structural |
-| Exit | 6 | Green | Goal = positive color |
-| Letterbox | 1 | Dark Blue | Frame the action |
+| Background | 5 | Black | Clean contrast |
+| Player | 12 | Orange | Warm, focal point |
+| Walls | 2 | Gray | Neutral, structural |
+| Exit | 14 | Green | Goal = positive color |
+| Letterbox | 4 | Darker Gray | Frame the action |
 
 ### 3.2 Grid Sizes
 - **Levels 1-2**: 8x8 (tutorial)
