@@ -12,7 +12,7 @@ from games.chain_reaction.sprites import MOVE_COUNTER, MOVE_COUNTER_OFF
 
 # Game identification
 GAME_ID = "chain_reaction"
-VERSION = "1.1.0"  # Major redesign for full 64x64 canvas
+VERSION = "0.01"  # Initial release
 
 # ARC3 Colors
 BACKGROUND_COLOR = 3  # Dark Gray - floor color like official games
@@ -41,6 +41,7 @@ class ChainReaction(ARCBaseGame):
     _player: Sprite
     _exit: Sprite
     _move_ui: ToggleableUserDisplay
+    _moves_remaining: int
 
     def __init__(self) -> None:
         """Initialize the game with camera, move UI, and levels."""
@@ -77,6 +78,7 @@ class ChainReaction(ARCBaseGame):
 
         # Reset move counter for new level
         self._move_ui.enable_all_by_tag("moves")
+        self._moves_remaining = MAX_MOVES
 
     def step(self) -> None:
         """Process one game step."""
@@ -98,9 +100,10 @@ class ChainReaction(ARCBaseGame):
             if moved:
                 # Consume a move
                 self._move_ui.disabled_first_by_tag("moves")
+                self._moves_remaining -= 1
 
         # Check lose condition (out of moves)
-        if moved and self._is_out_of_moves():
+        if moved and self._moves_remaining <= 0:
             self.lose()
             self.complete_action()
             return
@@ -116,10 +119,6 @@ class ChainReaction(ARCBaseGame):
                 self.next_level()
 
         self.complete_action()
-
-    def _is_out_of_moves(self) -> bool:
-        """Check if all moves have been consumed."""
-        return not self._move_ui.disabled_first_by_tag("moves", disable=False)
 
     def _try_move_player(self, dx: int, dy: int) -> bool:
         """Attempt to move player, handling block pushing. Returns True if moved."""

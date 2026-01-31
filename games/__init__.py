@@ -31,8 +31,8 @@ if TYPE_CHECKING:
 # Game registry with version info
 # Format: base_id -> (module_path, version)
 _GAME_REGISTRY: dict[str, tuple[str, str]] = {
-    "world_shifter": ("games.world_shifter", "1.1.0"),
-    "chain_reaction": ("games.chain_reaction", "1.1.0"),
+    "world_shifter": ("games.world_shifter", "0.01"),
+    "chain_reaction": ("games.chain_reaction", "0.01"),
 }
 
 

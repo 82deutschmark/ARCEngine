@@ -12,7 +12,7 @@ from games.world_shifter.sprites import ENERGY_PILL, ENERGY_PILL_OFF
 
 # Game identification
 GAME_ID = "world_shifter"
-VERSION = "1.1.0"  # Major redesign for full 64x64 canvas
+VERSION = "0.01"  # Initial release
 
 # ARC3 Colors
 BACKGROUND_COLOR = 3  # Dark Gray - floor color like official games
@@ -39,6 +39,7 @@ class WorldShifter(ARCBaseGame):
     _world_origin_x: int
     _world_origin_y: int
     _energy_ui: ToggleableUserDisplay
+    _energy_remaining: int
 
     def __init__(self) -> None:
         """Initialize the game with camera, energy UI, and levels."""
@@ -77,6 +78,7 @@ class WorldShifter(ARCBaseGame):
 
         # Reset energy for new level
         self._energy_ui.enable_all_by_tag("energy")
+        self._energy_remaining = MAX_ENERGY
 
     def step(self) -> None:
         """Process one game step with inverse movement."""
@@ -99,9 +101,10 @@ class WorldShifter(ARCBaseGame):
                 moved = True
                 # Consume energy on successful move
                 self._energy_ui.disabled_first_by_tag("energy")
+                self._energy_remaining -= 1
 
         # Check lose condition (out of energy)
-        if moved and self._is_out_of_energy():
+        if moved and self._energy_remaining <= 0:
             self.lose()
             self.complete_action()
             return
@@ -115,10 +118,6 @@ class WorldShifter(ARCBaseGame):
 
         self.complete_action()
 
-    def _is_out_of_energy(self) -> bool:
-        """Check if all energy has been consumed."""
-        # Check if any energy pills are still enabled
-        return not self._energy_ui.disabled_first_by_tag("energy", disable=False)
 
     def _get_world_offset(self) -> tuple[int, int]:
         """Calculate current world offset from origin."""

@@ -14,7 +14,7 @@ Features:
 - Energy tracking UI at BOTTOM of canvas (30 moves per level)
 - Scaled 4x sprites for visibility
 - 6 levels of increasing difficulty
-- game_id-version key: world_shifter-1.1.0
+- game_id-version key: world_shifter-0.01
 """
 
 from games.world_shifter.game import WorldShifter, GAME_ID, VERSION

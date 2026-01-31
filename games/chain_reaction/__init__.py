@@ -14,7 +14,7 @@ Features:
 - Move tracking UI at BOTTOM of canvas (25 moves per level)
 - Scaled 4x sprites for visibility
 - 6 levels with increasing color pairs
-- game_id-version key: chain_reaction-1.1.0
+- game_id-version key: chain_reaction-0.01
 """
 
 from games.chain_reaction.game import ChainReaction, GAME_ID, VERSION
