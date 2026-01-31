@@ -10,8 +10,8 @@
 from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite
 from games.world_shifter.levels import LEVELS
 
-BACKGROUND_COLOR = 0  # Black
-LETTERBOX_COLOR = 1  # Dark blue
+BACKGROUND_COLOR = 5  # Black (ARC3 color 5)
+LETTERBOX_COLOR = 4   # Darker Gray (ARC3 color 4)
 
 
 class WorldShifter(ARCBaseGame):

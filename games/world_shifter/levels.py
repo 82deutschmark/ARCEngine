@@ -21,9 +21,9 @@ LEVEL_1 = Level(
     grid_size=(8, 8),
     data={
         "min_x": -3,
-        "max_x": 0,
+        "max_x": 3,
         "min_y": -4,
-        "max_y": 0,
+        "max_y": 4,
     },
 )
 
@@ -38,9 +38,9 @@ LEVEL_2 = Level(
     grid_size=(8, 8),
     data={
         "min_x": -3,
-        "max_x": 0,
+        "max_x": 3,
         "min_y": -3,
-        "max_y": 0,
+        "max_y": 3,
     },
 )
 
@@ -55,9 +55,9 @@ LEVEL_3 = Level(
     grid_size=(10, 10),
     data={
         "min_x": -4,
-        "max_x": 0,
+        "max_x": 4,
         "min_y": -4,
-        "max_y": 0,
+        "max_y": 4,
     },
 )
 
@@ -72,9 +72,9 @@ LEVEL_4 = Level(
     grid_size=(10, 10),
     data={
         "min_x": -4,
-        "max_x": 0,
-        "min_y": -3,
-        "max_y": 0,
+        "max_x": 4,
+        "min_y": -4,
+        "max_y": 4,
     },
 )
 
@@ -89,9 +89,9 @@ LEVEL_5 = Level(
     grid_size=(12, 12),
     data={
         "min_x": -5,
-        "max_x": 0,
+        "max_x": 5,
         "min_y": -5,
-        "max_y": 0,
+        "max_y": 5,
     },
 )
 
@@ -106,9 +106,9 @@ LEVEL_6 = Level(
     grid_size=(12, 12),
     data={
         "min_x": -5,
-        "max_x": 0,
+        "max_x": 5,
         "min_y": -5,
-        "max_y": 0,
+        "max_y": 5,
     },
 )
 

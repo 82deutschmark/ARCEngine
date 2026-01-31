@@ -3,7 +3,7 @@
 **Author:** Claude Opus 4.5
 **Date:** 31-January-2026
 **Status:** Draft
-**Version:** 1.0.0
+**Version:** 0.0.1
 
 > **Match colors. Clear the board. Escape.**
 
