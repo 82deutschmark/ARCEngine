@@ -1,11 +1,11 @@
 # Author: Claude Sonnet 4
 # Date: 2026-01-31
-# PURPOSE: World Shifter game logic - creative redesign.
-#          Core mechanic: world moves around FIXED player position.
-#          Floating platforms on dark background, energy bar at bottom.
-# SRP/DRY check: Pass - clean game logic for world-shifting mechanic
+# PURPOSE: World Shifter game logic - the world moves, not you.
+#          Core mechanic: player is FIXED, world shifts inversely to input.
+#          Collision checks if player center would be on a wall pixel.
+# SRP/DRY check: Pass - proper inverse-movement mechanic with pixel collision
 
-"""World Shifter game implementation - Creative Redesign."""
+"""World Shifter game implementation - Inverse Movement Puzzle."""
 
 from arcengine import ARCBaseGame, Camera, GameAction, Level, Sprite, ToggleableUserDisplay
 from games.world_shifter.levels import LEVELS
@@ -13,11 +13,14 @@ from games.world_shifter.sprites import ENERGY_PILL, ENERGY_PILL_OFF
 
 # Game identification
 GAME_ID = "world_shifter"
-VERSION = "0.01"  # Initial release
+VERSION = "0.02"  # Fixed collision detection
 
 # ARC3 Colors - dark background makes floating platforms pop
 BACKGROUND_COLOR = 5  # Black - dark void behind floating platforms
 LETTERBOX_COLOR = 5   # Black - seamless border
+
+# Wall color in the maze sprites (gray = 2 means blocked)
+WALL_COLOR = 2
 
 # Energy configuration - bar at BOTTOM of 64x64 canvas
 MAX_ENERGY = 30  # 30 pills = 60 pixels wide at bottom
@@ -38,8 +41,7 @@ class WorldShifter(ARCBaseGame):
     """
 
     _player: Sprite
-    _world_origin_x: int
-    _world_origin_y: int
+    _maze: Sprite
     _energy_ui: ToggleableUserDisplay
     _energy_remaining: int
 
@@ -70,13 +72,9 @@ class WorldShifter(ARCBaseGame):
         )
 
     def on_set_level(self, level: Level) -> None:
-        """Cache references when level loads and track world origin."""
+        """Cache references when level loads."""
         self._player = level.get_sprites_by_name("player")[0]
-
-        # Track world origin for boundary checking
-        maze = level.get_sprites_by_tag("maze")[0]
-        self._world_origin_x = maze.x
-        self._world_origin_y = maze.y
+        self._maze = level.get_sprites_by_tag("maze")[0]
 
         # Reset energy for new level
         self._energy_ui.enable_all_by_tag("energy")
@@ -85,6 +83,7 @@ class WorldShifter(ARCBaseGame):
     def step(self) -> None:
         """Process one game step with inverse movement."""
         # Determine intended movement direction from input
+        # Player presses UP -> world moves DOWN (player effectively moves up relative to world)
         dx, dy = 0, 0
         if self.action.id == GameAction.ACTION1:  # Up pressed
             dy = 1  # World moves DOWN (opposite)
@@ -111,7 +110,7 @@ class WorldShifter(ARCBaseGame):
             self.complete_action()
             return
 
-        # Check win condition (exit reached player)
+        # Check win condition (exit overlaps player position)
         if self._check_exit_collision():
             if self.is_last_level():
                 self.win()
@@ -120,58 +119,67 @@ class WorldShifter(ARCBaseGame):
 
         self.complete_action()
 
+    def _get_player_center(self) -> tuple[int, int]:
+        """Get the center pixel position of the player sprite."""
+        # Player is 3x3, center is at (x+1, y+1)
+        return self._player.x + 1, self._player.y + 1
 
-    def _get_world_offset(self) -> tuple[int, int]:
-        """Calculate current world offset from origin."""
-        maze = self.current_level.get_sprites_by_tag("maze")[0]
-        offset_x = maze.x - self._world_origin_x
-        offset_y = maze.y - self._world_origin_y
-        return offset_x, offset_y
+    def _is_wall_at_position(self, world_x: int, world_y: int) -> bool:
+        """
+        Check if there's a wall at the given world position.
+        Returns True if the position is outside the maze or on a wall pixel.
+        """
+        # Convert world position to maze-local coordinates
+        local_x = world_x - self._maze.x
+        local_y = world_y - self._maze.y
+
+        # Check bounds - outside maze is considered blocked (void)
+        if local_y < 0 or local_y >= len(self._maze.pixels):
+            return True
+        if local_x < 0 or local_x >= len(self._maze.pixels[0]):
+            return True
+
+        # Check pixel color: -1 is transparent (walkable), WALL_COLOR (2) is blocked
+        pixel = self._maze.pixels[local_y][local_x]
+        return pixel == WALL_COLOR
 
     def _can_move_world(self, dx: int, dy: int) -> bool:
         """
         Check if world can move in the given direction.
-
-        Validates:
-        1. Movement is within defined bounds
-        2. Player won't be inside a wall after movement
+        
+        The world moving by (dx, dy) is equivalent to the player moving by (-dx, -dy)
+        relative to the world. We check if the player's center would be on a wall.
         """
-        # Get current offset
-        current_offset_x, current_offset_y = self._get_world_offset()
-        new_offset_x = current_offset_x + dx
-        new_offset_y = current_offset_y + dy
-
-        # Check bounds from level data
-        min_x = self.current_level.get_data("min_x")
-        max_x = self.current_level.get_data("max_x")
-        min_y = self.current_level.get_data("min_y")
-        max_y = self.current_level.get_data("max_y")
-
-        # Use defaults if not specified
-        if min_x is None:
-            min_x = -10
-        if max_x is None:
-            max_x = 10
-        if min_y is None:
-            min_y = -10
-        if max_y is None:
-            max_y = 10
-
-        if not (min_x <= new_offset_x <= max_x):
-            return False
-        if not (min_y <= new_offset_y <= max_y):
-            return False
-
-        # Check collision: would player be inside a wall after movement?
-        # Simulate the movement and check collision
-        maze = self.current_level.get_sprites_by_tag("maze")[0]
-
-        # Temporarily move maze to check collision
-        maze.move(dx, dy)
-        collides = self._player.collides_with(maze)
-        maze.move(-dx, -dy)  # Move back
-
-        return not collides
+        player_cx, player_cy = self._get_player_center()
+        
+        # After world moves by (dx, dy), the player's position relative to the maze
+        # changes by (-dx, -dy). So we check the new relative position.
+        # In world coords, player stays at (player_cx, player_cy)
+        # Maze moves to (maze.x + dx, maze.y + dy)
+        # So player's local coords in maze become:
+        #   local_x = player_cx - (maze.x + dx) = (player_cx - maze.x) - dx
+        #   local_y = player_cy - (maze.y + dy) = (player_cy - maze.y) - dy
+        # This is equivalent to checking position (player_cx, player_cy) with maze at new position
+        
+        # Temporarily calculate what the position would be
+        new_maze_x = self._maze.x + dx
+        new_maze_y = self._maze.y + dy
+        
+        local_x = player_cx - new_maze_x
+        local_y = player_cy - new_maze_y
+        
+        # Check bounds
+        if local_y < 0 or local_y >= len(self._maze.pixels):
+            return False  # Would fall into void
+        if local_x < 0 or local_x >= len(self._maze.pixels[0]):
+            return False  # Would fall into void
+        
+        # Check if on wall pixel
+        pixel = self._maze.pixels[local_y][local_x]
+        if pixel == WALL_COLOR:
+            return False  # Would be inside wall
+        
+        return True
 
     def _move_world(self, dx: int, dy: int) -> None:
         """Move all moveable sprites in the given direction."""
@@ -180,9 +188,21 @@ class WorldShifter(ARCBaseGame):
             sprite.move(dx, dy)
 
     def _check_exit_collision(self) -> bool:
-        """Check if exit sprite overlaps with player."""
+        """
+        Check if exit sprite overlaps with player.
+        Uses center-point collision for precision.
+        """
         exit_sprites = self.current_level.get_sprites_by_tag("exit")
         if not exit_sprites:
             return False
         exit_sprite = exit_sprites[0]
-        return self._player.collides_with(exit_sprite)
+        
+        # Get player center
+        player_cx, player_cy = self._get_player_center()
+        
+        # Get exit center (exit is 3x3)
+        exit_cx = exit_sprite.x + 1
+        exit_cy = exit_sprite.y + 1
+        
+        # Check if centers are within 1 pixel (overlapping)
+        return abs(player_cx - exit_cx) <= 1 and abs(player_cy - exit_cy) <= 1

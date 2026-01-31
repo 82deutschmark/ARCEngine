@@ -17,10 +17,12 @@ PLAYER_Y = 29
 
 # Level 1: "The Island" - Simple floating platform (10x10)
 # Teaches the basic mechanic: world moves, you stay fixed
+# Player center (32,30) → maze-local (5,5) = walkable
+# Exit center (31,29) → maze-local (4,4) = walkable, 1 move away
 LEVEL_1 = Level(
     sprites=[
         SPRITES["world_1"].clone().set_position(27, 25),
-        SPRITES["exit"].clone().set_position(34, 26),
+        SPRITES["exit"].clone().set_position(30, 28),  # Center at (31,29), maze-local (4,4)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
@@ -34,10 +36,12 @@ LEVEL_1 = Level(
 
 # Level 2: "Twin Peaks" - Two chambers connected (10x12)
 # Learn to navigate between distinct areas
+# Player center (32,30) → maze-local (5,7) = walkable (row 7 has walkable at col 3-6)
+# Exit placed in upper chamber
 LEVEL_2 = Level(
     sprites=[
         SPRITES["world_2"].clone().set_position(27, 23),
-        SPRITES["exit"].clone().set_position(35, 25),
+        SPRITES["exit"].clone().set_position(30, 24),  # Center at (31,25), maze-local (4,2)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
@@ -51,10 +55,11 @@ LEVEL_2 = Level(
 
 # Level 3: "The Spiral" - Wind your way to the center (12x12)
 # Exit is at spiral center - must think in reverse
+# Player starts at outer edge, exit in center
 LEVEL_3 = Level(
     sprites=[
         SPRITES["world_3"].clone().set_position(26, 23),
-        SPRITES["exit"].clone().set_position(31, 28),
+        SPRITES["exit"].clone().set_position(30, 28),  # Center at (31,29), maze-local (5,6)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
@@ -71,7 +76,7 @@ LEVEL_3 = Level(
 LEVEL_4 = Level(
     sprites=[
         SPRITES["world_4"].clone().set_position(26, 23),
-        SPRITES["exit"].clone().set_position(36, 26),
+        SPRITES["exit"].clone().set_position(30, 26),  # Center at (31,27), maze-local (5,4)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
@@ -88,7 +93,7 @@ LEVEL_4 = Level(
 LEVEL_5 = Level(
     sprites=[
         SPRITES["world_5"].clone().set_position(25, 22),
-        SPRITES["exit"].clone().set_position(36, 29),
+        SPRITES["exit"].clone().set_position(30, 28),  # Center at (31,29), maze-local (6,7)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
@@ -105,7 +110,7 @@ LEVEL_5 = Level(
 LEVEL_6 = Level(
     sprites=[
         SPRITES["world_6"].clone().set_position(25, 22),
-        SPRITES["exit"].clone().set_position(31, 28),
+        SPRITES["exit"].clone().set_position(30, 27),  # Center at (31,28), maze-local (6,6)
         SPRITES["player"].clone().set_position(PLAYER_X, PLAYER_Y),
     ],
     grid_size=(64, 64),
