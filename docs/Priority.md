@@ -1,10 +1,6 @@
+I've identified these two as the most promising of the game ideas that previous assistants came up with.
 
-
-
-
-
-
-
+The other idea that had some merit was the game documented called Key Forge.
 
 # Assessment of Game Ideas
 

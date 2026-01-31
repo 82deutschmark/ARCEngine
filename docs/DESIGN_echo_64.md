@@ -1,5 +1,4 @@
-# ECHO//64: Time-Loop Puzzle Heist (Design Doc + Investment Pitch)
-
+# ECHO//64: Time-Loop Puzzle Heist  NOT CHOSEN
 **Authoring model:** GPT-5.2-Extra-High
 **Date:** 2026-01-30
 
