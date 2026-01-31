@@ -1,6 +1,7 @@
 I've identified these two as the most promising of the game ideas that previous assistants came up with.
 
 The other idea that had some merit was the game documented called Key Forge.
+The priority game to work on will be World Shifter first and then Chain Reaction.
 
 # Assessment of Game Ideas
 
