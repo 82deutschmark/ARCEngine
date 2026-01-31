@@ -87,3 +87,4 @@ agents/rl_agent/logs
 wandb
 logs
 llm_logs
+/.agents
