@@ -15,7 +15,9 @@
 Chain Reaction
 
 ### Elevator Pitch
-A Sokoban-style (what the fuck is Sokoban? I've never heard of this. Explain it better)puzzle game where pushing colored blocks into matching blocks destroys both. Clear all colored blocks to unlock the exit and escape each level.
+A **block-pushing puzzle game** (in the style of classic warehouse puzzlers like Boxxle or those "push the crate onto the target" games) where you shove colored blocks around a grid. The twist: pushing a block into another block **of the same color destroys both**. Clear all colored blocks to unlock the exit and escape each level.
+
+> **What's Sokoban?** A 1982 Japanese puzzle game where you push boxes onto target spots in a warehouse. The term is often used generically for any "push blocks around a grid" puzzle game. Think of those levels in Zelda or Pokemon where you push boulders onto switches.
 
 ### Core Innovation
 Unlike traditional Sokoban where you push boxes onto targets, Chain Reaction uses **mutual annihilation**: two matching blocks colliding means both disappear. This creates cascading possibilities and requires planning destruction sequences.

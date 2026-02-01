@@ -13,6 +13,7 @@ authors = [
     {name = "arcprizefoundation", email = ""},
 ]
 dependencies = [
+    "arc-agi>=0.9.1",
     "numpy>=1.24.0",
     "pydantic>=2.10.6",
 ]
