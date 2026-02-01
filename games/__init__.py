@@ -1,7 +1,7 @@
 # Author: Claude Sonnet 4
-# Date: 2026-01-31
+# Date: 2026-02-01
 # PURPOSE: Game registry providing centralized discovery and instantiation of all ARCEngine games.
-#          Enables shareability via stable game_id-version keys for variants and sharing.
+#          Updated to use official game IDs (ws01, gw01) from games.official module.
 # SRP/DRY check: Pass - registry module with version support
 
 """
@@ -14,13 +14,13 @@ Usage:
     from games import get_game, list_games, get_game_info
 
     # Get available games
-    available = list_games()  # ["chain_reaction", "world_shifter"]
+    available = list_games()  # ["gw01", "ws01"]
 
-    # Instantiate a game by base ID
-    game = get_game("world_shifter")
+    # Instantiate a game by ID
+    game = get_game("ws01")
 
     # Get full info including version
-    info = get_game_info("world_shifter")  # {"id": "world_shifter", "version": "1.0.0", "full_id": "world_shifter-1.0.0"}
+    info = get_game_info("ws01")  # {"id": "ws01", "version": "1.0.0", ...}
 """
 
 from typing import TYPE_CHECKING
@@ -28,11 +28,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from arcengine import ARCBaseGame
 
-# Game registry with version info
+# Game registry with version info - using official game IDs
 # Format: base_id -> (module_path, version)
 _GAME_REGISTRY: dict[str, tuple[str, str]] = {
-    "world_shifter": ("games.world_shifter", "0.02"),
-    "chain_reaction": ("games.chain_reaction", "1.0.0"),  # single-file
+    "ws01": ("games.official.ws01", "1.0.0"),  # World Shifter
+    "gw01": ("games.official.gw01", "1.0.0"),  # Gravity Well
 }
 
 
@@ -41,8 +41,8 @@ def get_game(game_id: str) -> "ARCBaseGame":
     Instantiate a game by its ID.
 
     Args:
-        game_id: The base identifier for the game (e.g., "world_shifter")
-                 Can also accept full game_id-version format (e.g., "world_shifter-1.0.0")
+        game_id: The base identifier for the game (e.g., "ws01", "gw01")
+                 Can also accept full game_id-version format (e.g., "ws01-1.0.0")
 
     Returns:
         A new instance of the requested game
@@ -57,14 +57,14 @@ def get_game(game_id: str) -> "ARCBaseGame":
         available = ", ".join(sorted(_GAME_REGISTRY.keys()))
         raise ValueError(f"Unknown game: {game_id}. Available games: {available}")
 
-    if base_id == "world_shifter":
-        from games.world_shifter import WorldShifter
+    if base_id == "ws01":
+        from games.official.ws01 import Ws01
 
-        return WorldShifter()
-    elif base_id == "chain_reaction":
-        from games.chain_reaction import ChainReaction
+        return Ws01()
+    elif base_id == "gw01":
+        from games.official.gw01 import Gw01
 
-        return ChainReaction()
+        return Gw01()
     else:
         raise ValueError(f"Game {game_id} registered but not implemented")
 
