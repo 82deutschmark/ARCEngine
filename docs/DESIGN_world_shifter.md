@@ -1,12 +1,36 @@
 # World Shifter: Game Design Document
 
-**Author:** Claude Opus 4.5
+**Author:** Claude Opus 4
 **Date:** 31-January-2026
-**Status:** Draft
-**Version:** 0.0.1
+**Status:** Implemented (v0.03)
+**Version:** 0.03
 
 > **You don't move. The world moves around you.**
-This game is currently garbage. It's just tiny and awful and pretty much needs a total rethink.  Possibly the biggest problem with it is that all of the levels are just squares. They're not creative shapes, and they're not even large; they're tiny. All the levels should start out pretty much using the same size and using at least 50x50 of the entire board. And I'd really like something where it's more complex than just this. That there's a ring of multi-colored checkered pixels along the outside, and what happens is the checkered pixels along the rim change every time you move, and that determines something in the game somewhere.  So there should be multiple levels of the world moving. Like, you move within this world in the ring. And then there's the outer ring. Do you get what I'm saying?
+
+## v0.03 Implementation Summary
+
+The game has been completely redesigned following the `complex_maze.py` pattern:
+
+### Key Changes
+- **Large 50x50 mazes** - Fill most of the 64x64 canvas
+- **Checkered rim** - 2-pixel wide border that cycles through 4 color phases on each move
+- **Single-file pattern** - All sprites/levels inline in `game.py` (deleted `sprites.py`, `levels.py`)
+- **Procedural mazes** - Generated with seeded random for variety
+- **4 levels** - Each with different maze pattern and exit placement
+
+### Rim Mechanic
+The checkered rim cycles through color pairs on each successful move:
+1. Blue/Light Blue
+2. Yellow/Orange  
+3. Light Blue/Blue (inverted)
+4. Orange/Yellow (inverted)
+
+This provides visual feedback that the world has shifted.
+
+### Files
+- `games/world_shifter/game.py` - Complete game implementation
+- `games/world_shifter/__init__.py` - Package exports
+
 ---
 
 ## 1. Game Concept

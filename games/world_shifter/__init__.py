@@ -1,22 +1,23 @@
-# Author: Claude Sonnet 4
+# Author: Claude Opus 4
 # Date: 2026-01-31
-# PURPOSE: World Shifter game package. Exports game class, ID, and version for registry.
-# SRP/DRY check: Pass - game package with proper versioning and 64x64 canvas
+# PURPOSE: World Shifter game package - redesigned with large mazes and checkered rim.
+# SRP/DRY check: Pass - single-file pattern following complex_maze.py
 
 """
-World Shifter: The world moves, not you.
+World Shifter: The world moves around you, not the other way around.
 
 A puzzle game where player input moves the entire world in the opposite direction.
-Navigate mazes by shifting walls, obstacles, and the exit toward your fixed position.
+Navigate large 50x50 mazes by shifting them toward your fixed position.
+Features a dynamic checkered rim that cycles colors on each move.
 
 Features:
-- Full 64x64 canvas like official ARC3 games
-- Energy tracking UI at BOTTOM of canvas (30 moves per level)
-- Scaled 4x sprites for visibility
-- 6 levels of increasing difficulty
-- game_id-version key: world_shifter-0.01
+- Full 64x64 canvas with 50x50 playable mazes
+- Checkered rim border that cycles colors on movement
+- Inverse movement mechanic (push up = world moves down)
+- 4 levels of procedurally generated mazes
+- game_id-version: world_shifter-0.03
 """
 
-from games.world_shifter.game import WorldShifter, GAME_ID, VERSION
+from games.world_shifter.game import GAME_ID, VERSION, WorldShifter
 
 __all__ = ["WorldShifter", "GAME_ID", "VERSION"]
