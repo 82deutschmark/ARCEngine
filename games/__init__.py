@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 # Format: base_id -> (module_path, version)
 _GAME_REGISTRY: dict[str, tuple[str, str]] = {
     "world_shifter": ("games.world_shifter", "0.02"),
-    "chain_reaction": ("games.chain_reaction", "0.01"),
+    "chain_reaction": ("games.chain_reaction", "1.0.0"),  # single-file
 }
 
 
