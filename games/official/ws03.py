@@ -37,6 +37,7 @@ sprites = {
 }
 
 levels = [
+    # Level 1: krg - Tutorial level, 0 base energy + 2 fog compensation
     Level(
         sprites=[
             sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(32, 8).set_rotation(180),
@@ -46,30 +47,169 @@ levels = [
             sprites["pca"].clone().set_position(39, 45), sprites["rzt"].clone().set_position(35, 11),
             sprites["snw"].clone().set_position(33, 9), sprites["tuv"].clone().set_position(1, 53),
             sprites["ulq"].clone().set_position(33, 9),
-            # Extra energy pickups for fog of war mode
+            # Fog compensation: 2 pickups near start and mid-path
             sprites["zba"].clone().set_position(15, 16),
             sprites["zba"].clone().set_position(30, 26),
-            sprites["zba"].clone().set_position(45, 16),
-            sprites["zba"].clone().set_position(20, 36),
-            sprites["zba"].clone().set_position(40, 36),
-            sprites["zba"].clone().set_position(25, 46),
-            sprites["zba"].clone().set_position(50, 26),
         ],
         grid_size=(64, 64),
         data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 0, "qqv": 5, "ggk": 9, "fij": 270, "kdy": True},
         name="krg",
+    ),
+    # Level 2: mgu - 2 base energy + 2 fog compensation = 4 total
+    Level(
+        sprites=[
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(12, 38),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2), sprites["kdy"].clone().set_position(49, 45),
+            sprites["lhs"].clone().set_position(14, 40), sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(54,30),(34,0),(59,10),(59,5),(54,15),(54,10),(9,35),(9,45),(19,50),(9,40),(54,5),(14,45),(14,50),(9,5),(9,30),(9,25),(19,30),(24,30),(19,40),(19,45),(19,35),(39,15),(39,35),(44,30),(34,45),(14,5),(39,20),(44,20),(24,20),(44,25),(39,40),(39,45),(24,35),(24,25),(24,50),(19,25),(24,40),(24,45),(29,45),(29,30),(29,25),(24,15),(44,35),(54,34)]] + [
+            sprites["pca"].clone().set_position(29, 40), sprites["rzt"].clone().set_position(15, 41),
+            sprites["snw"].clone().set_position(13, 39), sprites["tuv"].clone().set_position(1, 53),
+            sprites["ulq"].clone().set_position(13, 39),
+            # LS20 base energy
+            sprites["zba"].clone().set_position(15, 16),
+            sprites["zba"].clone().set_position(30, 51),
+            # Fog compensation: 2 pickups near decision points
+            sprites["zba"].clone().set_position(45, 26),
+            sprites["zba"].clone().set_position(20, 36),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 270, "qqv": 5, "ggk": 9, "fij": 0, "kdy": True},
+        name="mgu",
+    ),
+    # Level 3: puq - 3 base energy + 2 fog compensation = 5 total
+    Level(
+        sprites=[
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(52, 48),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2), sprites["kdy"].clone().set_position(49, 10),
+            sprites["lhs"].clone().set_position(54, 50), sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(34,0),(59,10),(59,5),(39,10),(14,25),(19,40),(19,45),(19,35),(49,50),(39,35),(39,40),(39,45),(14,30),(49,45),(49,40),(14,20),(14,50),(39,5),(39,50),(44,45),(19,50),(44,40),(44,50),(44,20),(49,20),(39,20),(19,10),(14,35),(39,15),(34,35),(14,10),(14,15),(44,35),(24,35),(34,10),(24,10)]] + [
+            sprites["pca"].clone().set_position(9, 45), sprites["qqv"].clone().set_position(29, 45),
+            sprites["rzt"].clone().set_position(55, 51), sprites["snw"].clone().set_position(53, 49),
+            sprites["tuv"].clone().set_position(1, 53), sprites["ulq"].clone().set_position(53, 49),
+            # LS20 base energy
+            sprites["zba"].clone().set_position(20, 31),
+            sprites["zba"].clone().set_position(35, 6),
+            sprites["zba"].clone().set_position(50, 36),
+            # Fog compensation: 2 pickups near corridors
+            sprites["zba"].clone().set_position(15, 16),
+            sprites["zba"].clone().set_position(45, 21),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 270, "qqv": 5, "ggk": 12, "fij": 0, "kdy": True},
+        name="puq",
+    ),
+    # Level 4: tmx - 4 base energy + 2 fog compensation = 6 total
+    Level(
+        sprites=[
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(7, 3).set_rotation(90),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2),
+            sprites["lhs"].clone().set_position(9, 5), sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(34,0),(59,10),(59,5),(19,30),(14,10),(9,10),(24,25),(29,30),(19,10),(29,5),(9,20),(14,15),(29,25),(29,35),(34,35),(19,50),(39,50),(39,30),(49,35),(9,15),(49,10),(49,15),(44,10),(29,40),(29,20),(39,45),(44,50),(19,25),(39,35),(14,50),(9,45)]] + [
+            sprites["pca"].clone().set_position(54, 5), sprites["qqv"].clone().set_position(34, 30),
+            sprites["rzt"].clone().set_position(10, 6), sprites["snw"].clone().set_position(8, 4),
+            sprites["tuv"].clone().set_position(1, 53), sprites["ulq"].clone().set_position(8, 4),
+            sprites["vxy"].clone().set_position(24, 30),
+            # LS20 base energy
+            sprites["zba"].clone().set_position(35, 41),
+            sprites["zba"].clone().set_position(15, 46),
+            sprites["zba"].clone().set_position(25, 21),
+            sprites["zba"].clone().set_position(55, 51),
+            # Fog compensation: 2 pickups near start and mid-map
+            sprites["zba"].clone().set_position(20, 16),
+            sprites["zba"].clone().set_position(45, 26),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 0, "qqv": 4, "ggk": 14, "fij": 0, "kdy": True},
+        name="tmx",
+    ),
+    # Level 5: zba - 3 base energy + 2 fog compensation = 5 total
+    Level(
+        sprites=[
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(52, 3).set_rotation(180),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2), sprites["kdy"].clone().set_position(19, 40),
+            sprites["lhs"].clone().set_position(54, 5), sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(34,0),(59,10),(59,5),(29,30),(29,35),(49,10),(49,5),(29,15),(29,20),(24,25),(19,25),(49,15),(24,30),(24,20),(34,20),(34,30),(49,35),(49,40),(49,45),(49,50),(44,50),(44,5),(14,25),(49,20),(49,30),(14,50),(9,45)]] + [
+            sprites["pca"].clone().set_position(54, 50), sprites["qqv"].clone().set_position(29, 25),
+            sprites["rzt"].clone().set_position(55, 6), sprites["snw"].clone().set_position(53, 4),
+            sprites["tuv"].clone().set_position(1, 53), sprites["ulq"].clone().set_position(53, 4),
+            sprites["vxy"].clone().set_position(19, 10),
+            # LS20 base energy
+            sprites["zba"].clone().set_position(40, 6),
+            sprites["zba"].clone().set_position(10, 6),
+            sprites["zba"].clone().set_position(40, 51),
+            # Fog compensation: 2 pickups along traversal path
+            sprites["zba"].clone().set_position(20, 26),
+            sprites["zba"].clone().set_position(35, 36),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 90, "qqv": 4, "ggk": 12, "fij": 0, "kdy": True},
+        name="zba",
+    ),
+    # Level 6: lyd - 5 base energy + 2 fog compensation = 7 total (dual targets)
+    Level(
+        sprites=[
+            sprites["ggk"].clone().set_position(53, 34),
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(52, 48),
+            sprites["hul"].clone().set_position(52, 33),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2), sprites["kdy"].clone().set_position(19, 25),
+            sprites["lhs"].clone().set_position(54, 50), sprites["lhs"].clone().set_position(54, 35),
+            sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(34,0),(59,10),(59,5),(29,30),(54,10),(24,30),(34,30),(49,35),(49,40),(49,45),(49,50),(44,50),(49,30),(54,5),(44,45),(39,50),(44,40),(34,50),(39,45),(49,25),(19,10),(14,30),(44,30),(49,5),(24,10),(34,25),(19,30),(34,15),(29,10),(9,45),(14,50),(14,25),(44,35),(14,15),(34,10),(14,10)]] + [
+            sprites["pca"].clone().set_position(24, 50), sprites["qqv"].clone().set_position(24, 25),
+            sprites["rzt"].clone().set_position(55, 51), sprites["rzt"].clone().set_position(55, 36),
+            sprites["snw"].clone().set_position(53, 49), sprites["tuv"].clone().set_position(1, 53),
+            sprites["ulq"].clone().set_position(53, 34), sprites["ulq"].clone().set_position(53, 49),
+            sprites["vxy"].clone().set_position(29, 25),
+            # LS20 base energy
+            sprites["zba"].clone().set_position(45, 26),
+            sprites["zba"].clone().set_position(10, 41),
+            sprites["zba"].clone().set_position(55, 16),
+            sprites["zba"].clone().set_position(45, 6),
+            sprites["zba"].clone().set_position(20, 16),
+            # Fog compensation: 2 pickups near dual targets
+            sprites["zba"].clone().set_position(35, 46),
+            sprites["zba"].clone().set_position(15, 31),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": [5, 0], "nlo": [9, 8], "opw": [90, 90], "qqv": 0, "ggk": 14, "fij": 0, "kdy": True},
+        name="lyd",
+    ),
+    # Level 7: fij - 6 base energy, no fog compensation (originally had fog)
+    Level(
+        sprites=[
+            sprites["hep"].clone().set_position(1, 53), sprites["hul"].clone().set_position(27, 48),
+            sprites["kdj"].clone().set_position(3, 55).set_scale(2), sprites["kdy"].clone().set_position(54, 20),
+            sprites["lhs"].clone().set_position(29, 50), sprites["mgu"].clone(),
+        ] + [sprites["nlo"].clone().set_position(x, y) for x, y in [(4,0),(9,0),(4,5),(14,0),(19,0),(24,0),(29,0),(39,0),(44,0),(49,0),(54,0),(59,0),(4,10),(4,15),(4,20),(4,25),(4,30),(4,35),(59,15),(59,20),(59,25),(59,30),(59,35),(59,40),(59,45),(59,50),(59,55),(54,55),(49,55),(44,55),(39,55),(34,55),(29,55),(24,55),(19,55),(4,40),(4,45),(4,50),(9,50),(4,55),(9,55),(14,55),(34,0),(59,10),(59,5),(24,40),(49,10),(49,5),(39,20),(29,20),(24,25),(49,15),(24,20),(34,20),(39,45),(34,40),(24,45),(34,45),(24,50),(34,50),(49,20),(39,40),(54,40),(19,50),(24,35),(39,50),(44,20),(9,45),(14,50),(19,45)]] + [
+            sprites["pca"].clone().set_position(14, 10), sprites["qqv"].clone().set_position(9, 40),
+            sprites["rzt"].clone().set_position(30, 51), sprites["snw"].clone().set_position(28, 49),
+            sprites["tuv"].clone().set_position(1, 53), sprites["ulq"].clone().set_position(28, 49),
+            sprites["vxy"].clone().set_position(19, 40),
+            # LS20 base energy (fij already had fog, no compensation needed)
+            sprites["zba"].clone().set_position(55, 6),
+            sprites["zba"].clone().set_position(30, 26),
+            sprites["zba"].clone().set_position(55, 51),
+            sprites["zba"].clone().set_position(15, 46),
+            sprites["zba"].clone().set_position(15, 21),
+            sprites["zba"].clone().set_position(45, 6),
+        ],
+        grid_size=(64, 64),
+        data={"vxy": 42, "tuv": 0, "nlo": 8, "opw": 180, "qqv": 1, "ggk": 12, "fij": 0, "kdy": True},
+        name="fij",
     ),
 ]
 
 
 class Ws03(ARCBaseGame):
     def __init__(self, seed: int = 0) -> None:
-        camera = Camera(width=64, height=64, background=5, letter_box=5, interfaces=[])
-        super().__init__(game_id="ws03", levels=levels, camera=camera, seed=seed)
-        self.hep = [sprites["dcb"], sprites["nio"], sprites["opw"], sprites["lyd"], sprites["tmx"]]
+        # Initialize attributes BEFORE super().__init__ since on_set_level is called during init
+        # Must match ls20's order: opw(0), lyd(1), tmx(2), nio(3), dcb(4), fij(5)
+        self.hep = [sprites["opw"], sprites["lyd"], sprites["tmx"], sprites["nio"], sprites["dcb"], sprites["fij"]]
         # Jarring color palette: Pink, Red, Yellow, Orange, Purple, Green, Dark Red, Blue, Light Pink, Light Gray
         self.hul = [6, 8, 11, 12, 15, 14, 13, 9, 7, 1]
         self.kdj = [0, 90, 180, 270]
+        camera = Camera(width=64, height=64, background=5, letter_box=5, interfaces=[])
+        super().__init__(game_id="ws03", levels=levels, camera=camera, seed=seed)
 
     def _get_rotation_index(self, value) -> int:
         try:
@@ -86,9 +226,10 @@ class Ws03(ARCBaseGame):
             return 0
 
     def on_set_level(self, level: Level) -> None:
-        self.mgu = level.get_sprites_by_name("mgu")[0]
-        self.nio = level.get_sprites_by_name("nio")[0]
-        self.nlo = level.get_sprites_by_name("nlo")[0]
+        # Use tags like ls20 does: caf=player piece, wex=key indicator, nfq=level boundary
+        self.mgu = level.get_sprites_by_tag("caf")[0]
+        self.nio = level.get_sprites_by_tag("wex")[0]
+        self.nlo = level.get_sprites_by_tag("nfq")[0]
         self.opw = sprites["opw"].clone()
         self.current_level.add_sprite(self.opw)
         self.opw.set_visible(False)
