@@ -26,7 +26,7 @@ python -m pytest -v                       # Verbose
 
 ARCEngine is a Python 2D sprite game engine designed for ARC-AGI-3. It enforces specific constraints:
 - 64×64 pixel output grid with 16 colors
-- Turn-based gameplay (6 actions + RESET)
+- Turn-based gameplay (6 actions + RESET +UNDO)
 - Each action produces 1-N frames
 
 ### Core Components
@@ -109,13 +109,13 @@ This document summarizes the generally applicable engineering expectations for t
 - Seek approval on the plan before implementing.
 
 ## File headers (required for TS/JS/Py)
-- Every TypeScript, JavaScript, or Python file you create shouldstart with:
+- Every TypeScript, JavaScript, or Python file you create should start with:
 
   ```
   Author: {Your Model Name}
-  Date: {timestamp}
+  Date: {timestamp} or DD-Month-YYYY
   PURPOSE: Verbose details about functionality, integration points, dependencies
-  SRP/DRY check: Pass/Fail - did you verify existing functionality?
+  
   ```
 
 - If you touch a file, update its header metadata.
@@ -125,7 +125,7 @@ This document summarizes the generally applicable engineering expectations for t
 - Naming: meaningful names; avoid one-letter variables except tight loops.
 - Error handling: exhaustive, user-safe errors; handle failure modes explicitly.
 - Comments: explain non-obvious logic and integration boundaries inline (especially streaming and external API glue).
-- Reuse: prefer shared helpers and `shadcn/ui` components over custom one-offs.
+- Reuse: prefer shared helpers and components over custom one-offs.
 - Architecture discipline: prefer repositories/services patterns over raw SQL or one-off DB calls.
 - Pragmatism: fix root causes; avoid unrelated refactors and avoid over-engineering (small hobby project).
 
