@@ -6,7 +6,7 @@
 **Version:** 1.0.0
 
 > **You don't move. The world moves around you.**
-
+This game is currently garbage. It's just tiny and awful and pretty much needs a total rethink.  Possibly the biggest problem with it is that all of the levels are just squares. They're not creative shapes, and they're not even large; they're tiny. All the levels should start out pretty much using the same size and using at least 50x50 of the entire board. And I'd really like something where it's more complex than just this. That there's a ring of multi-colored checkered pixels along the outside, and what happens is the checkered pixels along the rim change every time you move, and that determines something in the game somewhere.  So there should be multiple levels of the world moving. Like, you move within this world in the ring. And then there's the outer ring. Do you get what I'm saying?
 ---
 
 ## 1. Game Concept
