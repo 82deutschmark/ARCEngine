@@ -1,7 +1,7 @@
-# Author: Claude Sonnet 4
+# Author: Cascade (ChatGPT)
 # Date: 2026-02-01
 # PURPOSE: Game registry providing centralized discovery and instantiation of all ARCEngine games.
-#          Updated to use official game IDs (ws01, gw01) from games.official module.
+#          Updated to include official ARC Prize preview IDs (ls20, ft09, vc33) alongside ws01/gw01.
 # SRP/DRY check: Pass - registry module with version support
 
 """
@@ -14,7 +14,7 @@ Usage:
     from games import get_game, list_games, get_game_info
 
     # Get available games
-    available = list_games()  # ["gw01", "ws01"]
+    available = list_games()  # ["gw01", "ws01", "ls20", "ft09", "vc33"]
 
     # Instantiate a game by ID
     game = get_game("ws01")
@@ -33,6 +33,9 @@ if TYPE_CHECKING:
 _GAME_REGISTRY: dict[str, tuple[str, str]] = {
     "ws01": ("games.official.ws01", "1.0.0"),  # World Shifter
     "gw01": ("games.official.gw01", "1.0.0"),  # Gravity Well
+    "ls20": ("games.official.ls20", "1.0.0"),  # Light Switch (ARC Prize)
+    "ft09": ("games.official.ft09", "1.0.0"),  # Fill The Grid (ARC Prize)
+    "vc33": ("games.official.vc33", "1.0.0"),  # Vector Chase (ARC Prize)
 }
 
 
@@ -61,12 +64,24 @@ def get_game(game_id: str) -> "ARCBaseGame":
         from games.official.ws01 import Ws01
 
         return Ws01()
-    elif base_id == "gw01":
+    if base_id == "gw01":
         from games.official.gw01 import Gw01
 
         return Gw01()
-    else:
-        raise ValueError(f"Game {game_id} registered but not implemented")
+    if base_id == "ls20":
+        from games.official.ls20 import Ls20
+
+        return Ls20()
+    if base_id == "ft09":
+        from games.official.ft09 import Ft09
+
+        return Ft09()
+    if base_id == "vc33":
+        from games.official.vc33 import Vc33
+
+        return Vc33()
+
+    raise ValueError(f"Game {game_id} registered but not implemented")
 
 
 def list_games() -> list[str]:
