@@ -15,7 +15,7 @@
 Chain Reaction
 
 ### Elevator Pitch
-A Sokoban-style puzzle game where pushing colored blocks into matching blocks destroys both. Clear all colored blocks to unlock the exit and escape each level.
+A Sokoban-style (what the fuck is Sokoban? I've never heard of this. Explain it better)puzzle game where pushing colored blocks into matching blocks destroys both. Clear all colored blocks to unlock the exit and escape each level.
 
 ### Core Innovation
 Unlike traditional Sokoban where you push boxes onto targets, Chain Reaction uses **mutual annihilation**: two matching blocks colliding means both disappear. This creates cascading possibilities and requires planning destruction sequences.
