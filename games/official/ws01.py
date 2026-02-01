@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 import math
 from typing import List, Tuple
 
@@ -1340,6 +1341,22 @@ class Ws01(ARCBaseGame):
 
         self.krg()
 
+    def _get_rotation_index(self, rotation: int) -> int:
+        """Safely get rotation index with fallback to 0 if value not found."""
+        try:
+            return self.kdj.index(rotation)
+        except ValueError:
+            logging.warning(f"ws01: rotation {rotation} not in {self.kdj}, using index 0")
+            return 0
+
+    def _get_color_index(self, color: int) -> int:
+        """Safely get color index with fallback to 0 if value not found."""
+        try:
+            return self.hul.index(color)
+        except ValueError:
+            logging.warning(f"ws01: color {color} not in {self.hul}, using index 0")
+            return 0
+
     def krg(self) -> None:
         fig = self.current_level.get_data("vxy")
         if fig:
@@ -1377,8 +1394,8 @@ class Ws01(ARCBaseGame):
             lxu = [lxu]
 
         for dqk in range(len(self.qqv)):
-            self.cjl.append(self.kdj.index(yxt[dqk]))
-            self.vxy.append(self.hul.index(lxu[dqk]))
+            self.cjl.append(self._get_rotation_index(yxt[dqk]))
+            self.vxy.append(self._get_color_index(lxu[dqk]))
             self.pca[dqk].pixels = self.hep[self.gfy[dqk]].pixels.copy()
             self.pca[dqk].color_remap(0, self.hul[self.vxy[dqk]])
             self.pca[dqk].set_rotation(self.kdj[self.cjl[dqk]])
@@ -1513,8 +1530,8 @@ class Ws01(ARCBaseGame):
         self.complete_action()
 
     def pxr(self) -> None:
-        self.tuv = self.kdj.index(self.current_level.get_data("fij"))
-        self.tmx = self.hul.index(self.current_level.get_data("ggk"))
+        self.tuv = self._get_rotation_index(self.current_level.get_data("fij"))
+        self.tmx = self._get_color_index(self.current_level.get_data("ggk"))
         self.snw = self.current_level.get_data("qqv")
         self.nio.pixels = self.hep[self.snw].pixels.copy()
         self.nio.color_remap(0, self.hul[self.tmx])
