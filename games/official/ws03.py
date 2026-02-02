@@ -236,8 +236,9 @@ class Ws03(ARCBaseGame):
         self.qqv = level.get_sprites_by_tag("gic")
         self.pca = level.get_sprites_by_tag("caf")
         self.gfy = [level.get_data("qqv")] * len(self.qqv)
-        self.vxy = [level.get_data("ggk")] * len(self.qqv)
-        self.cjl = [self.kdj.index(level.get_data("fij"))] * len(self.qqv)
+        # Must convert color VALUE to INDEX (ls20 uses hul.index())
+        self.vxy = [self._get_color_index(level.get_data("ggk"))] * len(self.qqv)
+        self.cjl = [self._get_rotation_index(level.get_data("fij"))] * len(self.qqv)
         self.rzt = [False] * len(self.qqv)
         # Fog of war always enabled in WS03
         self.qee = True
