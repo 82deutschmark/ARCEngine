@@ -5,9 +5,11 @@
 # SRP/DRY check: Pass - Reuses proven game mechanics from LS20/WS01/WS02
 
 import logging
-from typing import List
+import math
+from typing import List, Tuple
+
 import numpy as np
-from arcengine import ARCBaseGame, Camera, Level, Sprite
+from arcengine import ARCBaseGame, Camera, Level, RenderableUserDisplay, Sprite
 
 # WS03 uses jarring clashing colors: Pink (6), Red (8), Yellow (11), Orange (12), Purple (15), Green (14)
 sprites = {
@@ -35,6 +37,64 @@ sprites = {
     "vxy": Sprite(pixels=[[-2]*5, [-2, 6, -2, -2, -2], [-2, -2, 6, 6, -2], [-2, -2, 6, -2, -2], [-2]*5], name="vxy", visible=True, collidable=False, tags=["gsu"], layer=-1),
     "zba": Sprite(pixels=[[11, 11, 11], [11, -1, 11], [11, 11, 11]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
 }
+
+BACKGROUND_COLOR = 5
+PADDING_COLOR = 5
+
+
+class jvq(RenderableUserDisplay):
+    """Fog of War interface - renders visibility radius around player and UI elements."""
+    zba: List[Tuple[int, int]]
+
+    def __init__(self, vxy: "Ws03", ulq: int):
+        self.tuv = vxy
+        self.tmx = ulq
+        self.snw = ulq
+
+    def rzt(self, qqv: int) -> None:
+        self.snw = max(0, min(qqv, self.tmx))
+
+    def pca(self) -> bool:
+        if self.snw >= 0:
+            self.snw -= 1
+        return self.snw >= 0
+
+    def opw(self) -> None:
+        self.snw = self.tmx
+
+    def render_interface(self, frame: np.ndarray) -> np.ndarray:
+        if self.tmx == 0 or self.tuv.xhp:
+            return frame
+
+        nlo = 1.5
+        # Always render fog of war in WS03
+        if self.tuv.qee:
+            for hhe in range(64):
+                for dcv in range(64):
+                    if math.dist((hhe, dcv), (self.tuv.mgu.y + nlo, self.tuv.mgu.x + nlo)) > 20.0:
+                        frame[hhe, dcv] = 5
+
+            if self.tuv.nio and self.tuv.nio.is_visible:
+                nio = self.tuv.nio.render()
+                mgu = 3
+                lyd = 55
+                for hhe in range(6):
+                    for w in range(6):
+                        if nio[hhe][w] != -1:
+                            frame[lyd + hhe, mgu + w] = nio[hhe][w]
+
+        for hhe in range(self.tmx):
+            mgu = 13 + hhe
+            lyd = 61
+            frame[lyd : lyd + 2, mgu] = 11 if self.tmx - hhe - 1 < self.snw else 5
+
+        for lhs in range(3):
+            mgu = 56 + 3 * lhs
+            lyd = 61
+            for x in range(2):
+                frame[lyd : lyd + 2, mgu + x] = 8 if self.tuv.lbq > lhs else 5
+        return frame
+
 
 levels = [
     # Level 1: krg - Tutorial level, 0 base energy + 2 fog compensation
@@ -202,14 +262,29 @@ levels = [
 
 class Ws03(ARCBaseGame):
     def __init__(self, seed: int = 0) -> None:
-        # Initialize attributes BEFORE super().__init__ since on_set_level is called during init
+        # Initialize energy interface before super().__init__ since on_set_level is called during init
+        dcb = levels[0].get_data("vxy") if levels else 0
+        fij = dcb if dcb else 0
+        self.ggk = jvq(self, fij)
+        
         # Must match ls20's order: opw(0), lyd(1), tmx(2), nio(3), dcb(4), fij(5)
         self.hep = [sprites["opw"], sprites["lyd"], sprites["tmx"], sprites["nio"], sprites["dcb"], sprites["fij"]]
-        # Jarring color palette: Pink, Red, Yellow, Orange, Purple, Green, Dark Red, Blue, Light Pink, Light Gray
-        self.hul = [6, 8, 11, 12, 15, 14, 13, 9, 7, 1]
+        # Match LS20's color palette order so level data indices work correctly
+        # LS20 uses [12, 9, 14, 8] - we keep same values for compatibility
+        self.hul = [12, 9, 14, 8]
         self.kdj = [0, 90, 180, 270]
-        camera = Camera(width=64, height=64, background=5, letter_box=5, interfaces=[])
-        super().__init__(game_id="ws03", levels=levels, camera=camera, seed=seed)
+        self.qee = False
+        
+        super().__init__("ws03", levels, Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), False, seed, [1, 2, 3, 4])
+        
+        self.krg()
+    
+    def krg(self) -> None:
+        """Reset energy interface based on current level data."""
+        fig = self.current_level.get_data("vxy")
+        if fig:
+            self.ggk.tmx = fig
+            self.ggk.opw()
 
     def _get_rotation_index(self, value) -> int:
         try:
@@ -227,46 +302,55 @@ class Ws03(ARCBaseGame):
 
     def on_set_level(self, level: Level) -> None:
         # Use tags like ls20 does: caf=player piece, wex=key indicator, nfq=level boundary
-        self.mgu = level.get_sprites_by_tag("caf")[0]
-        self.nio = level.get_sprites_by_tag("wex")[0]
-        self.nlo = level.get_sprites_by_tag("nfq")[0]
-        self.opw = sprites["opw"].clone()
-        self.current_level.add_sprite(self.opw)
-        self.opw.set_visible(False)
-        self.qqv = level.get_sprites_by_tag("gic")
-        self.pca = level.get_sprites_by_tag("caf")
-        self.gfy = [level.get_data("qqv")] * len(self.qqv)
-        # Must convert color VALUE to INDEX (ls20 uses hul.index())
-        self.vxy = [self._get_color_index(level.get_data("ggk"))] * len(self.qqv)
-        self.cjl = [self._get_rotation_index(level.get_data("fij"))] * len(self.qqv)
-        self.rzt = [False] * len(self.qqv)
+        self.mgu = self.current_level.get_sprites_by_tag("caf")[0]
+        self.nio = self.current_level.get_sprites_by_tag("wex")[0]
+        self.nlo = self.current_level.get_sprites_by_tag("nfq")[0]
+        self.opw = self.current_level.get_sprites_by_tag("fng")[0]
+        self.pca = self.current_level.get_sprites_by_tag("axa")
+        self.qqv = self.current_level.get_sprites_by_tag("mae")
+        self.rzt = [False] * len(self.pca)
+        
+        self.snw = 0
+        self.tmx = 0
+        self.tuv = 0
+        self.krg()
+        
+        self.cjl = []
+        self.vxy = []
         # Fog of war always enabled in WS03
         self.qee = True
-
-        class Ggk:
-            def __init__(self, pca_list):
-                self.pca_list, self.tmx = pca_list, 0
-            def rzt(self, tmx):
-                self.tmx = tmx
-            def pca(self):
-                return all(sprite.visible for sprite in self.pca_list)
-
-        self.ggk = Ggk(self.pca)
+        
+        self.gfy = self.current_level.get_data("tuv")
+        if isinstance(self.gfy, int):
+            self.gfy = [self.gfy]
+        
+        yxt = self.current_level.get_data("opw")
+        if isinstance(yxt, int):
+            yxt = [yxt]
+        
+        lxu = self.current_level.get_data("nlo")
+        if isinstance(lxu, int):
+            lxu = [lxu]
+        
         for dqk in range(len(self.qqv)):
-            self.qqv[dqk].pixels = self.hep[self.gfy[dqk]].pixels.copy()
-            self.qqv[dqk].color_remap(0, self.hul[self.vxy[dqk]])
-            self.qqv[dqk].set_rotation(self.kdj[self.cjl[dqk]])
+            self.cjl.append(self.kdj.index(yxt[dqk]))
+            self.vxy.append(self.hul.index(lxu[dqk]))
             self.pca[dqk].pixels = self.hep[self.gfy[dqk]].pixels.copy()
             self.pca[dqk].color_remap(0, self.hul[self.vxy[dqk]])
             self.pca[dqk].set_rotation(self.kdj[self.cjl[dqk]])
+        
         self.pxr()
         self.egb = sprites["krg"].clone()
         self.current_level.add_sprite(self.egb)
         self.egb.set_visible(False)
         self.lbq = 3
-        self.vcn, self.bzf, self.osd = [], [], []
-        self.xhp, self.kbj = False, False
-        self.rjw, self.qbn = self.mgu.x, self.mgu.y
+        self.vcn: List[Sprite] = []
+        self.bzf: List[Sprite] = []
+        self.osd: List[Sprite] = []
+        self.xhp = False
+        self.kbj = False
+        self.rjw = self.mgu.x
+        self.qbn = self.mgu.y
 
     def rbt(self, edo: int, cdg: int, hds: int, xwr: int) -> List[Sprite]:
         return [bes for bes in self.current_level._sprites if bes.x >= edo and bes.x < edo + hds and bes.y >= cdg and bes.y < cdg + xwr]
@@ -367,8 +451,8 @@ class Ws03(ARCBaseGame):
         self.complete_action()
 
     def pxr(self) -> None:
-        self.tuv = self._get_rotation_index(self.current_level.get_data("fij"))
-        self.tmx = self._get_color_index(self.current_level.get_data("ggk"))
+        self.tuv = self.kdj.index(self.current_level.get_data("fij"))
+        self.tmx = self.hul.index(self.current_level.get_data("ggk"))
         self.snw = self.current_level.get_data("qqv")
         self.nio.pixels = self.hep[self.snw].pixels.copy()
         self.nio.color_remap(0, self.hul[self.tmx])
