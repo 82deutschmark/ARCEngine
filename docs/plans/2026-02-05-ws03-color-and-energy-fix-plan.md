@@ -16,6 +16,7 @@ WS03 was created as a variant of WS01 with permanent fog of war + seeded randomn
 ## Detailed Color Audit: WS01 vs WS03
 
 ### ARC Color Index Reference
+AVOID USING 2, 3, 4 they are too gray...  use only if you need ambiguous colors or fog of war 
 export const ARC3_COLORS_TUPLES: Record<number, [number, number, number]> = {
   0: [255, 255, 255],   // White
   1: [204, 204, 204],   // Light Gray
@@ -36,7 +37,7 @@ export const ARC3_COLORS_TUPLES: Record<number, [number, number, number]> = {
 } as const;
 
 
-### Sprite-by-Sprite Color Differences
+### Sprite-by-Sprite Color Differences  (NEEDS AUDIT!!!)
 
 | Sprite | Role | WS01 Color(s) | WS03 Color(s) | Fix Needed |
 |--------|------|---------------|---------------|------------|
