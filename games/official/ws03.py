@@ -86,13 +86,13 @@ class jvq(RenderableUserDisplay):
         for hhe in range(self.tmx):
             mgu = 13 + hhe
             lyd = 61
-            frame[lyd : lyd + 2, mgu] = 11 if self.tmx - hhe - 1 < self.snw else 5
+            frame[lyd : lyd + 2, mgu] = 12 if self.tmx - hhe - 1 < self.snw else 0
 
         for lhs in range(3):
             mgu = 56 + 3 * lhs
             lyd = 61
             for x in range(2):
-                frame[lyd : lyd + 2, mgu + x] = 8 if self.tuv.lbq > lhs else 5
+                frame[lyd : lyd + 2, mgu + x] = 14 if self.tuv.lbq > lhs else 0
         return frame
 
 
