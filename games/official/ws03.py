@@ -107,8 +107,8 @@ levels = [
             sprites["pca"].clone().set_position(39, 45), sprites["rzt"].clone().set_position(35, 11),
             sprites["snw"].clone().set_position(33, 9), sprites["tuv"].clone().set_position(1, 53),
             sprites["ulq"].clone().set_position(33, 9),
-            # Fog compensation: 2 pickups near start and mid-path
-            sprites["zba"].clone().set_position(15, 16),
+            # Fog compensation: 2 pickups in accessible corridors
+            sprites["zba"].clone().set_position(35, 21),
             sprites["zba"].clone().set_position(30, 26),
         ],
         grid_size=(64, 64),
@@ -126,10 +126,10 @@ levels = [
             sprites["snw"].clone().set_position(13, 39), sprites["tuv"].clone().set_position(1, 53),
             sprites["ulq"].clone().set_position(13, 39),
             # LS20 base energy
-            sprites["zba"].clone().set_position(15, 16),
+            sprites["zba"].clone().set_position(35, 16),
             sprites["zba"].clone().set_position(30, 51),
-            # Fog compensation: 2 pickups near decision points
-            sprites["zba"].clone().set_position(45, 26),
+            # Fog compensation: 2 pickups in accessible corridors
+            sprites["zba"].clone().set_position(50, 16),
             sprites["zba"].clone().set_position(20, 36),
         ],
         grid_size=(64, 64),
@@ -148,11 +148,11 @@ levels = [
             sprites["tuv"].clone().set_position(1, 53), sprites["ulq"].clone().set_position(53, 49),
             # LS20 base energy
             sprites["zba"].clone().set_position(20, 31),
-            sprites["zba"].clone().set_position(35, 6),
+            sprites["zba"].clone().set_position(30, 16),
             sprites["zba"].clone().set_position(50, 36),
-            # Fog compensation: 2 pickups near corridors
-            sprites["zba"].clone().set_position(15, 16),
-            sprites["zba"].clone().set_position(45, 21),
+            # Fog compensation: 2 pickups in accessible corridors
+            sprites["zba"].clone().set_position(50, 11),
+            sprites["zba"].clone().set_position(10, 41),
         ],
         grid_size=(64, 64),
         data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 270, "qqv": 5, "ggk": 12, "fij": 0, "kdy": True},
@@ -172,10 +172,10 @@ levels = [
             # LS20 base energy
             sprites["zba"].clone().set_position(35, 41),
             sprites["zba"].clone().set_position(15, 46),
-            sprites["zba"].clone().set_position(25, 21),
+            sprites["zba"].clone().set_position(35, 16),
             sprites["zba"].clone().set_position(55, 51),
-            # Fog compensation: 2 pickups near start and mid-map
-            sprites["zba"].clone().set_position(20, 16),
+            # Fog compensation: 2 pickups in accessible corridors
+            sprites["zba"].clone().set_position(50, 26),
             sprites["zba"].clone().set_position(45, 26),
         ],
         grid_size=(64, 64),
@@ -197,9 +197,9 @@ levels = [
             sprites["zba"].clone().set_position(40, 6),
             sprites["zba"].clone().set_position(10, 6),
             sprites["zba"].clone().set_position(40, 51),
-            # Fog compensation: 2 pickups along traversal path
+            # Fog compensation: 2 pickups in accessible corridors
             sprites["zba"].clone().set_position(20, 26),
-            sprites["zba"].clone().set_position(35, 36),
+            sprites["zba"].clone().set_position(35, 11),
         ],
         grid_size=(64, 64),
         data={"vxy": 42, "tuv": 5, "nlo": 9, "opw": 90, "qqv": 4, "ggk": 12, "fij": 0, "kdy": True},
@@ -221,14 +221,14 @@ levels = [
             sprites["ulq"].clone().set_position(53, 34), sprites["ulq"].clone().set_position(53, 49),
             sprites["vxy"].clone().set_position(29, 25),
             # LS20 base energy
-            sprites["zba"].clone().set_position(45, 26),
+            sprites["zba"].clone().set_position(40, 16),
             sprites["zba"].clone().set_position(10, 41),
             sprites["zba"].clone().set_position(55, 16),
-            sprites["zba"].clone().set_position(45, 6),
-            sprites["zba"].clone().set_position(20, 16),
-            # Fog compensation: 2 pickups near dual targets
-            sprites["zba"].clone().set_position(35, 46),
-            sprites["zba"].clone().set_position(15, 31),
+            sprites["zba"].clone().set_position(55, 21),
+            sprites["zba"].clone().set_position(10, 6),
+            # Fog compensation: 2 pickups in accessible corridors
+            sprites["zba"].clone().set_position(30, 41),
+            sprites["zba"].clone().set_position(10, 21),
         ],
         grid_size=(64, 64),
         data={"vxy": 42, "tuv": [5, 0], "nlo": [9, 8], "opw": [90, 90], "qqv": 0, "ggk": 14, "fij": 0, "kdy": True},
