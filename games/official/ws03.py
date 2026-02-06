@@ -251,7 +251,7 @@ levels = [
             sprites["zba"].clone().set_position(55, 51),
             sprites["zba"].clone().set_position(15, 46),
             sprites["zba"].clone().set_position(15, 21),
-            sprites["zba"].clone().set_position(45, 6),
+            sprites["zba"].clone().set_position(45, 11),
         ],
         grid_size=(64, 64),
         data={"vxy": 42, "tuv": 0, "nlo": 8, "opw": 180, "qqv": 1, "ggk": 12, "fij": 0, "kdy": True},
