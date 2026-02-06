@@ -35,11 +35,11 @@ sprites = {
     "tuv": Sprite(pixels=[[6]*10] + [[6] + [-1]*8 + [6]]*8 + [[6]*10], name="tuv", visible=False, collidable=True, tags=["fng"], layer=5),
     "ulq": Sprite(pixels=[[6]*7] + [[6] + [-1]*5 + [6]]*5 + [[6]*7], name="ulq", visible=False, collidable=True, tags=["qex"], layer=-1),
     "vxy": Sprite(pixels=[[-2]*5, [-2, 6, -2, -2, -2], [-2, -2, 6, 6, -2], [-2, -2, 6, -2, -2], [-2]*5], name="vxy", visible=True, collidable=False, tags=["gsu"], layer=-1),
-    "zba": Sprite(pixels=[[11, 11, 11], [11, -1, 11], [11, 11, 11]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
+    "zba": Sprite(pixels=[[12, 12, 12], [12, -1, 12], [12, 12, 12]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
 }
 
-BACKGROUND_COLOR = 5
-PADDING_COLOR = 5
+BACKGROUND_COLOR = 0
+PADDING_COLOR = 0
 
 
 class jvq(RenderableUserDisplay):
