@@ -1,88 +1,87 @@
 # WS03 Color Scheme & Energy Placement Fix Plan
 
-**Author:** Claude Opus 4.6
-**Date:** 2026-02-05
+**Author:** Claude Opus 4.6 / Claude Haiku 4.5
+**Date:** 2026-02-05 (Revised)
 **File:** `external/ARCEngine/games/official/ws03.py`
-**Reference:** `external/ARCEngine/games/official/ws01.py` (source of truth for colors)
+**Reference:** World Shifter visual style (magenta border, clean health bar)
 
 ## Problem Summary
 
-WS03 was created as a variant of WS01 with permanent fog of war + seeded randomness. The gameplay mechanics work well, but:
+WS03 has excessive gray (color 5) and visual clutter. The goal is to improve visual clarity by:
 
-1. **Colors are completely wrong** - every sprite uses the wrong color palette
-2. **Energy pickups are inaccessible** - placed inside walls or unreachable areas
-3. **Special buttons lost their distinctive appearance** - the shape-change (kdy) and color-change (qqv) buttons use wrong colors
+1. **Replace gray border with magenta** - Use color 6 for world border (like World Shifter)
+2. **Improve health bar design** - Clearer color separation and visual readability
+3. **Refactor player sprite** - Make it half the current size with colors 14 (green) and 10 (light blue)
+4. **Clean up excess grays** - Remove overuse of color 5 and dark grays (2, 3, 4)
 
-## Detailed Color Audit: WS01 vs WS03
+## ARC3 Color Index Reference
 
-### ARC Color Index Reference
-AVOID USING 2, 3, 4 they are too gray...  use only if you need ambiguous colors or fog of war 
-export const ARC3_COLORS_TUPLES: Record<number, [number, number, number]> = {
-  0: [255, 255, 255],   // White
-  1: [204, 204, 204],   // Light Gray
-  2: [153, 153, 153],   // Gray
-  3: [102, 102, 102],   // Dark Gray
-  4: [51, 51, 51],      // Darker Gray
-  5: [0, 0, 0],         // Black
-  6: [229, 58, 163],    // Pink (#E53AA3)
-  7: [255, 123, 204],   // Light Pink (#FF7BCC)
-  8: [249, 60, 49],     // Red (#F93C31)
-  9: [30, 147, 255],    // Blue (#1E93FF)
-  10: [136, 216, 241],  // Light Blue (#88D8F1)
-  11: [255, 220, 0],    // Yellow (#FFDC00)
-  12: [255, 133, 27],   // Orange (#FF851B)
-  13: [146, 18, 49],    // Dark Red (#921231)
-  14: [79, 204, 48],    // Green (#4FCC30)
-  15: [163, 86, 208],   // Purple (#A356D0)
-} as const;
+```
+0:  White (#FFFFFF)
+1:  Light Gray (#CCCCCC)
+2:  Gray (#999999)
+3:  Dark Gray (#666666)
+4:  Darker Gray (#333333)
+5:  Black (#000000) - AVOID OVERUSE
+6:  Magenta/Pink (#E53AA3) - World border, distinctive UI elements
+7:  Light Pink (#FF7BCC)
+8:  Red (#F93C31)
+9:  Blue (#1E93FF)
+10: Light Blue (#88D8F1) - Player sprite
+11: Yellow (#FFDC00)
+12: Orange (#FF851B) - Health/energy bars
+13: Dark Red (#921231)
+14: Green (#4FCC30) - Player sprite
+15: Purple (#A356D0)
+```
+
+**Strategy:** Use vibrant, distinctive colors; avoid gray (5) and dull grays (2-4) except for fog of war.
 
 
-### Sprite-by-Sprite Color Differences  (NEEDS AUDIT!!!)
+### Sprite Changes: WS03 → Improved (World Shifter Style)
 
-| Sprite | Role | WS01 Color(s) | WS03 Color(s) | Fix Needed |
-|--------|------|---------------|---------------|------------|
-| `dcb` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `fij` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `ggk` | Gate border (dual-target) | 2 (red) | 5 (gray) | Change to 2 |
-| `hep` | Level boundary block | 2 (red) | 5 (gray) | Change to 2 |
-| `hul` | Goal area backdrop | 15 (gray-light) | 13 | Keep 13 (same) |
-| `kdj` | Key indicator on HUD | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `kdy` | Rotation button | 9+7 (maroon+orange) | 6+1 (magenta+blue) | Change to 9+7 |
-| `krg` | Death/reset flash | 12 (orange) | 8 (azure) | Change to 12 |
-| `lhs` | Target landing pad | 2 (red) | 5 (gray) | Change to 2 |
-| `lyd` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `mgu` | World border (left wall + bottom box) | 2 (wall) + 13 (box border) | 5 (wall) + 4 (box border) | Change to 2+13 |
-| `nio` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `nlo` | Interior wall blocks | 13 (gray) | 4 (yellow) | Change to 13 |
-| `opw` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `pca` | Player piece (top+bottom) | 8+6 (azure+magenta) | 12+15 (orange+gray) | Change to 8+6 |
-| `qqv` | Color-change button | 6,11,9,14,8 | 15,8,6,11,12 | Change to 6,11,9,14,8 |
-| `rzt` | Key/target marker diagonal | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `snw` | Gate border | 2 (red) | 5 (gray) | Change to 2 |
-| `tmx` | Player shape option | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `tuv` | Hidden level boundary | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `ulq` | Hidden gate outline | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `vxy` | Shape-change button | 9 (maroon) | 6 (magenta) | Change to 9 |
-| `zba` | Energy pickup ring | 12 (orange) | 11 (yellow) | Change to 12 |
+| Sprite | Role | Current | Target | Notes |
+|--------|------|---------|--------|-------|
+| `dcb` | Player shape option | 6 (magenta) | 6 (magenta) | Keep - distinctive |
+| `fij` | Player shape option | 6 (magenta) | 6 (magenta) | Keep - distinctive |
+| `ggk` | Gate border | 5 (gray) | 6 (magenta) | Match world border |
+| `hep` | Level boundary block | 5 (gray) | 6 (magenta) | Match world border |
+| `hul` | Goal area backdrop | 13 (dark red) | 13 (dark red) | Keep |
+| `kdj` | Key indicator on HUD | 6 (magenta) | 6 (magenta) | Keep |
+| `kdy` | Rotation button | 6+1 (magenta+gray) | 6+12 (magenta+orange) | Improve color contrast |
+| `krg` | Death/reset flash | 8 (red) | 8 (red) | Keep |
+| `lhs` | Target landing pad | 5 (gray) | 6 (magenta) | Match world border |
+| `lyd` | Player shape option | 6 (magenta) | 6 (magenta) | Keep - distinctive |
+| `mgu` | World border | 5 (gray) + 4 (dark gray) | 6 (magenta) + 13 (dark red) | NEW: Use magenta (like World Shifter) |
+| `nio` | Player shape option | 6 (magenta) | 6 (magenta) | Keep |
+| `nlo` | Interior wall blocks | 4 (darker gray) | 13 (dark red) | Better contrast |
+| `opw` | Player shape option | 6 (magenta) | 6 (magenta) | Keep |
+| `pca` | **Player piece** | **12+15 (orange+gray)** | **14+10 (green+light blue) @ 50% scale** | **KEY CHANGE: Half size, new colors** |
+| `qqv` | Color-change button | 15,8,6,11,12 | 15,8,6,11,12 | Keep current palette |
+| `rzt` | Key/target marker | 6 (magenta) | 6 (magenta) | Keep |
+| `snw` | Gate border | 5 (gray) | 6 (magenta) | Match world border |
+| `tmx` | Player shape option | 6 (magenta) | 6 (magenta) | Keep |
+| `tuv` | Hidden level boundary | 6 (magenta) | 6 (magenta) | Keep |
+| `ulq` | Hidden gate outline | 6 (magenta) | 6 (magenta) | Keep |
+| `vxy` | Shape-change button | 6 (magenta) | 6 (magenta) | Keep |
+| `zba` | Energy pickup ring | 11 (yellow) | 12 (orange) | Better visual hierarchy |
 
 ### Global Constants
 
-| Constant | WS01 | WS03 | Fix |
-|----------|------|------|-----|
-| `BACKGROUND_COLOR` | 15 | 5 | Change to 15 |
-| `PADDING_COLOR` | 15 | 5 | Change to 15 |
-| `self.hul` (color cycle array) | [8, 6, 11, 14] | [12, 9, 14, 8] | Change to [8, 6, 11, 14] |
+| Constant | Current | Target | Notes |
+|----------|---------|--------|-------|
+| `BACKGROUND_COLOR` | 5 (black) | 0 (white) | Better clarity |
+| `PADDING_COLOR` | 5 (black) | 0 (white) | Better clarity |
+| Fog overlay color | 5 (black) | 5 (black) | Keep (obscures behind magenta border) |
 
-### Render Interface Colors (jvq class)
+### Health/Energy Bar Colors
 
-| Element | WS01 | WS03 | Fix |
-|---------|------|------|-----|
-| Fog overlay color | 2 (red) | 5 (gray) | Change to 2 |
-| Empty fog area color | 15 | 5 | Change to 15 |
-| Energy bar filled | 12 (orange) | 11 (yellow) | Change to 12 |
-| Energy bar empty | 15 | 5 | Change to 15 |
-| Lives filled | 14 (green) | 8 (azure) | Change to 14 |
-| Lives empty | 15 | 5 | Change to 15 |
+| Element | Current | Target | Notes |
+|---------|---------|--------|-------|
+| Energy bar filled | 11 (yellow) | 12 (orange) | Better saturation |
+| Energy bar empty | 5 (black) | 0 (white) | Clearer contrast |
+| Lives filled | 8 (red) | 14 (green) | Matches WS01 style |
+| Lives empty | 5 (black) | 0 (white) | Clearer contrast |
 
 ## Energy Pickup Accessibility Audit
 
@@ -110,45 +109,59 @@ WS03 added "fog compensation" energy pickups beyond what WS01 has. Need to verif
 
 **Strategy for fixing inaccessible pickups:** I'll need to verify each fog-compensation pickup position against the wall layout. Any pickup sitting inside a wall block will be relocated to a nearby open corridor.
 
-## What WS03 Should KEEP (gameplay mechanics)
+## What WS03 Should KEEP (Core Identity)
 
-1. Permanent fog of war (`self.qee = True` always, not driven by level data `kdy`)
-2. Seeded randomness (`seed` parameter in constructor)
-3. Extra energy pickups to compensate for fog difficulty (but in accessible locations)
-4. The `__init__` signature accepting `seed` parameter
+1. **Permanent fog of war** - The defining feature of WS03 (unlike WS01)
+   - `self.qee = True` always, not driven by level data
+   - Fog overlay rendered at line 71-75 (jvq.render_interface)
+2. **Seeded randomness** - Enable deterministic play testing
+   - `seed` parameter in constructor
+3. **Extra energy pickups** - Compensate for fog difficulty
+4. **Gameplay mechanics** - All sprites, levels, and logic from WS01
+
+## Key Difference: WS03 vs WS01
+
+WS03 is NOT a complete recolor of WS01. It is WS01 + permanent fog of war with improved visual design.
 
 ## Implementation Steps
 
-### Step 1: Fix all sprite color definitions (lines 16-38)
-Replace every sprite definition to use WS01's exact colors.
+### Step 1: Update player sprite `pca` (line 30)
+Create new half-size sprite using colors 14 (green) and 10 (light blue):
+- Current: 5×5 pixels with colors 12+15
+- Target: Scaled 50% (approximately 2-3px), colors 14+10
 
-### Step 2: Fix global constants (lines 41-42)
+### Step 2: Update world border sprites (lines 19, 26, 33)
+- `hep`: Change from 5 → 6 (magenta)
+- `mgu`: Change from 5+4 → 6+13 (magenta + dark red)
+- `snw`: Change from 5 → 6 (magenta)
+
+### Step 3: Update other border sprites (lines 18, 24, 32)
+- `ggk`: Change from 5 → 6 (magenta)
+- `lhs`: Change from 5 → 6 (magenta)
+- `ulq`: Change from 6 → 6 (keep magenta for consistency)
+
+### Step 4: Update global constants (lines 41-42)
 ```python
-BACKGROUND_COLOR = 15
-PADDING_COLOR = 15
+BACKGROUND_COLOR = 0  # white instead of 5 (black)
+PADDING_COLOR = 0     # white instead of 5 (black)
 ```
 
-### Step 3: Fix jvq render_interface colors (lines 65-96)
-- Line 75: fog overlay `5` -> `2`
-- Line 89: energy bar filled `11` -> `12`, empty `5` -> `15`
-- Line 95: lives filled `8` -> `14`, empty `5` -> `15`
+### Step 5: Update render_interface health bar colors (lines 89, 95)
+- Line 89: Energy bar filled `11` → `12` (yellow → orange), empty `5` → `0` (black → white)
+- Line 95: Lives filled `8` → `14` (red → green), empty `5` → `0` (black → white)
 
-### Step 4: Fix color cycle array in Ws03.__init__ (line 274)
-```python
-self.hul = [8, 6, 11, 14]  # was [12, 9, 14, 8]
-```
+### Step 6: Update interior wall colors (line 28)
+- `nlo`: Change from 4 → 13 (darker gray → dark red) for better contrast
 
-### Step 5: Fix kbj flash color in step() (line 366)
-```python
-self.nlo.color_remap(None, 5)  # already 5 in WS03, WS01 also uses 5 - OK
-```
-
-### Step 6: Audit and fix energy pickup positions
-For each level, verify zba positions against nlo wall grid and relocate any inaccessible ones.
+### Step 7: Update button colors (lines 22, 31)
+- `kdy`: Change from [−2, −2, 6, −2, −2] blue accent to orange (12) accent
+- `qqv`: Review color palette, keep or adjust for consistency
 
 ## Verification
 
-1. Run the game and visually compare WS03 against WS01 screenshot
-2. Verify all energy pickups are reachable by playing through each level
-3. Confirm fog of war still works with correct overlay color (red/2, not gray)
-4. Confirm color-change and shape-change buttons have their distinctive WS01 appearance
+1. Visual check: Compare against World Shifter screenshot
+2. Magenta border clearly distinguishes play area
+3. Health bar is readable with orange (filled) and white (empty)
+4. Player sprite is half-size and uses green+light blue colors
+5. Interior walls are dark red (not dull gray)
+6. **CONFIRM**: Fog of war still works and obscures properly with world border
