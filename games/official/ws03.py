@@ -1,8 +1,8 @@
-# Author: Claude Opus 4.5
-# Date: 2026-02-01
-# PURPOSE: WS03 game - variant of LS20/WS02 with jarring color palette and permanent fog of war
-# Features: Pink/Red/Yellow/Orange/Purple clashing colors, always-on fog of war, extra energy pickups
-# SRP/DRY check: Pass - Reuses proven game mechanics from LS20/WS01/WS02
+# Author: Claude Opus 4.5 / Claude Haiku 4.5
+# Date: 2026-02-05
+# PURPOSE: WS03 game - variant of WS01 with permanent fog of war + seeded randomness
+# Features: Magenta border, improved color hierarchy, permanent fog of war, extra energy pickups
+# SRP/DRY check: Pass - Reuses proven game mechanics from WS01
 
 import logging
 import math
@@ -11,7 +11,7 @@ from typing import List, Tuple
 import numpy as np
 from arcengine import ARCBaseGame, Camera, Level, RenderableUserDisplay, Sprite
 
-# WS03 uses jarring clashing colors: Pink (6), Red (8), Yellow (11), Orange (12), Purple (15), Green (14)
+# WS03 uses distinctive colors: Magenta borders (6), dark red walls (13), orange energy (12), green+light blue player (14+10)
 sprites = {
     "dcb": Sprite(pixels=[[-1, 6, -1], [6, 6, -1], [-1, 6, 6]], name="dcb", visible=True, collidable=True, layer=1),
     "fij": Sprite(pixels=[[6, 6, 6], [-1, -1, 6], [6, -1, 6]], name="fij", visible=True, collidable=False, layer=-2),
@@ -35,7 +35,7 @@ sprites = {
     "tuv": Sprite(pixels=[[6]*10] + [[6] + [-1]*8 + [6]]*8 + [[6]*10], name="tuv", visible=False, collidable=True, tags=["fng"], layer=5),
     "ulq": Sprite(pixels=[[6]*7] + [[6] + [-1]*5 + [6]]*5 + [[6]*7], name="ulq", visible=False, collidable=True, tags=["qex"], layer=-1),
     "vxy": Sprite(pixels=[[-2]*5, [-2, 6, -2, -2, -2], [-2, -2, 6, 6, -2], [-2, -2, 6, -2, -2], [-2]*5], name="vxy", visible=True, collidable=False, tags=["gsu"], layer=-1),
-    "zba": Sprite(pixels=[[12, 12, 12], [12, -1, 12], [12, 12, 12]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
+    "zba": Sprite(pixels=[[12]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
 }
 
 BACKGROUND_COLOR = 0
