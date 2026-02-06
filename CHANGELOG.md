@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **docs/Reference/Engine-Reference/Documentation-Index.md** - Curated mirror of https://docs.arcprize.org/llms.txt for fast navigation of ARC-AGI-3 documentation
+  - Groups commands, toolkit pages, platform policies, and templates per official categories
+  - Highlights refresh instructions to keep the list synchronized with upstream
+  - **Author**: Cascade (OpenAI Assistant)
+
 - **games/official/** - Official ARC-AGI-3 preview games downloaded via `arc-agi` API
   - `ls20.py` - Shape-matching navigation puzzle (7 levels, 4 actions)
   - `ft09.py` - Color-cycling constraint satisfaction (6 levels, 6 actions)

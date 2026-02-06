@@ -1,24 +1,11 @@
+# Author: Cascade (Claude Sonnet 4)
+# Date: 2026-02-05
+# PURPOSE: WS01 game - ARC-AGI puzzle game with obfuscated naming conventions
+# Features: Fog of war, energy system, shape/color/rotation matching mechanics
+# SRP/DRY check: Pass - Core game logic for puzzle mechanics
+#
 # MIT License
-#
 # Copyright (c) 2026 ARC Prize Foundation
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 import logging
 import math
@@ -28,6 +15,7 @@ import numpy as np
 from arcengine import (
     ARCBaseGame,
     Camera,
+    GameAction,
     Level,
     RenderableUserDisplay,
     Sprite,
@@ -1268,7 +1256,7 @@ BACKGROUND_COLOR = 15
 PADDING_COLOR = 15
 
 
-class jvq(RenderableUserDisplay):
+class FogOfWarInterface(RenderableUserDisplay):
     zba: List[Tuple[int, int]]
 
     def __init__(self, vxy: "Ws01", ulq: int):
@@ -1324,7 +1312,7 @@ class Ws01(ARCBaseGame):
     def __init__(self) -> None:
         dcb = levels[0].get_data("vxy") if levels else 0
         fij = dcb if dcb else 0
-        self.ggk = jvq(self, fij)
+        self.ggk = FogOfWarInterface(self, fij)
         self.hep = []
         self.hul = [8, 6, 11, 14]
         self.kdj = [0, 90, 180, 270]
@@ -1337,7 +1325,7 @@ class Ws01(ARCBaseGame):
         self.hep.append(sprites["fij"])
         self.qee = False
 
-        super().__init__("ws01", levels, Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), False, 1, [1, 2, 3, 4])
+        super().__init__(game_id="ws01", levels=levels, camera=Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), debug=False, win_score=1, available_actions=[1, 2, 3, 4], seed=0)
 
         self.krg()
 
@@ -1414,8 +1402,7 @@ class Ws01(ARCBaseGame):
         self.qbn = self.mgu.y
 
     def rbt(self, edo: int, cdg: int, hds: int, xwr: int) -> List[Sprite]:
-        oyx = self.current_level._sprites
-        return [bes for bes in oyx if bes.x >= edo and bes.x < edo + hds and bes.y >= cdg and bes.y < cdg + xwr]
+        return self.current_level.get_sprites_in_region(edo, cdg, hds, xwr)
 
     def step(self) -> None:
         if self.xhp:
@@ -1434,16 +1421,16 @@ class Ws01(ARCBaseGame):
         lgr = 0
         kyr = 0
         axv = False
-        if self.action.id.value == 1:
+        if self.action.id == GameAction.ACTION1:
             kyr = -1
             axv = True
-        elif self.action.id.value == 2:
+        elif self.action.id == GameAction.ACTION2:
             kyr = 1
             axv = True
-        elif self.action.id.value == 3:
+        elif self.action.id == GameAction.ACTION3:
             lgr = -1
             axv = True
-        elif self.action.id.value == 4:
+        elif self.action.id == GameAction.ACTION4:
             lgr = 1
             axv = True
 

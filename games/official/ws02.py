@@ -9,7 +9,7 @@ import math
 from typing import List, Tuple
 
 import numpy as np
-from arcengine import ARCBaseGame, Camera, Level, RenderableUserDisplay, Sprite
+from arcengine import ARCBaseGame, Camera, GameAction, Level, RenderableUserDisplay, Sprite
 
 # WS02 color theme: Light blue (10) borders, yellow (4) walls, green (3) door body
 # Shape sprites use 0 as base color so color_remap(0, target) works correctly
@@ -309,7 +309,7 @@ levels = [
 
 
 # Fog of War interface - renders visibility radius around player and UI elements
-class jvq(RenderableUserDisplay):
+class FogOfWarInterface(RenderableUserDisplay):
     zba: List[Tuple[int, int]]
 
     def __init__(self, vxy: "Ws02", ulq: int):
@@ -370,7 +370,7 @@ class Ws02(ARCBaseGame):
         # Initialize energy interface before super().__init__ since on_set_level is called during init
         dcb = levels[0].get_data("vxy") if levels else 0
         fij = dcb if dcb else 0
-        self.ggk = jvq(self, fij)
+        self.ggk = FogOfWarInterface(self, fij)
 
         # Shape sprites list: opw(0), lyd(1), tmx(2), nio(3), dcb(4), fij(5)
         self.hep = [sprites["opw"], sprites["lyd"], sprites["tmx"], sprites["nio"], sprites["dcb"], sprites["fij"]]
@@ -379,7 +379,7 @@ class Ws02(ARCBaseGame):
         self.kdj = [0, 90, 180, 270]
         self.qee = False
 
-        super().__init__("ws02", levels, Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), False, seed, [1, 2, 3, 4])
+        super().__init__(game_id="ws02", levels=levels, camera=Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), debug=False, win_score=1, available_actions=[1, 2, 3, 4], seed=seed)
 
         self.krg()
 
@@ -458,8 +458,7 @@ class Ws02(ARCBaseGame):
         self.qbn = self.mgu.y
 
     def rbt(self, edo: int, cdg: int, hds: int, xwr: int) -> List[Sprite]:
-        oyx = self.current_level._sprites
-        return [bes for bes in oyx if bes.x >= edo and bes.x < edo + hds and bes.y >= cdg and bes.y < cdg + xwr]
+        return self.current_level.get_sprites_in_region(edo, cdg, hds, xwr)
 
     def step(self) -> None:
         if self.xhp:
@@ -478,16 +477,16 @@ class Ws02(ARCBaseGame):
         lgr = 0
         kyr = 0
         axv = False
-        if self.action.id.value == 1:
+        if self.action.id == GameAction.ACTION1:
             kyr = -1
             axv = True
-        elif self.action.id.value == 2:
+        elif self.action.id == GameAction.ACTION2:
             kyr = 1
             axv = True
-        elif self.action.id.value == 3:
+        elif self.action.id == GameAction.ACTION3:
             lgr = -1
             axv = True
-        elif self.action.id.value == 4:
+        elif self.action.id == GameAction.ACTION4:
             lgr = 1
             axv = True
 
