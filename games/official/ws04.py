@@ -10,7 +10,7 @@ import math
 from typing import List, Tuple
 
 import numpy as np
-from arcengine import ARCBaseGame, Camera, Level, RenderableUserDisplay, Sprite
+from arcengine import ARCBaseGame, Camera, GameAction, Level, RenderableUserDisplay, Sprite
 
 # WS04 color theme: Cyan (8) borders/frames, maroon (9) walls, yellow (4) door body
 # Player: Dark Gray (3) top + Light Pink (7) bottom -- neutral/warm contrast, pops against Blue walls
@@ -18,27 +18,27 @@ from arcengine import ARCBaseGame, Camera, Level, RenderableUserDisplay, Sprite
 sprites = {
     "dcb": Sprite(pixels=[[-1, 0, -1], [0, 0, -1], [-1, 0, 0]], name="dcb", visible=True, collidable=True, layer=1),
     "fij": Sprite(pixels=[[0, 0, 0], [-1, -1, 0], [0, -1, 0]], name="fij", visible=True, collidable=False, layer=-2),
-    "ggk": Sprite(pixels=[[8, 8, 8, 8, 8, 8, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, 8, 8, 8, 8, 8, 8]], name="ggk", visible=True, collidable=True, tags=["yar", "vdr"], layer=-3),
-    "hep": Sprite(pixels=[[8]*10]*10, name="hep", visible=True, collidable=True, tags=["nfq"], layer=1),
+    "ggk": Sprite(pixels=[[8, 8, 8, 8, 8, 8, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, 8, 8, 8, 8, 8, 8]], name="ggk", visible=True, collidable=True, tags=["frame", "dual_slot_frame"], layer=-3),
+    "hep": Sprite(pixels=[[8]*10]*10, name="hep", visible=True, collidable=True, tags=["level_boundary"], layer=1),
     "hul": Sprite(pixels=[[4, 4, -1, -1, -1, -1, -1, 4, 4], [4]*9, [4]*9, [4]*9, [4]*9, [4]*9, [4]*9, [4]*9, [4]*9], name="hul", visible=True, collidable=True, layer=-4),
-    "kdj": Sprite(pixels=[[0, -1, 0], [-1, 0, -1], [0, -1, 0]], name="kdj", visible=True, collidable=True, tags=["wex"], layer=10),
-    "kdy": Sprite(pixels=[[-2]*5, [-2, -2, 8, -2, -2], [-2, 4, 8, 8, -2], [-2, -2, 4, -2, -2], [-2]*5], name="kdy", visible=True, collidable=True, tags=["bgt"], layer=-1),
+    "kdj": Sprite(pixels=[[0, -1, 0], [-1, 0, -1], [0, -1, 0]], name="kdj", visible=True, collidable=True, tags=["key_indicator"], layer=10),
+    "kdy": Sprite(pixels=[[-2]*5, [-2, -2, 8, -2, -2], [-2, 4, 8, 8, -2], [-2, -2, 4, -2, -2], [-2]*5], name="kdy", visible=True, collidable=True, tags=["rotation_changer"], layer=-1),
     "krg": Sprite(pixels=[[2]], name="krg", visible=True, collidable=True, layer=3),
-    "lhs": Sprite(pixels=[[8]*5]*5, name="lhs", visible=True, collidable=False, tags=["mae"], layer=-3),
+    "lhs": Sprite(pixels=[[8]*5]*5, name="lhs", visible=True, collidable=False, tags=["key_slot"], layer=-3),
     "lyd": Sprite(pixels=[[-1, 0, -1], [-1, 0, -1], [0, 0, 0]], name="lyd", visible=True, collidable=True),
     "mgu": Sprite(pixels=[[-1]*64]*52 + [[9]*12 + [-1]*52] + [[9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9] + [-1]*52]*7 + [[9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9] + [9]*52]*3 + [[9]*12 + [9]*52], name="mgu", visible=True, collidable=True),
     "nio": Sprite(pixels=[[-1, 0, 0], [0, -1, 0], [-1, 0, -1]], name="nio", visible=True, collidable=True),
-    "nlo": Sprite(pixels=[[9]*5]*5, name="nlo", visible=True, collidable=True, tags=["jdd"], layer=-5),
+    "nlo": Sprite(pixels=[[9]*5]*5, name="nlo", visible=True, collidable=True, tags=["wall"], layer=-5),
     "opw": Sprite(pixels=[[0, 0, -1], [-1, 0, 0], [0, -1, 0]], name="opw", visible=True, collidable=True),
-    "pca": Sprite(pixels=[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]], name="pca", visible=True, collidable=True, tags=["caf"]),
-    "qqv": Sprite(pixels=[[-2]*5, [-2, 9, 14, 14, -2], [-2, 9, 4, 8, -2], [-2, 12, 12, 8, -2], [-2]*5], name="qqv", visible=True, collidable=False, tags=["gic"], layer=-1),
-    "rzt": Sprite(pixels=[[0, -1, -1], [-1, 0, -1], [-1, -1, 0]], name="rzt", visible=True, collidable=True, tags=["axa"]),
-    "snw": Sprite(pixels=[[8]*7, [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8]*7], name="snw", visible=True, collidable=True, tags=["yar"], layer=-3),
+    "pca": Sprite(pixels=[[3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]], name="pca", visible=True, collidable=True, tags=["player"]),
+    "qqv": Sprite(pixels=[[-2]*5, [-2, 9, 14, 14, -2], [-2, 9, 4, 8, -2], [-2, 12, 12, 8, -2], [-2]*5], name="qqv", visible=True, collidable=False, tags=["color_changer"], layer=-1),
+    "rzt": Sprite(pixels=[[0, -1, -1], [-1, 0, -1], [-1, -1, 0]], name="rzt", visible=True, collidable=True, tags=["lock"]),
+    "snw": Sprite(pixels=[[8]*7, [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8]*7], name="snw", visible=True, collidable=True, tags=["frame"], layer=-3),
     "tmx": Sprite(pixels=[[0, -1, 0], [0, -1, 0], [0, 0, 0]], name="tmx", visible=True, collidable=True),
-    "tuv": Sprite(pixels=[[8]*10] + [[8] + [-1]*8 + [8]]*8 + [[8]*10], name="tuv", visible=False, collidable=True, tags=["fng"], layer=5),
-    "ulq": Sprite(pixels=[[8]*7] + [[8] + [-1]*5 + [8]]*5 + [[8]*7], name="ulq", visible=False, collidable=True, tags=["qex"], layer=-1),
-    "vxy": Sprite(pixels=[[-2]*5, [-2, 8, -2, -2, -2], [-2, -2, 8, 8, -2], [-2, -2, 8, -2, -2], [-2]*5], name="vxy", visible=True, collidable=False, tags=["gsu"], layer=-1),
-    "zba": Sprite(pixels=[[4, 4, 4], [4, -1, 4], [4, 4, 4]], name="zba", visible=True, collidable=False, tags=["iri"], layer=-1),
+    "tuv": Sprite(pixels=[[8]*10] + [[8] + [-1]*8 + [8]]*8 + [[8]*10], name="tuv", visible=False, collidable=True, tags=["win_indicator"], layer=5),
+    "ulq": Sprite(pixels=[[8]*7] + [[8] + [-1]*5 + [8]]*5 + [[8]*7], name="ulq", visible=False, collidable=True, tags=["slot_border"], layer=-1),
+    "vxy": Sprite(pixels=[[-2]*5, [-2, 8, -2, -2, -2], [-2, -2, 8, 8, -2], [-2, -2, 8, -2, -2], [-2]*5], name="vxy", visible=True, collidable=False, tags=["shape_changer"], layer=-1),
+    "zba": Sprite(pixels=[[4, 4, 4], [4, -1, 4], [4, 4, 4]], name="zba", visible=True, collidable=False, tags=["energy_pickup"], layer=-1),
 }
 
 BACKGROUND_COLOR = 10
@@ -74,7 +74,7 @@ levels = [
             sprites["ulq"].clone().set_position(43, 14),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 3, "nlo": 12, "opw": 0, "qqv": 2, "ggk": 9, "fij": 90, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": 3, "slot_colors": 12, "slot_rotations": 0, "initial_shape": 2, "initial_color": 9, "initial_rotation": 90, "enable_fog": False},
         name="tutorial",
     ),
     # Level 2: Corridor maze - narrow paths between wall clusters
@@ -109,7 +109,7 @@ levels = [
             sprites["zba"].clone().set_position(40, 31),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 1, "nlo": 14, "opw": 180, "qqv": 4, "ggk": 8, "fij": 270, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": 1, "slot_colors": 14, "slot_rotations": 180, "initial_shape": 4, "initial_color": 8, "initial_rotation": 270, "enable_fog": False},
         name="corridor",
     ),
     # Level 3: Diamond layout - walls form diamond shapes
@@ -146,7 +146,7 @@ levels = [
             sprites["zba"].clone().set_position(35, 51),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 0, "nlo": 12, "opw": 270, "qqv": 5, "ggk": 14, "fij": 0, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": 0, "slot_colors": 12, "slot_rotations": 270, "initial_shape": 5, "initial_color": 14, "initial_rotation": 0, "enable_fog": False},
         name="diamond",
     ),
     # Level 4: Split arena - central wall divides the map
@@ -185,7 +185,7 @@ levels = [
             sprites["zba"].clone().set_position(50, 6),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 4, "nlo": 9, "opw": 0, "qqv": 3, "ggk": 12, "fij": 180, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": 4, "slot_colors": 9, "slot_rotations": 0, "initial_shape": 3, "initial_color": 12, "initial_rotation": 180, "enable_fog": False},
         name="split",
     ),
     # Level 5: Spiral - walls create a spiral path inward
@@ -229,7 +229,7 @@ levels = [
             sprites["zba"].clone().set_position(40, 21),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 2, "nlo": 8, "opw": 90, "qqv": 1, "ggk": 9, "fij": 0, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": 2, "slot_colors": 8, "slot_rotations": 90, "initial_shape": 1, "initial_color": 9, "initial_rotation": 0, "enable_fog": False},
         name="spiral",
     ),
     # Level 6: Dual targets - two goals in opposite corners
@@ -275,7 +275,7 @@ levels = [
             sprites["zba"].clone().set_position(40, 26),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": [5, 3], "nlo": [9, 14], "opw": [90, 270], "qqv": 0, "ggk": 12, "fij": 0, "kdy": False},
+        data={"max_energy": 36, "slot_shapes": [5, 3], "slot_colors": [9, 14], "slot_rotations": [90, 270], "initial_shape": 0, "initial_color": 12, "initial_rotation": 0, "enable_fog": False},
         name="dual",
     ),
     # Level 7: Fog gauntlet - tight fog of war, energy management critical
@@ -317,78 +317,89 @@ levels = [
             sprites["zba"].clone().set_position(40, 51),
         ],
         grid_size=(64, 64),
-        data={"vxy": 36, "tuv": 1, "nlo": 8, "opw": 180, "qqv": 0, "ggk": 14, "fij": 90, "kdy": True},
+        data={"max_energy": 36, "slot_shapes": 1, "slot_colors": 8, "slot_rotations": 180, "initial_shape": 0, "initial_color": 14, "initial_rotation": 90, "enable_fog": True},
         name="fogrun",
     ),
 ]
 
 
-class jvq(RenderableUserDisplay):
-    """WS04 interface - vertical energy bar on right side + level progress dots."""
+class VerticalEnergyInterface(RenderableUserDisplay):
+    """WS04 interface - vertical energy bar on right side + level progress dots.
+    
+    Renders:
+    - Fog of war overlay (when enabled)
+    - Key indicator panel in corner during fog
+    - Vertical energy bar (right side, columns 61-62)
+    - Lives display (bottom-right, stacked vertically)
+    - Level progress dots (top-right corner)
+    """
     zba: List[Tuple[int, int]]
 
-    def __init__(self, vxy: "Ws04", ulq: int):
-        self.tuv = vxy
-        self.tmx = ulq
-        self.snw = ulq
+    def __init__(self, game: "Ws04", max_energy: int):
+        self.game = game
+        self.max_energy = max_energy
+        self.current_energy = max_energy
 
-    def rzt(self, qqv: int) -> None:
-        self.snw = max(0, min(qqv, self.tmx))
+    def set_energy(self, energy: int) -> None:
+        """Set current energy level, clamped to [0, max_energy]."""
+        self.current_energy = max(0, min(energy, self.max_energy))
 
-    def pca(self) -> bool:
-        if self.snw >= 0:
-            self.snw -= 1
-        return self.snw >= 0
+    def consume_energy(self) -> bool:
+        """Consume one unit of energy. Returns True if energy remains."""
+        if self.current_energy >= 0:
+            self.current_energy -= 1
+        return self.current_energy >= 0
 
-    def opw(self) -> None:
-        self.snw = self.tmx
+    def refill_energy(self) -> None:
+        """Restore energy to maximum."""
+        self.current_energy = self.max_energy
 
     def render_interface(self, frame: np.ndarray) -> np.ndarray:
-        if self.tmx == 0 or self.tuv.xhp:
+        if self.max_energy == 0 or self.game.showing_death_screen:
             return frame
 
-        nlo = 1.5
+        sprite_center_offset = 1.5
         # Fog of war when enabled
-        if self.tuv.qee:
-            for hhe in range(64):
-                for dcv in range(64):
-                    if math.dist((hhe, dcv), (self.tuv.mgu.y + nlo, self.tuv.mgu.x + nlo)) > 15.0:
-                        frame[hhe, dcv] = 9
+        if self.game.fog_enabled:
+            for row in range(64):
+                for col in range(64):
+                    if math.dist((row, col), (self.game.player.y + sprite_center_offset, self.game.player.x + sprite_center_offset)) > 15.0:
+                        frame[row, col] = 9
 
             # Key indicator in corner when fog active - bordered panel
-            if self.tuv.nio and self.tuv.nio.is_visible:
-                nio = self.tuv.nio.render()
-                mgu = 3
-                lyd = 55
+            if self.game.key_indicator and self.game.key_indicator.is_visible:
+                key_pixels = self.game.key_indicator.render()
+                panel_x = 3
+                panel_y = 55
                 # Draw bordered panel: 1px cyan border + gray background
-                for hhe in range(lyd - 1, lyd + 7):
-                    for w in range(mgu - 1, mgu + 7):
-                        if 0 <= hhe < 64 and 0 <= w < 64:
-                            if hhe == lyd - 1 or hhe == lyd + 6 or w == mgu - 1 or w == mgu + 6:
-                                frame[hhe, w] = 8  # Cyan border
+                for row in range(panel_y - 1, panel_y + 7):
+                    for col in range(panel_x - 1, panel_x + 7):
+                        if 0 <= row < 64 and 0 <= col < 64:
+                            if row == panel_y - 1 or row == panel_y + 6 or col == panel_x - 1 or col == panel_x + 6:
+                                frame[row, col] = 8  # Cyan border
                             else:
-                                frame[hhe, w] = 15  # Purple background
+                                frame[row, col] = 15  # Purple background
                 # Draw key sprite on top
-                for hhe in range(6):
-                    for w in range(6):
-                        if nio[hhe][w] != -1:
-                            frame[lyd + hhe, mgu + w] = nio[hhe][w]
+                for row in range(6):
+                    for col in range(6):
+                        if key_pixels[row][col] != -1:
+                            frame[panel_y + row, panel_x + col] = key_pixels[row][col]
 
         # Vertical energy bar on right side (column 61-62, rows from bottom up)
-        for hhe in range(self.tmx):
-            row = 58 - hhe
-            frame[row, 61] = 4 if self.tmx - hhe - 1 < self.snw else 9
-            frame[row, 62] = 4 if self.tmx - hhe - 1 < self.snw else 9
+        for i in range(self.max_energy):
+            row = 58 - i
+            frame[row, 61] = 4 if self.max_energy - i - 1 < self.current_energy else 9
+            frame[row, 62] = 4 if self.max_energy - i - 1 < self.current_energy else 9
 
         # Lives display (bottom-right, stacked vertically)
-        for lhs in range(3):
-            row = 61 - lhs * 3
-            frame[row, 61] = 3 if self.tuv.lbq > lhs else 9
-            frame[row, 62] = 3 if self.tuv.lbq > lhs else 9
+        for life_idx in range(3):
+            row = 61 - life_idx * 3
+            frame[row, 61] = 3 if self.game.lives_remaining > life_idx else 9
+            frame[row, 62] = 3 if self.game.lives_remaining > life_idx else 9
 
         # Level progress dots (top-right corner, row 2, cols 55-61)
         total_levels = len(levels)
-        current_idx = self.tuv.ypg
+        current_idx = self.game.current_level_index
         for lvl in range(total_levels):
             col = 55 + lvl
             if col < 63:
@@ -398,260 +409,308 @@ class jvq(RenderableUserDisplay):
 
 
 class Ws04(ARCBaseGame):
+    """WS04 - Cyan/Blue/Yellow Puzzle Game.
+    
+    A variant with Cyan (8) borders/frames, Blue (9) walls, Yellow (4) doors,
+    vertical energy bar on the right side, and level progress dots.
+    
+    Game Mechanics:
+    - Optional fog of war (enabled per level via enable_fog data key)
+    - Energy system: each move consumes energy, running out causes respawn
+    - Lives system: 3 lives total, losing all lives ends the game
+    - Key matching: player must configure key shape/color/rotation to match lock slots
+    - 7 unique levels with increasing difficulty
+    
+    Level Data Keys:
+    - max_energy: Maximum energy available for the level
+    - slot_shapes: Shape indices for each key slot
+    - slot_colors: Color indices for each key slot
+    - slot_rotations: Rotation angles for each key slot
+    - initial_shape: Initial shape index for the key indicator
+    - initial_color: Initial color index for the key indicator
+    - initial_rotation: Initial rotation angle for the key indicator
+    - enable_fog: Flag to enable fog of war
+    
+    Sprite Tags:
+    - player: Player sprite
+    - key_indicator: Key indicator sprite
+    - level_boundary: Level boundary sprite
+    - win_indicator: Win indicator sprite
+    - lock: Lock sprites
+    - key_slot: Key slot sprites
+    - wall: Wall sprites (blocks movement)
+    - energy_pickup: Energy pickup sprites
+    - shape_changer: Shape changer sprites
+    - color_changer: Color changer sprites
+    - rotation_changer: Rotation changer sprites
+    - slot_border: Slot border sprites
+    - frame: Frame sprites
+    - dual_slot_frame: Special frame tag for dual-slot levels
+    """
     def __init__(self, seed: int = 0) -> None:
-        dcb = levels[0].get_data("vxy") if levels else 0
-        fij = dcb if dcb else 0
-        self.ggk = jvq(self, fij)
+        """Initialize WS04 game instance.
+        
+        Args:
+            seed: Random seed for procedural generation (default: 0)
+        """
+        # Initialize energy interface before super().__init__ since on_set_level is called during init
+        initial_energy = levels[0].get_data("max_energy") if levels else 0
+        energy_value = initial_energy if initial_energy else 0
+        self.energy_interface = VerticalEnergyInterface(self, energy_value)
 
         # Shape sprites: opw(0), lyd(1), tmx(2), nio(3), dcb(4), fij(5)
-        self.hep = [sprites["opw"], sprites["lyd"], sprites["tmx"], sprites["nio"], sprites["dcb"], sprites["fij"]]
-        self.hul = [12, 9, 14, 8]
-        self.kdj = [0, 90, 180, 270]
-        self.qee = False
-        self.ypg = 0  # Current level index for progress dots
+        self.shape_templates = [sprites["opw"], sprites["lyd"], sprites["tmx"], sprites["nio"], sprites["dcb"], sprites["fij"]]
+        self.color_palette = [12, 9, 14, 8]
+        self.rotation_angles = [0, 90, 180, 270]
+        self.fog_enabled = False
+        self.current_level_index = 0  # Current level index for progress dots
 
-        super().__init__("ws04", levels, Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.ggk]), False, seed, [1, 2, 3, 4])
+        super().__init__(
+            game_id="ws04",
+            levels=levels,
+            camera=Camera(0, 0, 16, 16, BACKGROUND_COLOR, PADDING_COLOR, [self.energy_interface]),
+            debug=False,
+            seed=seed,
+            available_actions=[1, 2, 3, 4]
+        )
 
-        self.krg()
+        self.reset_energy_interface()
 
     def _get_rotation_index(self, value) -> int:
+        """Convert rotation angle to index in rotation_angles array."""
         try:
-            return self.kdj.index(value)
+            return self.rotation_angles.index(value)
         except (ValueError, TypeError):
-            logging.warning(f"ws04: rotation {value} not in {self.kdj}, using index 0")
+            logging.warning(f"ws04: rotation {value} not in {self.rotation_angles}, using index 0")
             return 0
 
     def _get_color_index(self, value) -> int:
+        """Convert color value to index in color_palette array."""
         try:
-            return self.hul.index(value)
+            return self.color_palette.index(value)
         except (ValueError, TypeError):
-            logging.warning(f"ws04: color {value} not in {self.hul}, using index 0")
+            logging.warning(f"ws04: color {value} not in {self.color_palette}, using index 0")
             return 0
 
-    def krg(self) -> None:
+    def reset_energy_interface(self) -> None:
         """Reset energy interface based on current level data."""
-        fig = self.current_level.get_data("vxy")
-        if fig:
-            self.ggk.tmx = fig
-            self.ggk.opw()
+        max_energy = self.current_level.get_data("max_energy")
+        if max_energy:
+            self.energy_interface.max_energy = max_energy
+            self.energy_interface.refill_energy()
 
     def on_set_level(self, level: Level) -> None:
-        self.mgu = self.current_level.get_sprites_by_tag("caf")[0]
-        self.nio = self.current_level.get_sprites_by_tag("wex")[0]
-        self.nlo = self.current_level.get_sprites_by_tag("nfq")[0]
-        self.opw = self.current_level.get_sprites_by_tag("fng")[0]
-        self.pca = self.current_level.get_sprites_by_tag("axa")
-        self.qqv = self.current_level.get_sprites_by_tag("mae")
-        self.rzt = [False] * len(self.pca)
+        """Called when a level is loaded. Initialize level-specific game state."""
+        # Use tags to identify game sprites
+        self.player = self.current_level.get_sprites_by_tag("player")[0]
+        self.key_indicator = self.current_level.get_sprites_by_tag("key_indicator")[0]
+        self.level_boundary = self.current_level.get_sprites_by_tag("level_boundary")[0]
+        self.win_indicator = self.current_level.get_sprites_by_tag("win_indicator")[0]
+        self.lock_sprites = self.current_level.get_sprites_by_tag("lock")
+        self.key_slots = self.current_level.get_sprites_by_tag("key_slot")
+        self.keys_collected = [False] * len(self.lock_sprites)
 
-        self.snw = 0
-        self.tmx = 0
-        self.tuv = 0
-        self.krg()
+        self.current_shape_index = 0
+        self.current_color_index = 0
+        self.current_rotation_index = 0
+        self.reset_energy_interface()
 
-        self.cjl = []
-        self.vxy = []
-        self.qee = self.current_level.get_data("kdy")
+        self.slot_rotations = []
+        self.slot_colors = []
+        self.fog_enabled = self.current_level.get_data("enable_fog")
 
         # Track level index for progress dots
         for idx, lvl in enumerate(levels):
             if lvl.name == self.current_level.name:
-                self.ypg = idx
+                self.current_level_index = idx
                 break
 
-        self.gfy = self.current_level.get_data("tuv")
-        if isinstance(self.gfy, int):
-            self.gfy = [self.gfy]
+        self.slot_shapes = self.current_level.get_data("slot_shapes")
+        if isinstance(self.slot_shapes, int):
+            self.slot_shapes = [self.slot_shapes]
 
-        yxt = self.current_level.get_data("opw")
-        if isinstance(yxt, int):
-            yxt = [yxt]
+        slot_rotations_data = self.current_level.get_data("slot_rotations")
+        if isinstance(slot_rotations_data, int):
+            slot_rotations_data = [slot_rotations_data]
 
-        lxu = self.current_level.get_data("nlo")
-        if isinstance(lxu, int):
-            lxu = [lxu]
+        slot_colors_data = self.current_level.get_data("slot_colors")
+        if isinstance(slot_colors_data, int):
+            slot_colors_data = [slot_colors_data]
 
-        for dqk in range(len(self.qqv)):
-            self.cjl.append(self._get_rotation_index(yxt[dqk]))
-            self.vxy.append(self._get_color_index(lxu[dqk]))
-            self.pca[dqk].pixels = self.hep[self.gfy[dqk]].pixels.copy()
-            self.pca[dqk].color_remap(0, self.hul[self.vxy[dqk]])
-            self.pca[dqk].set_rotation(self.kdj[self.cjl[dqk]])
+        for slot_index in range(len(self.key_slots)):
+            self.slot_rotations.append(self._get_rotation_index(slot_rotations_data[slot_index]))
+            self.slot_colors.append(self._get_color_index(slot_colors_data[slot_index]))
+            self.lock_sprites[slot_index].pixels = self.shape_templates[self.slot_shapes[slot_index]].pixels.copy()
+            self.lock_sprites[slot_index].color_remap(0, self.color_palette[self.slot_colors[slot_index]])
+            self.lock_sprites[slot_index].set_rotation(self.rotation_angles[self.slot_rotations[slot_index]])
 
-        self.pxr()
-        self.egb = sprites["krg"].clone()
-        self.current_level.add_sprite(self.egb)
-        self.egb.set_visible(False)
-        self.lbq = 3
-        self.vcn: List[Sprite] = []
-        self.bzf: List[Sprite] = []
-        self.osd: List[Sprite] = []
-        self.xhp = False
-        self.kbj = False
-        self.rjw = self.mgu.x
-        self.qbn = self.mgu.y
+        self.reset_key_state()
+        self.death_overlay = sprites["krg"].clone()
+        self.current_level.add_sprite(self.death_overlay)
+        self.death_overlay.set_visible(False)
+        self.lives_remaining = 3
+        self.collected_energy_sprites: List[Sprite] = []
+        self.removed_key_slots: List[Sprite] = []
+        self.removed_locks: List[Sprite] = []
+        self.showing_death_screen = False
+        self.showing_key_error = False
+        self.spawn_x = self.player.x
+        self.spawn_y = self.player.y
 
-    def rbt(self, edo: int, cdg: int, hds: int, xwr: int) -> List[Sprite]:
-        oyx = self.current_level._sprites
-        return [bes for bes in oyx if bes.x >= edo and bes.x < edo + hds and bes.y >= cdg and bes.y < cdg + xwr]
+    def get_sprites_in_area(self, x: int, y: int, width: int, height: int) -> List[Sprite]:
+        """Get all sprites within a rectangular area."""
+        return [sprite for sprite in self.current_level.get_sprites() if sprite.x >= x and sprite.x < x + width and sprite.y >= y and sprite.y < y + height]
 
     def step(self) -> None:
-        if self.xhp:
-            self.egb.set_visible(False)
-            self.nio.set_visible(True)
-            self.xhp = False
+        """Main game loop - processes player actions and updates game state."""
+        if self.showing_death_screen:
+            self.death_overlay.set_visible(False)
+            self.key_indicator.set_visible(True)
+            self.showing_death_screen = False
             self.complete_action()
             return
 
-        if self.kbj:
-            self.nlo.color_remap(None, 8)
-            self.kbj = False
+        if self.showing_key_error:
+            self.level_boundary.color_remap(None, 8)
+            self.showing_key_error = False
             self.complete_action()
             return
 
-        lgr = 0
-        kyr = 0
-        axv = False
-        if self.action.id.value == 1:
-            kyr = -1
-            axv = True
-        elif self.action.id.value == 2:
-            kyr = 1
-            axv = True
-        elif self.action.id.value == 3:
-            lgr = -1
-            axv = True
-        elif self.action.id.value == 4:
-            lgr = 1
-            axv = True
+        dx, dy, valid_action = 0, 0, False
+        if self.action.id == GameAction.ACTION1:
+            dy, valid_action = -1, True
+        elif self.action.id == GameAction.ACTION2:
+            dy, valid_action = 1, True
+        elif self.action.id == GameAction.ACTION3:
+            dx, valid_action = -1, True
+        elif self.action.id == GameAction.ACTION4:
+            dx, valid_action = 1, True
 
-        if not axv:
+        if not valid_action:
             self.complete_action()
             return
 
-        xpb = False
-        qul, cfy = self.mgu.x + lgr * 5, self.mgu.y + kyr * 5
-        yet = self.rbt(qul, cfy, 5, 5)
+        collected_energy = False
+        new_x, new_y = self.player.x + dx * 5, self.player.y + dy * 5
+        sprites_at_target = self.get_sprites_in_area(new_x, new_y, 5, 5)
 
-        mnc = False
-        for oib in yet:
-            if oib.tags is None:
+        blocked_by_wall = False
+        for sprite in sprites_at_target:
+            if sprite.tags is None:
                 break
-            elif "jdd" in oib.tags:
-                mnc = True
+            elif "wall" in sprite.tags:
+                blocked_by_wall = True
                 break
-            elif "mae" in oib.tags:
-                qzq = self.qqv.index(oib)
-                if not self.qhg(qzq):
-                    self.nlo.color_remap(None, 0)
-                    self.kbj = True
+            elif "key_slot" in sprite.tags:
+                slot_index = self.key_slots.index(sprite)
+                if not self.check_key_matches(slot_index):
+                    self.level_boundary.color_remap(None, 0)
+                    self.showing_key_error = True
                     self.complete_action()
                     return
-            elif "iri" in oib.tags:
-                xpb = True
-                self.ggk.rzt(self.ggk.tmx)
-                self.vcn.append(oib)
-                self.current_level.remove_sprite(oib)
-            elif "gsu" in oib.tags:
-                self.snw = (self.snw + 1) % len(self.hep)
-                self.nio.pixels = self.hep[self.snw].pixels.copy()
-                self.nio.color_remap(0, self.hul[self.tmx])
-                self.ihm()
-            elif "gic" in oib.tags:
-                apq = (self.tmx + 1) % len(self.hul)
-                self.nio.color_remap(self.hul[self.tmx], self.hul[apq])
-                self.tmx = apq
-                self.ihm()
-            elif "bgt" in oib.tags:
-                self.tuv = (self.tuv + 1) % 4
-                self.nio.set_rotation(self.kdj[self.tuv])
-                self.ihm()
+            elif "energy_pickup" in sprite.tags:
+                collected_energy = True
+                self.energy_interface.set_energy(self.energy_interface.max_energy)
+                self.collected_energy_sprites.append(sprite)
+                self.current_level.remove_sprite(sprite)
+            elif "shape_changer" in sprite.tags:
+                self.current_shape_index = (self.current_shape_index + 1) % len(self.shape_templates)
+                self.key_indicator.pixels = self.shape_templates[self.current_shape_index].pixels.copy()
+                self.key_indicator.color_remap(0, self.color_palette[self.current_color_index])
+                self.update_key_slots()
+            elif "color_changer" in sprite.tags:
+                next_color = (self.current_color_index + 1) % len(self.color_palette)
+                self.key_indicator.color_remap(self.color_palette[self.current_color_index], self.color_palette[next_color])
+                self.current_color_index = next_color
+                self.update_key_slots()
+            elif "rotation_changer" in sprite.tags:
+                self.current_rotation_index = (self.current_rotation_index + 1) % 4
+                self.key_indicator.set_rotation(self.rotation_angles[self.current_rotation_index])
+                self.update_key_slots()
 
-        if not mnc:
-            self.mgu.set_position(qul, cfy)
+        if not blocked_by_wall:
+            self.player.set_position(new_x, new_y)
 
-        if self.nje():
+        if self.check_all_keys_collected():
             self.next_level()
             self.complete_action()
             return
 
-        if not xpb and not self.ggk.pca():
-            self.lbq -= 1
-            if self.lbq == 0:
+        if not collected_energy and not self.energy_interface.consume_energy():
+            self.lives_remaining -= 1
+            if self.lives_remaining == 0:
                 self.lose()
                 self.complete_action()
                 return
-            self.egb.set_visible(True)
-            self.egb.set_scale(64)
-            self.egb.set_position(0, 0)
-            self.nio.set_visible(False)
+            self.death_overlay.set_visible(True)
+            self.death_overlay.set_scale(64)
+            self.death_overlay.set_position(0, 0)
+            self.key_indicator.set_visible(False)
 
-            self.xhp = True
-            self.rzt = [False] * len(self.qqv)
-            self.mgu.set_position(self.rjw, self.qbn)
-            self.pxr()
-            for bqs in self.vcn:
-                self.current_level.add_sprite(bqs)
-            for grk in self.bzf:
-                self.current_level.add_sprite(grk)
-            for qmb in self.osd:
-                self.current_level.add_sprite(qmb)
-            self.vcn = []
-            self.bzf = []
-            self.osd = []
-            self.ggk.rzt(self.ggk.tmx)
-            self.opw.set_visible(False)
-            for sfs in self.current_level.get_sprites_by_tag("qex"):
-                sfs.set_visible(False)
-            for pqv in self.current_level.get_sprites_by_tag("yar"):
-                pqv.set_visible(True)
+            self.showing_death_screen = True
+            self.keys_collected = [False] * len(self.key_slots)
+            self.player.set_position(self.spawn_x, self.spawn_y)
+            self.reset_key_state()
+            for energy_sprite in self.collected_energy_sprites:
+                self.current_level.add_sprite(energy_sprite)
+            for slot in self.removed_key_slots:
+                self.current_level.add_sprite(slot)
+            for lock in self.removed_locks:
+                self.current_level.add_sprite(lock)
+            self.collected_energy_sprites, self.removed_key_slots, self.removed_locks = [], [], []
+            self.energy_interface.set_energy(self.energy_interface.max_energy)
+            self.win_indicator.set_visible(False)
+            for border in self.current_level.get_sprites_by_tag("slot_border"):
+                border.set_visible(False)
+            for frame in self.current_level.get_sprites_by_tag("frame"):
+                frame.set_visible(True)
             self.complete_action()
             return
         self.complete_action()
 
-    def pxr(self) -> None:
-        self.tuv = self._get_rotation_index(self.current_level.get_data("fij"))
-        self.tmx = self._get_color_index(self.current_level.get_data("ggk"))
-        self.snw = self.current_level.get_data("qqv")
-        self.nio.pixels = self.hep[self.snw].pixels.copy()
-        self.nio.color_remap(0, self.hul[self.tmx])
-        self.nio.set_rotation(self.kdj[self.tuv])
+    def reset_key_state(self) -> None:
+        """Reset the key indicator to its initial configuration for the current level."""
+        self.current_rotation_index = self._get_rotation_index(self.current_level.get_data("initial_rotation"))
+        self.current_color_index = self._get_color_index(self.current_level.get_data("initial_color"))
+        self.current_shape_index = self.current_level.get_data("initial_shape")
+        self.key_indicator.pixels = self.shape_templates[self.current_shape_index].pixels.copy()
+        self.key_indicator.color_remap(0, self.color_palette[self.current_color_index])
+        self.key_indicator.set_rotation(self.rotation_angles[self.current_rotation_index])
 
-    def ihm(self) -> None:
-        kic = False
-        for fxn, qis in enumerate(self.qqv):
-            dbb = self.current_level.get_sprite_at(qis.x - 1, qis.y - 1, "qex")
-            if self.qhg(fxn) and not self.rzt[fxn]:
-                kic = True
-                if dbb:
-                    dbb.set_visible(True)
+    def update_key_slots(self) -> None:
+        """Update visual state of key slots based on current key configuration."""
+        any_unlocked = False
+        for slot_idx, slot in enumerate(self.key_slots):
+            border = self.current_level.get_sprite_at(slot.x - 1, slot.y - 1, "slot_border")
+            if self.check_key_matches(slot_idx) and not self.keys_collected[slot_idx]:
+                any_unlocked = True
+                if border:
+                    border.set_visible(True)
             else:
-                if dbb:
-                    dbb.set_visible(False)
-        self.opw.set_visible(kic)
+                if border:
+                    border.set_visible(False)
+        self.win_indicator.set_visible(any_unlocked)
 
-    def qhg(self, azz: int) -> bool:
-        return self.snw == self.gfy[azz] and self.tmx == self.vxy[azz] and self.tuv == self.cjl[azz]
+    def check_key_matches(self, slot_index: int) -> bool:
+        """Check if current key configuration matches a specific slot."""
+        return self.current_shape_index == self.slot_shapes[slot_index] and self.current_color_index == self.slot_colors[slot_index] and self.current_rotation_index == self.slot_rotations[slot_index]
 
-    def nje(self) -> bool:
-        for uop, ywm in enumerate(self.qqv):
-            if not self.rzt[uop] and self.mgu.x == ywm.x and self.mgu.y == ywm.y and self.qhg(uop):
-                self.rzt[uop] = True
-                self.bzf.append(self.qqv[uop])
+    def check_all_keys_collected(self) -> bool:
+        """Check if player has collected all keys and update game state."""
+        for slot_idx, slot in enumerate(self.key_slots):
+            if not self.keys_collected[slot_idx] and self.player.x == slot.x and self.player.y == slot.y and self.check_key_matches(slot_idx):
+                self.keys_collected[slot_idx] = True
+                self.removed_key_slots.append(self.key_slots[slot_idx])
+                self.removed_locks.append(self.lock_sprites[slot_idx])
+                self.current_level.remove_sprite(self.key_slots[slot_idx])
+                self.current_level.remove_sprite(self.lock_sprites[slot_idx])
 
-                self.osd.append(self.pca[uop])
-                self.current_level.remove_sprite(self.qqv[uop])
-                self.current_level.remove_sprite(self.pca[uop])
+                frame = self.current_level.get_sprite_at(slot.x - 1, slot.y - 1, "frame")
+                if frame and "dual_slot_frame" in frame.tags:
+                    frame.set_visible(False)
+                    border = self.current_level.get_sprite_at(slot.x - 1, slot.y - 1, "slot_border")
+                    if border:
+                        border.set_visible(False)
+                    self.win_indicator.set_visible(False)
 
-                xkp = self.current_level.get_sprite_at(ywm.x - 1, ywm.y - 1, "yar")
-                if xkp and "vdr" in xkp.tags:
-                    xkp.set_visible(False)
-                    aoj = self.current_level.get_sprite_at(ywm.x - 1, ywm.y - 1, "qex")
-                    if aoj:
-                        aoj.set_visible(False)
-                    self.opw.set_visible(False)
-
-        for uop in range(len(self.rzt)):
-            if not self.rzt[uop]:
-                return False
-        return True
+        return all(self.keys_collected)
