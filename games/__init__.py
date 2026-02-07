@@ -35,7 +35,9 @@ _GAME_REGISTRY: dict[str, tuple[str, str]] = {
     "gw01": ("games.official.gw01", "1.0.0"),  # Gravity Well
     "ls20": ("games.official.ls20", "1.0.0"),  # Light Switch (ARC Prize)
     "ft09": ("games.official.ft09", "1.0.0"),  # Fill The Grid (ARC Prize)
+    "ct03": ("games.official.ct03", "1.0.0"),  # Cascade Tiles (Reskin of ft09)
     "vc33": ("games.official.vc33", "1.0.0"),  # Vector Chase (ARC Prize)
+    "ct01": ("games.official.ct01", "1.0.0"),  # Cascade Tiles
 }
 
 
@@ -76,10 +78,18 @@ def get_game(game_id: str) -> "ARCBaseGame":
         from games.official.ft09 import Ft09
 
         return Ft09()
+    if base_id == "ct03":
+        from games.official.ct03 import Ct03
+
+        return Ct03()
     if base_id == "vc33":
         from games.official.vc33 import Vc33
 
         return Vc33()
+    if base_id == "ct01":
+        from games.official.ct01 import Ct01
+
+        return Ct01()
 
     raise ValueError(f"Game {game_id} registered but not implemented")
 
