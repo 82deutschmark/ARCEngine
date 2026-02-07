@@ -1,5 +1,16 @@
 * RGB tuples for Arc3 colors (0-15).
  * Used by server-side sharp library for PNG generation.
+
+
+  It's a 16-color palette with:
+
+Grayscale (white to black): 0-5
+Pink tones: 6-7
+Red/Orange/Yellow warm tones: 8, 11, 12, 13
+Blue tones: 9, 10
+Green: 14
+Purple: 15
+
  */
 export const ARC3_COLORS_TUPLES: Record<number, [number, number, number]> = {
   0: [255, 255, 255],   // White
