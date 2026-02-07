@@ -606,7 +606,6 @@ class Ws04(ARCBaseGame):
                 if not self.check_key_matches(slot_index):
                     self.level_boundary.color_remap(None, 0)
                     self.showing_key_error = True
-                    self.complete_action()
                     return
             elif "energy_pickup" in sprite.tags:
                 collected_energy = True
@@ -664,7 +663,6 @@ class Ws04(ARCBaseGame):
                 border.set_visible(False)
             for frame in self.current_level.get_sprites_by_tag("frame"):
                 frame.set_visible(True)
-            self.complete_action()
             return
         self.complete_action()
 

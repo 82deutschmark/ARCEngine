@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **games/official/ws02.py, ws04.py** - Removed spurious `complete_action()` calls in key-error and death-overlay paths
+  - Root cause: LS20 (the template) returns from `step()` WITHOUT calling `complete_action()` in error/death paths, allowing the engine to auto-loop and produce a two-frame animation within a single keypress. WS02 and WS04 incorrectly added `complete_action()` before returning, which broke this multi-frame pattern and forced the player to press an extra key to dismiss the error flash or death overlay.
+  - WS01 and WS03 were already correct (matched LS20's pattern).
+  - **Author**: Cascade (Claude Sonnet 4)
+
 ### Added
 
 - **docs/Reference/Engine-Reference/Documentation-Index.md** - Curated mirror of https://docs.arcprize.org/llms.txt for fast navigation of ARC-AGI-3 documentation
