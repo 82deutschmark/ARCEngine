@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **games/official/gw02.py** - Clean rewrite of Gravity Well puzzle (gw01)
+  - All cryptic abbreviations replaced with readable names (e.g., `VDC`→`BACKGROUND_COLOR`, `uwl()`→`update_well_pixels()`, `self.col`→`self.orbs_collected`)
+  - Grayscale colors replaced with themed palette: platforms use Purple (15) fill + Dark Red (13) edge, well centers use Pink (6), letterbox uses Black (5) to match background
+  - Improved orb sprites: light orbs have white center highlight, heavy orbs have cyan center
+  - Full docstrings added to all methods
+  - Level comments describe puzzle objectives
+  - gw01.py renamed to gw01_deprecated.py and kept for reference
+  - **Author**: Claude Sonnet 4
+
 ### Changed
 
 - **games/official/ws03.py** - Redesigned player sprite from flat checkerboard to mage/wizard character

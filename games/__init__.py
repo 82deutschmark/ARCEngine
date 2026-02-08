@@ -32,7 +32,8 @@ if TYPE_CHECKING:
 # Format: base_id -> (module_path, version)
 _GAME_REGISTRY: dict[str, tuple[str, str]] = {
     "ws01": ("games.official.ws01", "1.0.0"),  # World Shifter
-    "gw01": ("games.official.gw01", "1.0.0"),  # Gravity Well
+    "gw01": ("games.official.gw01_deprecated", "1.0.0"),  # Gravity Well (deprecated)
+    "gw02": ("games.official.gw02", "1.0.0"),  # Gravity Well (cleaned)
     "ls20": ("games.official.ls20", "1.0.0"),  # Light Switch (ARC Prize)
     "ft09": ("games.official.ft09", "1.0.0"),  # Fill The Grid (ARC Prize)
     "ct03": ("games.official.ct03", "1.0.0"),  # Cascade Tiles (Reskin of ft09)
@@ -67,9 +68,13 @@ def get_game(game_id: str) -> "ARCBaseGame":
 
         return Ws01()
     if base_id == "gw01":
-        from games.official.gw01 import Gw01
+        from games.official.gw01_deprecated import Gw01
 
         return Gw01()
+    if base_id == "gw02":
+        from games.official.gw02 import Gw02
+
+        return Gw02()
     if base_id == "ls20":
         from games.official.ls20 import Ls20
 
