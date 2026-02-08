@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **games/official/ws03.py** - Redesigned player sprite from flat checkerboard to mage/wizard character
+  - Old: Blue (9) + Magenta (6) checkerboard pattern (no character shape, just a grid)
+  - New: Pointy Purple (15) hat, White (0) gem, Orange (12) magic torso, Magenta (6) robe, Dark Red (13) boots
+  - Distinct silhouette from WS04's astronaut; fits WS03's fog-of-war mystery theme
+  - **Author**: Cascade (Claude Sonnet 4)
+
 ### Fixed
 
 - **games/official/ws04.py** - Fixed unsolvable levels 1-4 due to missing changers
