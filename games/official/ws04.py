@@ -74,7 +74,7 @@ levels = [
             sprites["ulq"].clone().set_position(43, 14),
         ],
         grid_size=(64, 64),
-        data={"max_energy": 36, "slot_shapes": 3, "slot_colors": 12, "slot_rotations": 0, "initial_shape": 2, "initial_color": 9, "initial_rotation": 90, "enable_fog": False},
+        data={"max_energy": 36, "slot_shapes": 3, "slot_colors": 12, "slot_rotations": 0, "initial_shape": 3, "initial_color": 12, "initial_rotation": 90, "enable_fog": False},
         name="tutorial",
     ),
     # Level 2: Corridor maze - narrow paths between wall clusters
@@ -109,7 +109,7 @@ levels = [
             sprites["zba"].clone().set_position(40, 31),
         ],
         grid_size=(64, 64),
-        data={"max_energy": 36, "slot_shapes": 1, "slot_colors": 14, "slot_rotations": 180, "initial_shape": 4, "initial_color": 8, "initial_rotation": 270, "enable_fog": False},
+        data={"max_energy": 36, "slot_shapes": 1, "slot_colors": 14, "slot_rotations": 180, "initial_shape": 1, "initial_color": 14, "initial_rotation": 270, "enable_fog": False},
         name="corridor",
     ),
     # Level 3: Diamond layout - walls form diamond shapes
@@ -146,7 +146,7 @@ levels = [
             sprites["zba"].clone().set_position(35, 51),
         ],
         grid_size=(64, 64),
-        data={"max_energy": 36, "slot_shapes": 0, "slot_colors": 12, "slot_rotations": 270, "initial_shape": 5, "initial_color": 14, "initial_rotation": 0, "enable_fog": False},
+        data={"max_energy": 36, "slot_shapes": 0, "slot_colors": 12, "slot_rotations": 270, "initial_shape": 0, "initial_color": 14, "initial_rotation": 0, "enable_fog": False},
         name="diamond",
     ),
     # Level 4: Split arena - central wall divides the map
@@ -185,7 +185,7 @@ levels = [
             sprites["zba"].clone().set_position(50, 6),
         ],
         grid_size=(64, 64),
-        data={"max_energy": 36, "slot_shapes": 4, "slot_colors": 9, "slot_rotations": 0, "initial_shape": 3, "initial_color": 12, "initial_rotation": 180, "enable_fog": False},
+        data={"max_energy": 36, "slot_shapes": 4, "slot_colors": 9, "slot_rotations": 0, "initial_shape": 3, "initial_color": 12, "initial_rotation": 0, "enable_fog": False},
         name="split",
     ),
     # Level 5: Spiral - walls create a spiral path inward

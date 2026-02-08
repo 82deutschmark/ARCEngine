@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **games/official/ws04.py** - Fixed unsolvable levels 1-4 due to missing changers
+  - Levels had initial shape/color/rotation values that didn't match slot requirements, but lacked the changers needed to change them. Each level's initial values now match slot values for dimensions without a changer:
+  - Level 1 (tutorial): initial_shape 2→3, initial_color 9→12 (only rotation changer available)
+  - Level 2 (corridor): initial_shape 4→1, initial_color 8→14 (only rotation changer available)
+  - Level 3 (diamond): initial_shape 5→0 (has color+rotation changers but no shape changer)
+  - Level 4 (split): initial_rotation 180→0 (has shape+color changers but no rotation changer)
+  - Levels 5-7 were already correct (all three changers present)
+  - **Author**: Cascade (Claude Sonnet 4)
+
 - **games/official/ws04.py** - Fixed energy bar, lives, and progress dot colors using grayscale (0-5) instead of theme colors
   - Energy bar: changed from color 4 (Darker Gray) to 11 (Yellow) for filled segments
   - Lives display: changed from color 3 (Dark Gray) to 15 (Purple) for remaining lives
