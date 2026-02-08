@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **games/official/ws04.py** - Fixed energy bar, lives, and progress dot colors using grayscale (0-5) instead of theme colors
+  - Energy bar: changed from color 4 (Darker Gray) to 11 (Yellow) for filled segments
+  - Lives display: changed from color 3 (Dark Gray) to 15 (Purple) for remaining lives
+  - Progress dots: changed completed=4→11 (Yellow), current=3→15 (Purple)
+  - **Author**: Claude Opus 4.6
+
+- **games/official/ws04.py** - Redesigned player sprite to match Cyan/Blue/Yellow theme
+  - Old: Black outline, Purple helmet, Orange suit (clashed with theme)
+  - New: Yellow (11) helmet, Blue (9) suit, Cyan (8) boots/shoulders, Black (5) visor
+  - **Author**: Claude Opus 4.6
+
 - **games/official/ws02.py, ws04.py** - Removed spurious `complete_action()` calls in key-error and death-overlay paths
   - Root cause: LS20 (the template) returns from `step()` WITHOUT calling `complete_action()` in error/death paths, allowing the engine to auto-loop and produce a two-frame animation within a single keypress. WS02 and WS04 incorrectly added `complete_action()` before returning, which broke this multi-frame pattern and forced the player to press an extra key to dismiss the error flash or death overlay.
   - WS01 and WS03 were already correct (matched LS20's pattern).

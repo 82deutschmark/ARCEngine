@@ -1,5 +1,5 @@
 # Author: Claude Opus 4.6
-# Date: 2026-02-07 (redesigned pca player sprite)
+# Date: 2026-02-07 (fixed energy bar colors, redesigned player sprite)
 # PURPOSE: WS04 game - variant with Cyan/Blue/Yellow color theme and vertical UI
 # Features: Cyan (8) borders/frames, Blue (9) walls, Yellow (4) door, Light Blue (10) background
 #           Vertical energy bar on right side + level progress dots
@@ -13,7 +13,7 @@ import numpy as np
 from arcengine import ARCBaseGame, Camera, GameAction, Level, RenderableUserDisplay, Sprite
 
 # WS04 color theme: Cyan (8) borders/frames, maroon (9) walls, yellow (4) door body
-# Player: Purple (15) helmet, White (0) eyes, Orange (12) suit, Dark Red (13) belt, Black (5) outline
+# Player: Yellow (11) helmet, White (0) eyes, Blue (9) suit, Cyan (8) boots/shoulders, Black (5) visor
 # Shape sprites use 0 as base color so color_remap(0, target) works correctly
 sprites = {
     "dcb": Sprite(pixels=[[-1, 0, -1], [0, 0, -1], [-1, 0, 0]], name="dcb", visible=True, collidable=True, layer=1),
@@ -30,7 +30,7 @@ sprites = {
     "nio": Sprite(pixels=[[-1, 0, 0], [0, -1, 0], [-1, 0, -1]], name="nio", visible=True, collidable=True),
     "nlo": Sprite(pixels=[[9]*5]*5, name="nlo", visible=True, collidable=True, tags=["wall"], layer=-5),
     "opw": Sprite(pixels=[[0, 0, -1], [-1, 0, 0], [0, -1, 0]], name="opw", visible=True, collidable=True),
-    "pca": Sprite(pixels=[[-1, 5, 15, 5, -1], [5, 0, 15, 0, 5], [5, 12, 12, 12, 5], [-1, 12, 13, 12, -1], [-1, 5, -1, 5, -1]], name="pca", visible=True, collidable=True, tags=["player"]),
+    "pca": Sprite(pixels=[[-1, 11, 11, 11, -1], [11, 0, 5, 0, 11], [8, 9, 9, 9, 8], [-1, 9, 11, 9, -1], [-1, 8, -1, 8, -1]], name="pca", visible=True, collidable=True, tags=["player"]),
     "qqv": Sprite(pixels=[[-2]*5, [-2, 9, 14, 14, -2], [-2, 9, 4, 8, -2], [-2, 12, 12, 8, -2], [-2]*5], name="qqv", visible=True, collidable=False, tags=["color_changer"], layer=-1),
     "rzt": Sprite(pixels=[[0, -1, -1], [-1, 0, -1], [-1, -1, 0]], name="rzt", visible=True, collidable=True, tags=["lock"]),
     "snw": Sprite(pixels=[[8]*7, [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8]*7], name="snw", visible=True, collidable=True, tags=["frame"], layer=-3),
@@ -388,14 +388,14 @@ class VerticalEnergyInterface(RenderableUserDisplay):
         # Vertical energy bar on right side (column 61-62, rows from bottom up)
         for i in range(self.max_energy):
             row = 58 - i
-            frame[row, 61] = 4 if self.max_energy - i - 1 < self.current_energy else 9
-            frame[row, 62] = 4 if self.max_energy - i - 1 < self.current_energy else 9
+            frame[row, 61] = 11 if self.max_energy - i - 1 < self.current_energy else 9
+            frame[row, 62] = 11 if self.max_energy - i - 1 < self.current_energy else 9
 
         # Lives display (bottom-right, stacked vertically)
         for life_idx in range(3):
             row = 61 - life_idx * 3
-            frame[row, 61] = 3 if self.game.lives_remaining > life_idx else 9
-            frame[row, 62] = 3 if self.game.lives_remaining > life_idx else 9
+            frame[row, 61] = 15 if self.game.lives_remaining > life_idx else 9
+            frame[row, 62] = 15 if self.game.lives_remaining > life_idx else 9
 
         # Level progress dots (top-right corner, row 2, cols 55-61)
         total_levels = len(levels)
@@ -403,7 +403,7 @@ class VerticalEnergyInterface(RenderableUserDisplay):
         for lvl in range(total_levels):
             col = 55 + lvl
             if col < 63:
-                frame[2, col] = 4 if lvl < current_idx else (3 if lvl == current_idx else 8)
+                frame[2, col] = 11 if lvl < current_idx else (15 if lvl == current_idx else 8)
 
         return frame
 
