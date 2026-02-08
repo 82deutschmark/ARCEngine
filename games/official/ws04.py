@@ -13,7 +13,7 @@ import numpy as np
 from arcengine import ARCBaseGame, Camera, GameAction, Level, RenderableUserDisplay, Sprite
 
 # WS04 color theme: Cyan (8) borders/frames, maroon (9) walls, yellow (4) door body
-# Player: Yellow (11) helmet, White (0) eyes, Blue (9) suit, Cyan (8) boots/shoulders, Black (5) visor
+# Player: Yellow (11) helmet, White (0) eyes, Blue (9) suit, Cyan (8) boots/shoulders, Blue (1) visor
 # Shape sprites use 0 as base color so color_remap(0, target) works correctly
 sprites = {
     "dcb": Sprite(pixels=[[-1, 0, -1], [0, 0, -1], [-1, 0, 0]], name="dcb", visible=True, collidable=True, layer=1),
@@ -30,7 +30,7 @@ sprites = {
     "nio": Sprite(pixels=[[-1, 0, 0], [0, -1, 0], [-1, 0, -1]], name="nio", visible=True, collidable=True),
     "nlo": Sprite(pixels=[[9]*5]*5, name="nlo", visible=True, collidable=True, tags=["wall"], layer=-5),
     "opw": Sprite(pixels=[[0, 0, -1], [-1, 0, 0], [0, -1, 0]], name="opw", visible=True, collidable=True),
-    "pca": Sprite(pixels=[[-1, 11, 11, 11, -1], [11, 0, 5, 0, 11], [8, 9, 9, 9, 8], [-1, 9, 11, 9, -1], [-1, 8, -1, 8, -1]], name="pca", visible=True, collidable=True, tags=["player"]),
+    "pca": Sprite(pixels=[[-1, 11, 11, 11, -1], [11, 0, 1, 0, 11], [8, 9, 9, 9, 8], [-1, 9, 11, 9, -1], [-1, 8, -1, 8, -1]], name="pca", visible=True, collidable=True, tags=["player"]),
     "qqv": Sprite(pixels=[[-2]*5, [-2, 9, 14, 14, -2], [-2, 9, 4, 8, -2], [-2, 12, 12, 8, -2], [-2]*5], name="qqv", visible=True, collidable=False, tags=["color_changer"], layer=-1),
     "rzt": Sprite(pixels=[[0, -1, -1], [-1, 0, -1], [-1, -1, 0]], name="rzt", visible=True, collidable=True, tags=["lock"]),
     "snw": Sprite(pixels=[[8]*7, [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8, -1, -1, -1, -1, -1, 8], [8]*7], name="snw", visible=True, collidable=True, tags=["frame"], layer=-3),
